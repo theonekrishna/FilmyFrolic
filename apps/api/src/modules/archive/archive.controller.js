@@ -5,16 +5,15 @@ exports.getArchiveMovies = async (req, res) => {
   try {
     const page = req.query.page || 1;
     const limit = req.query.limit || 30;
-    const type = req.query.type || "movies"; // "movies" | "series"
+    const type = req.query.type; // "all" | "movies" | "series"
+    const query = req.query.query || req.query.search || "";
 
     const params = {
       Page: page,
       limit,
+      query,
+      type: type || "all",
     };
-
-    if (type) {
-      params.type = type;
-    }
 
     const data = await filmyService.getMovies(params);
 

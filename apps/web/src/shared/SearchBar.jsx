@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, X, Loader2, Film, User, Tv } from "lucide-react";
-
-const MOCK_RESULTS = [
-  { id: "1", type: "movie", title: "Oppenheimer", subtitle: "2023 · Drama", rating: 8.9 },
-  { id: "2", type: "actor", title: "Cillian Murphy", subtitle: "Actor", rating: undefined },
-  { id: "3", type: "show", title: "The Bear", subtitle: "2022 · Series", rating: 8.7 },
-];
+import { publicAxios } from "../utils/AxiosInstance";
 
 const TYPE_ICON = { movie: Film, actor: User, show: Tv };
 const TYPE_COLOR = { movie: "#f5c518", actor: "#1fd1a8", show: "#7c5cfc" };
@@ -13,25 +9,27 @@ const TYPE_COLOR = { movie: "#f5c518", actor: "#1fd1a8", show: "#7c5cfc" };
 export default function SearchBar({
   placeholder = "Search movies, actors, shows...",
   initialValue = "",
-  results,
+  results: externalResults,
   loading: externalLoading,
   onSearch,
   onResultClick,
   onClear,
   fullWidth = false,
 }) {
+  const navigate = useNavigate();
   const [value, setValue] = useState(initialValue);
   const [focused, setFocused] = useState(false);
   const [internalLoading, setInternalLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const timerRef = useRef(null);
   const containerRef = useRef(null);
 
   const isLoading = externalLoading ?? internalLoading;
-  const displayResults = results ?? (value.length > 1 ? MOCK_RESULTS : []);
+  const displayResults = externalResults ?? searchResults;
   const hasResults = displayResults.length > 0 && focused && value.length > 1;
 
-  // Simulated loading when no external handler
+  // Real API search with debounce
   function handleChange(v) {
     setValue(v);
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -40,13 +38,42 @@ export default function SearchBar({
       setInternalLoading(true);
       setShowResults(false);
 
-      timerRef.current = setTimeout(() => {
-        setInternalLoading(false);
-        setShowResults(true);
-      }, 600);
+      timerRef.current = setTimeout(async () => {
+        try {
+          const res = await publicAxios.get("/api/archive", { params: { search: v } });
+          const raw = res.data?.data ?? res.data?.movies ?? res.data;
+          const list = Array.isArray(raw) ? raw : [];
+
+          const formatted = list
+            .slice(0, 6)
+            .map((item) => {
+              const isSeries = item.type === "Series" || item.type === "series";
+              return {
+                id: item.id ?? item._id ?? item.tmdb_id,
+                type: isSeries ? "show" : "movie",
+                title: item.title ?? item.name ?? "Untitled",
+                subtitle: `${item.year || ""} ${item.genres?.[0] ? `· ${item.genres[0]}` : ""}`,
+                rating:
+                  (item.rating ?? item.vote_average)
+                    ? Number(item.rating ?? item.vote_average).toFixed(1)
+                    : undefined,
+              };
+            })
+            .filter((m) => m.id);
+
+          setSearchResults(formatted);
+          setShowResults(true);
+        } catch (err) {
+          console.warn("Header search error:", err);
+          setSearchResults([]);
+        } finally {
+          setInternalLoading(false);
+        }
+      }, 350);
     } else if (v.length <= 1) {
       setInternalLoading(false);
       setShowResults(false);
+      setSearchResults([]);
     }
 
     if (onSearch) onSearch(v);
@@ -55,9 +82,17 @@ export default function SearchBar({
   function handleClear() {
     setValue("");
     setShowResults(false);
+    setSearchResults([]);
     setInternalLoading(false);
-
     if (onClear) onClear();
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && value.trim()) {
+      setFocused(false);
+      setShowResults(false);
+      navigate(`/content/archive?search=${encodeURIComponent(value.trim())}`);
+    }
   }
 
   // Close on outside click
@@ -70,15 +105,15 @@ export default function SearchBar({
     }
 
     document.addEventListener("mousedown", handler);
-
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const showDropdown = focused && (hasResults || (showResults && displayResults.length > 0));
+
   return (
     <div
       ref={containerRef}
-      className={`relative font-[Outfit] ${fullWidth ? "w-full" : "w-full max-w-[480px]"}`}
+      className={`relative font-['Outfit',sans-serif] ${fullWidth ? "w-full" : "w-full max-w-[480px]"}`}
     >
       {/* Input row */}
       <div
@@ -110,11 +145,12 @@ export default function SearchBar({
           value={value}
           placeholder={placeholder}
           onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           onFocus={() => {
             setFocused(true);
-            if (value.length > 1) setShowResults(true);
+            if (value.length > 1 && displayResults.length > 0) setShowResults(true);
           }}
-          className={`flex-1 bg-transparent border-none outline-none font-[Outfit] text-[13px] font-normal text-[#f0f0f8] min-w-0 ${
+          className={`flex-1 bg-transparent border-none outline-none font-['Outfit',sans-serif] text-[13px] font-normal text-[#f0f0f8] min-w-0 ${
             value ? "not-italic" : "italic"
           }`}
         />
@@ -137,14 +173,18 @@ export default function SearchBar({
       {showDropdown && (
         <div className="absolute top-full left-0 right-0 bg-[#0d0d18] border border-[rgba(245,197,24,0.3)] border-t-0 rounded-b-[10px] overflow-hidden z-[200] shadow-[0_8px_40px_rgba(0,0,0,0.8)]">
           {displayResults.map((r, i) => {
-            const Icon = TYPE_ICON[r.type];
-            const color = TYPE_COLOR[r.type];
+            const Icon = TYPE_ICON[r.type] || Film;
+            const color = TYPE_COLOR[r.type] || "#f5c518";
             return (
               <button
                 key={r.id}
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  onResultClick?.(r);
+                  if (onResultClick) {
+                    onResultClick(r);
+                  } else {
+                    navigate(`/content/movie/${r.id}`);
+                  }
                   setFocused(false);
                   setShowResults(false);
                 }}
@@ -165,13 +205,13 @@ export default function SearchBar({
 
                 {/* Labels */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-[Outfit] text-[13px] font-semibold text-[#f0f0f8] whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="font-['Outfit',sans-serif] text-[13px] font-semibold text-[#f0f0f8] whitespace-nowrap overflow-hidden text-ellipsis">
                     {r.title}
                   </div>
 
                   {r.subtitle && (
                     <div
-                      className="font-[Outfit] text-[11px] mt-[1px]"
+                      className="font-['Outfit',sans-serif] text-[11px] mt-[1px]"
                       style={{ color: "rgba(240,240,248,0.38)" }}
                     >
                       {r.subtitle}
@@ -181,7 +221,7 @@ export default function SearchBar({
 
                 {/* Rating */}
                 {r.rating !== undefined && (
-                  <div className="font-[Outfit] text-[12px] font-bold text-[#f5c518] flex-shrink-0">
+                  <div className="font-['Outfit',sans-serif] text-[12px] font-bold text-[#f5c518] flex-shrink-0">
                     ★ {r.rating}
                   </div>
                 )}
@@ -189,19 +229,14 @@ export default function SearchBar({
             );
           })}
           {/* Footer hint */}
-          <div className="px-4 py-[8px] border-t border-[rgba(255,255,255,0.05)] font-[Outfit] text-[11px] text-[rgba(240,240,248,0.25)] flex items-center gap-[6px]">
+          <div className="px-4 py-[8px] border-t border-[rgba(255,255,255,0.05)] font-['Outfit',sans-serif] text-[11px] text-[rgba(240,240,248,0.25)] flex items-center gap-[6px]">
             <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">↵</span>
-            to select ·
+            to search all ·
             <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">Esc</span>
             to close
           </div>
         </div>
       )}
-
-      {/* Spinner keyframe */}
-      <style>{`
-  @keyframes ff-spin { to { transform: rotate(360deg); } }
-`}</style>
     </div>
   );
 }

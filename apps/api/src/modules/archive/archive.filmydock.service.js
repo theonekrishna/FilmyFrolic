@@ -13,7 +13,7 @@ const getMovies = async (params = {}) => {
     if (query) {
       tmdbData = await tmdbService.searchMovies(query, page);
     } else {
-      tmdbData = await tmdbService.getTrendingMovies(page);
+      tmdbData = await tmdbService.getTrendingMovies(page, params.type || "all");
     }
 
     if (tmdbData && tmdbData.results && tmdbData.results.length > 0) {

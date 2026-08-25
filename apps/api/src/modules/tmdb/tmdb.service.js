@@ -213,14 +213,20 @@ const formatMovieDTO = (movie) => {
   };
 };
 
-// 1. Fetch Trending Movies
-const getTrendingMovies = async (page = 1) => {
-  const cacheKey = `trending_${page}`;
+// 1. Fetch Trending Media (Movies / TV / All)
+const getTrendingMovies = async (page = 1, type = "all") => {
+  const mediaType =
+    type === "series" || type === "tv"
+      ? "tv"
+      : type === "movies" || type === "movie"
+        ? "movie"
+        : "all";
+  const cacheKey = `trending_${mediaType}_${page}`;
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
   try {
-    const res = await axios.get(`${TMDB_BASE_URL}/trending/movie/day`, {
+    const res = await axios.get(`${TMDB_BASE_URL}/trending/${mediaType}/day`, {
       params: { api_key: TMDB_API_KEY, page },
       timeout: 3000,
     });
@@ -229,7 +235,13 @@ const getTrendingMovies = async (page = 1) => {
       page: res.data.page,
       total_pages: res.data.total_pages,
       total_results: res.data.total_results,
-      results: res.data.results.map(formatMovieDTO),
+      results: res.data.results.map((item) => {
+        const dto = formatMovieDTO(item);
+        if (mediaType === "tv" || item.media_type === "tv" || item.first_air_date) {
+          dto.type = "Series";
+        }
+        return dto;
+      }),
     };
 
     setCachedData(cacheKey, formatted);

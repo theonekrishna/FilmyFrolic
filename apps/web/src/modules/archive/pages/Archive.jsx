@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import TopBar from "../../../layout/TopBar";
 import { Search } from "lucide-react";
 
@@ -21,8 +21,10 @@ const CONTAINER_PADDING = "px-4 md:px-10";
 
 export default function Archive() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get("search") || searchParams.get("query") || "";
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [focused, setFocused] = useState(false);
   const [filter, setFilter] = useState("all");
   const [recents, setRecents] = useState(RECENT_SEARCHES);
@@ -31,6 +33,12 @@ export default function Archive() {
   const [loadError, setLoadError] = useState(null);
 
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (initialQuery) {
+      setQuery(initialQuery);
+    }
+  }, [initialQuery]);
 
   function formatDuration(rawMinutes) {
     const total = parseInt(rawMinutes, 10);
@@ -49,7 +57,7 @@ export default function Archive() {
       id: raw?.id ?? raw?._id ?? raw?.tmdb_id ?? null,
       title: raw?.title ?? raw?.name ?? "Untitled",
       year: raw?.year ?? (raw?.release_date ? raw.release_date.split("-")[0] : ""),
-      rating,
+      rating: Number(rating.toFixed(1)),
       image: poster,
       genre: Array.isArray(raw?.genres) ? raw.genres : [],
       duration: raw?.runtime ? formatDuration(raw.runtime) : "",
@@ -65,7 +73,7 @@ export default function Archive() {
     setLoadError(null);
 
     const params = {};
-    if (filter !== "all") params.type = filter;
+    if (filter && filter !== "all") params.type = filter;
     if (query) params.query = query;
 
     publicAxios
