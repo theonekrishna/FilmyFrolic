@@ -630,41 +630,18 @@ export default function Communities() {
         <div className="flex gap-6 px-7 py-7 pb-16 items-start">
           {/* Main column */}
           <div className="flex-1 min-w-0">
-            {/* Desktop page header */}
-            <div className="flex items-start justify-between mb-6 gap-4">
-              <div>
-                <h1 className="font-[Bebas_Neue] text-4xl tracking-[2px] text-[#f0f0f8] m-0 leading-none">
-                  Communities
-                </h1>
-                <p className="font-[Outfit] text-[15px] text-[rgba(240,240,248,0.45)] mt-1.5 font-light">
-                  Find your fandom — join, post, and watch together
-                </p>
-              </div>
-
-              {/* Create Community — requires auth */}
-              <button
-                onClick={() =>
-                  requireAuth("Sign in to create your own community and build your fandom!", () =>
-                    setCreateSheetOpen(true)
-                  )
-                }
-                className="flex items-center gap-2 bg-[#3b82f6] border-none rounded-[10px] px-5 py-2.5 cursor-pointer font-[Outfit] text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(59,130,246,0.25)] transition-transform duration-150 hover:scale-[1.02] shrink-0"
-              >
-                <Plus size={14} /> Create Community
-              </button>
-            </div>
-
-            {/* Desktop filter tabs + Search */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+            {/* Desktop Control Sub-Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-[#12121e] border border-white/10 rounded-2xl p-3 px-4">
+              {/* Filter tabs */}
+              <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
                 {FILTER_TABS.map((tab) => (
                   <button
                     key={tab.value}
                     onClick={() => setActiveTab(tab.value)}
-                    className={`rounded-full px-[18px] py-2 font-[Outfit] text-[13px] cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 ${
+                    className={`rounded-xl px-4 py-1.5 font-['Outfit'] text-[13px] font-medium cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 ${
                       activeTab === tab.value
-                        ? "bg-[#3b82f6]/[0.09] border border-[#3b82f6]/[0.38] font-semibold text-[#3b82f6]"
-                        : "bg-white/[0.04] border border-white/[0.08] font-normal text-[rgba(240,240,248,0.55)]"
+                        ? "bg-[#3b82f6] text-white shadow-md shadow-blue-500/20 font-semibold"
+                        : "text-[#f0f0f8]/60 hover:text-white hover:bg-white/5"
                     }`}
                   >
                     {tab.label}
@@ -672,41 +649,54 @@ export default function Communities() {
                 ))}
               </div>
 
-              {/* Search Bar */}
-              <div
-                className={`flex items-center gap-2.5 h-10 rounded-full px-4 transition-all duration-200 flex-1 ${
-                  searchFocused
-                    ? "bg-[rgba(59,130,246,0.1)] border-[1.5px] border-[#3b82f6]/[0.5]"
-                    : "bg-white/[0.06] border-[1.5px] border-white/[0.12]"
-                }`}
-              >
-                <Search
-                  size={16}
-                  className={`shrink-0 transition-colors duration-200 ${
-                    searchFocused ? "text-[#3b82f6]" : "text-[rgba(240,240,248,0.5)]"
+              {/* Search Bar & Create Button */}
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center gap-2 h-9 rounded-xl px-3 transition-all duration-200 min-w-[220px] ${
+                    searchFocused
+                      ? "bg-[#12121e] border border-[#3b82f6]"
+                      : "bg-white/5 border border-white/10"
                   }`}
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  placeholder="Search communities..."
-                  autoComplete="off"
-                  className="flex-1 bg-transparent border-none outline-none font-[Outfit] text-[14px] text-[#f0f0f8] placeholder:text-[rgba(240,240,248,0.4)] caret-[#3b82f6] min-w-0"
-                />
-                {searchQuery && (
-                  <button
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setSearchQuery("");
-                    }}
-                    className="flex items-center justify-center w-4 h-4 rounded-full bg-white/[0.08] border-none cursor-pointer p-0 shrink-0 hover:bg-white/[0.12]"
-                  >
-                    <X size={10} color="rgba(240,240,248,0.5)" />
-                  </button>
-                )}
+                >
+                  <Search
+                    size={14}
+                    className={`shrink-0 transition-colors duration-200 ${
+                      searchFocused ? "text-[#3b82f6]" : "text-white/40"
+                    }`}
+                  />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    placeholder="Search communities..."
+                    autoComplete="off"
+                    className="flex-1 bg-transparent border-none outline-none font-['Outfit'] text-[13px] text-[#f0f0f8] placeholder:text-white/30 caret-[#3b82f6] min-w-0"
+                  />
+                  {searchQuery && (
+                    <button
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center justify-center w-4 h-4 rounded-full bg-white/10 text-white/50 hover:text-white shrink-0"
+                    >
+                      <X size={10} />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  onClick={() =>
+                    requireAuth("Sign in to create your own community and build your fandom!", () =>
+                      setCreateSheetOpen(true)
+                    )
+                  }
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl px-4 py-2 cursor-pointer font-['Outfit'] text-xs font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95 shrink-0"
+                >
+                  <Plus size={14} /> Create Community
+                </button>
               </div>
             </div>
 
