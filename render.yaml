@@ -1,0 +1,25 @@
+services:
+  # ── 1. API Backend Web Service ──
+  - type: web
+    name: filmyfrolic-api
+    env: node
+    rootDir: apps/api
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: node src/index.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+
+  # ── 2. Web Frontend Static Site ──
+  - type: web
+    name: filmy-frolic-new-frontend
+    env: static
+    rootDir: apps/web
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @filmyfrolic/web build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

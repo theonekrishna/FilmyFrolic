@@ -1,8 +1,7 @@
 const { supabase, supabaseAdmin } = require("../../configs/supabase");
 const { createClient } = require("@supabase/supabase-js");
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const signUpUser = async ({ email, password, displayName, username }) => {
   const { data: existing } = await supabase
@@ -184,12 +183,13 @@ const sendPasswordResetEmail = async (email) => {
   const recoveryLink = data.properties?.action_link;
   console.log(`🔑 PASSWORD RESET LINK FOR ${email}: ${recoveryLink}`);
 
-  try {
-    const { error: resendError } = await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Reset Your Password",
-      html: `
+  if (resend) {
+    try {
+      const { error: resendError } = await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: email,
+        subject: "Reset Your Password",
+        html: `
     <!DOCTYPE html>
     <html>
     <head><meta charset="UTF-8" /><title>Reset Password</title></head>
@@ -214,13 +214,18 @@ const sendPasswordResetEmail = async (email) => {
     </body>
     </html>
       `,
-    });
+      });
 
-    if (resendError) {
-      console.warn("Resend email delivery notice:", resendError.message);
+      if (resendError) {
+        console.warn("Resend email delivery notice:", resendError.message);
+      }
+    } catch (resendErr) {
+      console.warn("Resend exception notice:", resendErr.message);
     }
-  } catch (resendErr) {
-    console.warn("Resend exception notice:", resendErr.message);
+  } else {
+    console.log(
+      `[sendPasswordResetEmail] RESEND_API_KEY is not set. Reset link generated: ${recoveryLink}`
+    );
   }
 
   return true;
