@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Lock, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
 import InputField from "../components/InputField";
 import { publicAxios } from "../../../utils/AxiosInstance";
+import { supabase } from "../../../utils/supabaseClient";
 
 const BG_IMAGE =
   "https://images.unsplash.com/photo-1762532264896-c70364efe09f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080";
@@ -16,36 +17,30 @@ function decodeJwtPayload(token) {
   }
 }
 
-/**
- * Reads tokens from query params set by AuthCallbackPage:
- *   /reset-password?token=ACCESS&refreshToken=REFRESH&email=EMAIL
- *
- * Falls back to raw Supabase hash if AuthCallbackPage was bypassed:
- *   /#access_token=...&refresh_token=...&type=recovery
- */
 function extractTokens(searchParams) {
-  // Priority 1: clean query params from AuthCallbackPage
-  const tokenFromQuery = searchParams.get("token");
+  // Priority 1: query params (?token=... or ?access_token=...)
+  const tokenFromQuery = searchParams.get("token") || searchParams.get("access_token");
   if (tokenFromQuery) {
+    const refreshToken =
+      searchParams.get("refreshToken") || searchParams.get("refresh_token") || "";
+    const email = searchParams.get("email") || "";
     return {
       accessToken: tokenFromQuery,
-      refreshToken: searchParams.get("refreshToken") ?? "", // ← now correctly read
-      email: searchParams.get("email") ?? "",
+      refreshToken,
+      email,
     };
   }
 
-  // Priority 2: raw Supabase hash (direct redirect, no callback page)
+  // Priority 2: raw URL hash (#access_token=...&refresh_token=...&type=recovery)
   const hash = window.location.hash.slice(1);
   if (hash) {
     const params = new URLSearchParams(hash);
-    const type = params.get("type");
     const accessToken = params.get("access_token") ?? "";
     const refreshToken = params.get("refresh_token") ?? "";
 
-    if (type === "recovery" && accessToken) {
+    if (accessToken) {
       const payload = decodeJwtPayload(accessToken);
       const email = payload?.email ?? "";
-      window.history.replaceState(null, "", window.location.pathname);
       return { accessToken, refreshToken, email };
     }
   }
@@ -57,7 +52,8 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [{ accessToken, refreshToken, email }] = useState(() => extractTokens(searchParams));
+  const [tokenState, setTokenState] = useState(() => extractTokens(searchParams));
+  const { accessToken, refreshToken, email } = tokenState;
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -66,6 +62,24 @@ export default function ResetPasswordPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+
+  // Fallback: Check if Supabase client has active session from recovery link
+  useEffect(() => {
+    if (!accessToken) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data?.session?.access_token) {
+          const sessionAccessToken = data.session.access_token;
+          const sessionRefreshToken = data.session.refresh_token || "";
+          const payload = decodeJwtPayload(sessionAccessToken);
+          setTokenState({
+            accessToken: sessionAccessToken,
+            refreshToken: sessionRefreshToken,
+            email: payload?.email || "",
+          });
+        }
+      });
+    }
+  }, [accessToken]);
 
   const invalidLink = !accessToken;
 
@@ -86,7 +100,6 @@ export default function ResetPasswordPage() {
 
     try {
       setLoading(true);
-      // POST /api/auth/reset-password — all four fields required by the API
       await publicAxios.post("/api/auth/reset-password", {
         accessToken,
         refreshToken,

@@ -8,30 +8,48 @@ const AuthCallback = () => {
   const { signInWithToken } = useAuth();
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
+    const handleAuthCallback = async () => {
+      // Check hash params first for recovery type
+      const hash = window.location.hash.slice(1);
+      const params = new URLSearchParams(hash);
+      const type = params.get("type");
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token") || "";
 
-      if (error) {
-        console.log(error);
+      if (type === "recovery" && accessToken) {
+        navigate(`/reset-password?token=${accessToken}&refreshToken=${refreshToken}`, {
+          replace: true,
+        });
         return;
       }
+
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error || !data?.session) {
+        console.error("AuthCallback session error:", error);
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // Check if session event is recovery
       const { access_token, refresh_token } = data.session;
-      console.log("Access Token:", access_token);
-      console.log("Refresh Token:", refresh_token);
-      // Sets accessToken in localStorage AND updates user state immediately
       localStorage.setItem("refreshToken", refresh_token);
       signInWithToken(access_token);
 
-      console.log("Session:", data.session);
-
-      console.log("User:", data.session?.user);
-
       navigate("/", { replace: true });
     };
-    getSession();
-  }, []);
 
-  return <div>Loading...</div>;
+    handleAuthCallback();
+  }, [navigate, signInWithToken]);
+
+  return (
+    <div className="min-h-screen bg-[#080810] flex items-center justify-center text-white font-['Outfit']">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm text-gray-400">Authenticating session...</span>
+      </div>
+    </div>
+  );
 };
 
 export default AuthCallback;
