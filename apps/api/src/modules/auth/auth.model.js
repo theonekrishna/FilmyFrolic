@@ -1,5 +1,7 @@
 const { supabase, supabaseAdmin } = require("../../configs/supabase");
 const { createClient } = require("@supabase/supabase-js");
+const { Resend } = require("resend");
+
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
