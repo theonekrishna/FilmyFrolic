@@ -22,7 +22,7 @@ function SectionSkeleton() {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { featuredMovie, allTitles, loading, error, refetch } = useHomeMovies();
+  const { featuredMovie, featuredMovies, allTitles, loading, error, refetch } = useHomeMovies();
 
   if (error) {
     return (
@@ -47,7 +47,7 @@ export default function Home() {
         {loading ? (
           <div className="w-full h-[240px] md:h-[520px] animate-pulse bg-white/5" />
         ) : (
-          <HeroSection movie={featuredMovie} />
+          <HeroSection movie={featuredMovie} movies={featuredMovies} />
         )}
 
         {loading ? (

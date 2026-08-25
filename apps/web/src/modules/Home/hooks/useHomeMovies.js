@@ -4,8 +4,9 @@ import { publicAxios } from "../../../utils/AxiosInstance";
 const COMBINED_COUNT = 16;
 
 export function useHomeMovies() {
-  const [featuredMovie, setFeaturedMovie] = useState(null); // hero — single movie
-  const [allTitles, setAllTitles] = useState([]); // movies + series combined
+  const [featuredMovie, setFeaturedMovie] = useState(null);
+  const [featuredMovies, setFeaturedMovies] = useState([]);
+  const [allTitles, setAllTitles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,8 +34,9 @@ export function useHomeMovies() {
       id: raw?.id ?? raw?._id ?? raw?.tmdb_id ?? null,
       title: raw?.title ?? raw?.name ?? "Untitled",
       year: raw?.year ?? (raw?.release_date ? raw.release_date.split("-")[0] : ""),
-      rating,
+      rating: Number(rating.toFixed(1)),
       image: poster,
+      backdrop: raw?.backdrop_url || poster,
       genre: Array.isArray(raw?.genres) ? raw.genres : [],
       duration: raw?.runtime ? formatDuration(raw.runtime) : "",
       description: raw?.overview ?? raw?.synopsis ?? "",
@@ -47,14 +49,16 @@ export function useHomeMovies() {
   function mapFeaturedMovie(raw) {
     const rawRating = raw?.rating ?? raw?.vote_average;
     const rating = typeof rawRating === "number" ? rawRating : parseFloat(rawRating) || 0;
-    const poster = raw?.backdrop_url || raw?.poster_url || raw?.poster || raw?.image || "";
+    const backdrop = raw?.backdrop_url || raw?.poster_url || raw?.poster || raw?.image || "";
 
     return {
       id: raw?.id ?? raw?._id ?? raw?.tmdb_id ?? null,
       title: raw?.title ?? raw?.name ?? "Untitled",
       year: raw?.year ?? (raw?.release_date ? raw.release_date.split("-")[0] : ""),
-      rating,
-      image: poster,
+      rating: Number(rating.toFixed(1)),
+      image: backdrop,
+      backdrop,
+      poster: raw?.poster_url || raw?.poster || backdrop,
       genre: Array.isArray(raw?.genres) ? raw.genres : [],
       duration: formatDuration(raw?.runtime || raw?.movieDuration),
       description: raw?.overview ?? raw?.synopsis ?? "",
@@ -74,10 +78,15 @@ export function useHomeMovies() {
       const homeList = Array.isArray(rawData) ? rawData : [];
       const mappedMovies = homeList.map(mapListMovie).filter((m) => m.id);
 
-      const rawFeatured = homeRes.data?.featuredMovie || homeList[0];
-      setFeaturedMovie(rawFeatured ? mapFeaturedMovie(rawFeatured) : null);
+      // Top featured items for the Hero carousel
+      const heroList = homeList
+        .slice(0, 6)
+        .map(mapFeaturedMovie)
+        .filter((m) => m.id);
+      setFeaturedMovies(heroList);
+      setFeaturedMovie(heroList[0] || null);
 
-      // Series, fetched separately and merged in with the movies.
+      // Series
       let mappedSeries = [];
       try {
         const seriesRes = await publicAxios.get("/api/archive", {
@@ -90,7 +99,16 @@ export function useHomeMovies() {
         console.warn("Series load fallback:", seriesErr);
       }
 
-      const combined = [...mappedMovies, ...mappedSeries].sort((a, b) => b.rating - a.rating);
+      // Deduplicate items by ID and Title to prevent duplicates in Top Movies & Series
+      const uniqueMap = new Map();
+      [...mappedMovies, ...mappedSeries].forEach((item) => {
+        const key = `${item.id}-${item.title}`;
+        if (item.id && !uniqueMap.has(key)) {
+          uniqueMap.set(key, item);
+        }
+      });
+
+      const combined = Array.from(uniqueMap.values()).sort((a, b) => b.rating - a.rating);
 
       setAllTitles(combined.slice(0, COMBINED_COUNT));
     } catch (err) {
@@ -106,6 +124,7 @@ export function useHomeMovies() {
 
   return {
     featuredMovie,
+    featuredMovies,
     allTitles,
     loading,
     error,

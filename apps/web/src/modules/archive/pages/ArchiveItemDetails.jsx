@@ -26,39 +26,53 @@ function getInitials(name = "") {
 }
 
 function normalizeMovieDetail(m) {
+  if (!m) return null;
+  const rawRating = m.rating ?? m.vote_average ?? 0;
+  const rating = typeof rawRating === "number" ? rawRating : parseFloat(rawRating) || 0;
+  const image = m.backdrop_url || m.poster_url || m.poster || m.image || "";
+  const year = m.year ?? (m.release_date ? m.release_date.split("-")[0] : "");
+  const duration = m.runtime ? `${m.runtime} min` : m.movieDuration ? `${m.movieDuration} min` : "";
+  const description = m.overview ?? m.synopsis ?? m.description ?? "";
+
   return {
-    id: m._id,
-    title: m.title,
-    year: m.year,
-    rating: m.rating ?? 0,
-    image: m.poster,
-    genre: m.genres ?? [],
-    duration: m.movieDuration ? `${m.movieDuration} min` : "",
-    description: m.synopsis ?? "",
+    id: m.id ?? m._id,
+    title: m.title ?? m.name ?? "Untitled",
+    year,
+    rating: Number(rating.toFixed(1)),
+    image,
+    backdrop: m.backdrop_url || image,
+    poster: m.poster_url || m.poster || image,
+    genre: Array.isArray(m.genres) ? m.genres : Array.isArray(m.genre) ? m.genre : [],
+    duration,
+    description,
     review: m.review ?? "",
     badge: m.badge ?? null,
-    type: m.type ?? null,
-    languages: m.languages ?? [],
+    type: m.type ?? "Movie",
+    languages: m.languages ?? (m.original_language ? [m.original_language.toUpperCase()] : []),
     country: m.country ?? "",
     director: m.director ?? null,
     cast: (m.cast ?? []).map((c) => ({
-      name: c.castMember?.fullName ?? "Unknown",
-      role: c.characterName ?? c.castMember?.castType ?? "",
-      photo: c.castMember?.castPhoto ?? null,
-      initials: getInitials(c.castMember?.fullName),
+      name: c.name ?? c.castMember?.fullName ?? "Unknown",
+      role: c.character ?? c.role ?? c.characterName ?? "",
+      photo: c.profile_path
+        ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+        : (c.photo ?? c.castMember?.castPhoto ?? null),
+      initials: getInitials(c.name ?? c.castMember?.fullName),
     })),
     crew: (m.crew ?? []).map((c) => ({
-      name: c.fullName ?? "Unknown",
-      role: c.crewType ?? "",
-      photo: c.crewPhoto ?? null,
-      initials: getInitials(c.fullName),
+      name: c.name ?? c.fullName ?? "Unknown",
+      role: c.job ?? c.role ?? c.crewType ?? "",
+      photo: c.profile_path
+        ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+        : (c.photo ?? c.crewPhoto ?? null),
+      initials: getInitials(c.name ?? c.fullName),
     })),
     awards: m.awards ?? [],
     ottAvailability: m.ottAvailability ?? [],
-    trailerLink: m.trailerLink ?? [],
+    trailerLink: m.trailerLink ?? (m.trailer ? [m.trailer] : []),
     songsLink: m.songsLink ?? [],
     eventsLink: m.eventsLink ?? [],
-    story: m.story ?? "",
+    story: m.story ?? description,
     grossCollection: m.grossCollection ?? null,
     netCollection: m.netCollection ?? null,
   };
