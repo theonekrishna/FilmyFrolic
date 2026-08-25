@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Edit3, Loader2, TrendingUp, Flame, MessageSquare, X } from "lucide-react";
 
 import PostCard from "../components/PostCard";
-import SearchBar from "../components/SearchBar";
 import AuthPromptModal from "../components/Authpromptmodal ";
 
 // ── Lazy-load heavy modals — only downloaded when opened (~50 KB total) ────────
@@ -23,28 +22,9 @@ import {
   getPopularFeeds,
   getMostCommentedFeeds,
 } from "../services/feedService";
-import { useToast, ToastContainer } from "../../../shared/Toast";
+import { useToast } from "../../../shared/Toast";
 import { useAuth } from "../../../context/AuthContext";
 import TopBar from "../../../layout/TopBar";
-
-const ACCENT = "#3b82f6";
-
-function formatTimeAgo(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(days / 365)}y ago`;
-}
 
 export default function SocialFeed() {
   const navigate = useNavigate();
@@ -53,7 +33,6 @@ export default function SocialFeed() {
 
   // ── Ref to prevent spam-clicking a reaction while API is in flight ───────────
   const reactingPosts = useRef(new Set());
-  // emojiIdx being loaded per postId: { [postId]: emojiIdx }
   const [reactingState, setReactingState] = useState({});
 
   const [isLoggedIn] = useState(() => !!localStorage.getItem("accessToken"));
@@ -66,7 +45,6 @@ export default function SocialFeed() {
     }
     return false; // allowed
   }
-  // ─────────────────────────────────────────────────────────────────────────────
 
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
   const myProfile = currentUserProfile
@@ -176,7 +154,6 @@ export default function SocialFeed() {
     };
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPosts = useCallback(async (isBackgroundRefresh = false) => {
     try {
       if (!isBackgroundRefresh) setLoading(true);
@@ -206,7 +183,6 @@ export default function SocialFeed() {
     } finally {
       if (!isBackgroundRefresh) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMyProfile = async () => {
@@ -261,11 +237,6 @@ export default function SocialFeed() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleCommentCountUpdate = (postId, count) => {
-    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, comments: count } : p)));
-    setSavedPostsData((prev) => prev.map((p) => (p.id === postId ? { ...p, comments: count } : p)));
-  };
-
   useEffect(() => {
     if (feedSubTab === "saved") fetchSavedPosts();
   }, [feedSubTab]);
@@ -274,10 +245,9 @@ export default function SocialFeed() {
     async (postId, emojiIdx) => {
       if (requireAuth("Sign in to react to posts! 🔥")) return;
 
-      // Block spam-clicks while this post's reaction is already being processed
       if (reactingPosts.current.has(postId)) return;
       reactingPosts.current.add(postId);
-      setReactingState((prev) => ({ ...prev, [postId]: emojiIdx })); // show loader
+      setReactingState((prev) => ({ ...prev, [postId]: emojiIdx }));
 
       const post =
         posts.find((p) => p.id === postId) || savedPostsData.find((p) => p.id === postId);
@@ -321,9 +291,8 @@ export default function SocialFeed() {
           const s = { ...prev };
           delete s[postId];
           return s;
-        }); // hide loader
+        });
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     [posts, savedPostsData, isLoggedIn]
   );
@@ -344,7 +313,7 @@ export default function SocialFeed() {
 
   const handleSave = useCallback(
     async (postId) => {
-      if (requireAuth("Sign in to save posts to your collection! 🔖")) return; // ← GATE
+      if (requireAuth("Sign in to save posts to your collection! 🔖")) return;
 
       setSavedPosts((prev) => {
         const next = new Set(prev);
@@ -370,7 +339,6 @@ export default function SocialFeed() {
 
   const handleDelete = useCallback(
     async (postId) => {
-      // Delete is only shown to owners who are logged in — no gate needed
       setPosts((prev) => prev.filter((p) => p.id !== postId));
       setSavedPostsData((prev) => prev.filter((p) => p.id !== postId));
       try {
@@ -395,16 +363,7 @@ export default function SocialFeed() {
     [posts, savedPostsData]
   );
 
-  function handlePostUpdated(postId, newContent) {
-    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, content: newContent } : p)));
-    setSavedPostsData((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, content: newContent } : p))
-    );
-    toast.success("Post updated successfully");
-  }
-
   const handleShare = useCallback(async (postId) => {
-    // Share is always allowed — no gate
     try {
       const frontendBase = window.location.origin.includes("localhost")
         ? window.location.origin
@@ -420,7 +379,7 @@ export default function SocialFeed() {
 
   const openCommentModal = useCallback(
     (postId) => {
-      if (requireAuth("Sign in to join the conversation! 💬")) return; // ← GATE
+      if (requireAuth("Sign in to join the conversation! 💬")) return;
       setCommentPostId(postId);
       setCommentModalOpen(true);
     },
@@ -434,7 +393,6 @@ export default function SocialFeed() {
     setPosts((prev) => [transformedPost, ...prev]);
     setComposingPost(false);
   };
-  // ─────────────────────────────────────────────────────────────────────────────
 
   // Sidebar mini-card helper
   const SidebarPostCard = ({ post }) => {
@@ -504,7 +462,7 @@ export default function SocialFeed() {
     );
   };
 
-  // Sidebar content (shared between desktop and mobile drawer)
+  // Sidebar content
   const SidebarContent = () => (
     <div className="flex flex-col gap-4">
       {/* 🔥 Hot Right Now */}
@@ -570,7 +528,6 @@ export default function SocialFeed() {
     </div>
   );
 
-  // ── Feed loading skeleton ─────────────────────────────────────────────────
   const FeedSkeleton = () => (
     <div className="flex flex-col gap-3 px-4 lg:px-0 pt-3">
       {[1, 2, 3].map((i) => (
@@ -599,45 +556,64 @@ export default function SocialFeed() {
 
   return (
     <div className="min-h-screen bg-[#080810] flex flex-col relative">
-      {/* ── AuthPromptModal — rendered at TOP LEVEL, outside all stacking contexts ── */}
       <AuthPromptModal
         isOpen={authPrompt.open}
         onClose={() => setAuthPrompt({ open: false, message: "" })}
         message={authPrompt.message}
       />
 
-      {/* ── TopBar — always visible, never blocked by loading ── */}
+      {/* ── TopBar (Single sticky global header) ── */}
       <TopBar title="Feed" subtitle="What's happening in the community" />
 
-      {/* ── Action bar ── */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-[#080810]/95 backdrop-blur-xl border-b border-white/5 flex-shrink-0">
-        <div className="flex-1">
-          <SearchBar posts={posts} communities={[]} />
+      {/* ── Feed Header Sub-Bar (Sub-tabs & Compose) ── */}
+      <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-2.5 bg-[#080810]/95 backdrop-blur-xl border-b border-white/5 flex-shrink-0 sticky top-[56px] z-30">
+        {/* Feed Sub-tabs */}
+        <div className="flex items-center gap-1.5 bg-[#12121e] border border-white/10 rounded-xl p-1">
+          {[
+            { id: "all", label: "All Posts" },
+            { id: "saved", label: `Saved (${savedPostsData.length})` },
+          ].map((t) => {
+            const isActive = feedSubTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setFeedSubTab(t.id)}
+                className={`px-4 py-1.5 rounded-lg font-['Outfit'] text-[13px] font-medium transition-all ${
+                  isActive
+                    ? "bg-[#3b82f6] text-white shadow-md shadow-blue-500/20 font-semibold"
+                    : "text-[#f0f0f8]/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Mobile trending button */}
-        <button
-          onClick={() => setSidebarDrawerOpen(true)}
-          className="lg:hidden w-9 h-9 rounded-full bg-[#f97316]/10 border border-[#f97316]/30 flex items-center justify-center transition-colors hover:bg-[#f97316]/20 flex-shrink-0"
-          title="Trending"
-        >
-          <Flame size={15} className="text-[#f97316]" />
-        </button>
-
-        {/* Compose button */}
-        {isLoggedIn && (
+        {/* Right actions: Trending drawer toggle (mobile) & Compose button */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setComposingPost(true)}
-            className="w-9 h-9 rounded-full bg-[#3b82f6]/10 border border-[#3b82f6]/30 flex items-center justify-center transition-colors hover:bg-[#3b82f6]/20 flex-shrink-0"
-            title="New Post"
+            onClick={() => setSidebarDrawerOpen(true)}
+            className="lg:hidden w-9 h-9 rounded-xl bg-[#f97316]/10 border border-[#f97316]/30 flex items-center justify-center transition-colors hover:bg-[#f97316]/20 flex-shrink-0"
+            title="Trending"
           >
-            <Edit3 size={15} className="text-[#3b82f6]" />
+            <Flame size={16} className="text-[#f97316]" />
           </button>
-        )}
+
+          {isLoggedIn && (
+            <button
+              onClick={() => setComposingPost(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-['Outfit'] text-xs font-bold shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <Edit3 size={15} />
+              <span>New Post</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Two-column layout ── */}
-      <div className="flex gap-0 lg:gap-5 lg:px-6 lg:pt-4" style={{ minHeight: 0, flex: 1 }}>
+      <div className="flex gap-0 lg:gap-6 lg:px-6 lg:pt-4" style={{ minHeight: 0, flex: 1 }}>
         {/* LEFT: Main Feed */}
         <div
           className="flex-1 min-w-0 overflow-y-auto"
@@ -647,10 +623,10 @@ export default function SocialFeed() {
           {isLoggedIn && (
             <div
               onClick={() => setComposingPost(true)}
-              className="flex items-center gap-3 p-3 px-4 bg-[#12121e] border-b border-white/5 lg:border lg:rounded-2xl lg:mb-3 cursor-pointer hover:bg-[#1a1a2e] transition-colors"
+              className="flex items-center gap-3 p-3.5 px-4 bg-[#12121e] border-b border-white/5 lg:border lg:rounded-2xl lg:mb-4 cursor-pointer hover:bg-[#1a1a2e] transition-all shadow-md"
             >
               {myProfile?.avatar_url ? (
-                <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                   <img
                     src={myProfile.avatar_url}
                     alt={myProfile.username}
@@ -661,7 +637,7 @@ export default function SocialFeed() {
                 </div>
               ) : (
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center font-['Outfit'] font-extrabold text-[13px] text-white flex-shrink-0"
+                  className="w-10 h-10 rounded-full flex items-center justify-center font-['Outfit'] font-extrabold text-[13px] text-white flex-shrink-0"
                   style={{
                     background:
                       myProfile?.avatar_color || "linear-gradient(135deg, #f5c518, #e84545)",
@@ -672,39 +648,19 @@ export default function SocialFeed() {
                     "?"}
                 </div>
               )}
-              <div className="flex-1 h-9 bg-white/5 border border-white/10 rounded-full flex items-center px-4">
-                <span className="font-['Outfit'] text-[13px] text-[#f0f0f8]/30">
+              <div className="flex-1 h-10 bg-white/5 border border-white/10 rounded-full flex items-center px-4 transition-colors hover:bg-white/10">
+                <span className="font-['Outfit'] text-[13px] text-[#f0f0f8]/40 font-light">
                   What's on your cinematic mind,{" "}
-                  {myProfile?.username || myProfile?.display_name || "friend"}?
+                  <span className="font-semibold text-white/70">
+                    {myProfile?.username || myProfile?.display_name || "friend"}
+                  </span>
+                  ?
                 </span>
               </div>
             </div>
           )}
 
-          {/* Sub-tabs: All | Saved */}
-          <div className="flex border-b border-white/5 bg-[#0d0d18] lg:bg-transparent lg:border-0 lg:mb-2">
-            {[
-              { id: "all", label: "All Posts" },
-              { id: "saved", label: `Saved (${savedPostsData.length})` },
-            ].map((t) => {
-              const isActive = feedSubTab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setFeedSubTab(t.id)}
-                  className={`flex-1 h-10 bg-transparent border-b-2 font-['Outfit'] text-[12px] transition-all ${
-                    isActive
-                      ? "border-[#3b82f6] text-[#3b82f6] font-bold"
-                      : "border-transparent text-[#f0f0f8]/50 font-normal hover:text-[#f0f0f8]/70"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ── Feed loading skeleton — replaces the full-page spinner ── */}
+          {/* ── Feed loading skeleton ── */}
           {loading && <FeedSkeleton />}
 
           {/* Error State */}
@@ -802,43 +758,41 @@ export default function SocialFeed() {
 
       {/* ── Mobile Sidebar Drawer ── */}
       {sidebarDrawerOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-[998] bg-black/60 backdrop-blur-sm"
-          onClick={() => setSidebarDrawerOpen(false)}
-        />
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setSidebarDrawerOpen(false)}
+          />
+          <div className="absolute right-0 top-0 bottom-0 w-[300px] bg-[#0d0d18] p-4 overflow-y-auto border-l border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <span className="font-['Outfit'] font-bold text-white text-sm">Trending & Hot</span>
+              <button
+                onClick={() => setSidebarDrawerOpen(false)}
+                className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <SidebarContent />
+          </div>
+        </div>
       )}
 
-      <div
-        className={`
-          lg:hidden fixed top-0 right-0 z-[999] h-full w-[300px] bg-[#0d0d18]
-          border-l border-white/10 shadow-[-8px_0_32px_rgba(0,0,0,0.6)]
-          flex flex-col
-          transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-          ${sidebarDrawerOpen ? "translate-x-0" : "translate-x-full"}
-        `}
-      >
-        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <Flame size={16} className="text-[#f97316]" />
-            <span className="font-['Bebas_Neue'] text-[18px] tracking-[1.5px] text-[#f0f0f8]">
-              Trending
-            </span>
-          </div>
-          <button
-            onClick={() => setSidebarDrawerOpen(false)}
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
-          >
-            <X size={14} color="rgba(240,240,248,0.6)" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          <SidebarContent />
-        </div>
-      </div>
-
-      {/* ── Modals (lazy-loaded — only downloaded when opened) ── */}
+      {/* ── Lazy Loaded Modals ── */}
       <Suspense fallback={null}>
+        {commentModalOpen && (
+          <CommentModal
+            isOpen={commentModalOpen}
+            onClose={() => {
+              setCommentModalOpen(false);
+              setCommentPostId(null);
+            }}
+            postId={commentPostId}
+            onCommentCountUpdate={handleCommentCountUpdate}
+            myProfile={myProfile}
+          />
+        )}
+
         {composingPost && (
           <CreatePostModal
             isOpen={composingPost}
@@ -847,34 +801,19 @@ export default function SocialFeed() {
             onPostCreated={handlePostCreated}
           />
         )}
-      </Suspense>
-      <Suspense fallback={null}>
-        {commentModalOpen && (
-          <CommentModal
-            isOpen={commentModalOpen}
-            onClose={() => setCommentModalOpen(false)}
-            postId={commentPostId}
-            isLoggedIn={isLoggedIn}
-            myProfile={myProfile}
-            onCountUpdate={handleCommentCountUpdate}
-          />
-        )}
-      </Suspense>
-      <Suspense fallback={null}>
-        {editModalOpen && (
+
+        {editModalOpen && postToEdit && (
           <EditPostModal
             isOpen={editModalOpen}
             onClose={() => {
               setEditModalOpen(false);
               setPostToEdit(null);
             }}
-            myProfile={myProfile}
-            postToEdit={postToEdit}
+            post={postToEdit}
             onPostUpdated={handlePostUpdated}
           />
         )}
       </Suspense>
-      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} />
     </div>
   );
 }
