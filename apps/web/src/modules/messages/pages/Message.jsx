@@ -15,7 +15,7 @@ import {
   deleteMessage,
 } from "../services/messageService";
 import { supabase } from "../utils/supabaseClient";
-import AuthPromptModal from "../components/Authpromptmoda"; // 👈 ADD THIS IMPORT
+import AuthPromptModal from "../components/Authpromptmodal ";
 
 // --- HELPERS (Keep these outside the component) ---
 const AVATAR_PALETTES = [
@@ -98,153 +98,74 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState("");
   const [inboxLoading, setInboxLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState({});
-  const [authPromptOpen, setAuthPromptOpen] = useState(false); // 👈 ADD THIS
+  const [isSending, setIsSending] = useState(false);
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   const location = useLocation();
-
-  // --- 3. REFS ---
-  const scrollRef = useRef(null);
-  const activeUserRef = useRef(activeUser);
   const channelRef = useRef(null);
-  const presenceChannelRef = useRef(null);
+  const scrollRef = useRef(null);
 
-  useEffect(() => {
-    activeUserRef.current = activeUser;
-  }, [activeUser]);
-
-  // --- 4. API ACTIONS (Moved above useEffect to avoid initialization error) ---
+  // --- 3. INBOX FETCHING ---
   const fetchInbox = useCallback(async () => {
-    setInboxLoading(true);
+    if (!currentUserId) {
+      setInboxLoading(false);
+      return;
+    }
     const res = await getInbox();
     if (res.success) {
       setThreads(res.data || []);
     }
     setInboxLoading(false);
-  }, []);
+  }, [currentUserId]);
 
   useEffect(() => {
     fetchInbox();
   }, [fetchInbox]);
 
+  // --- 4. SUPABASE REALTIME & PRESENCE ---
   useEffect(() => {
     if (!currentUserId) return;
 
-    if (presenceChannelRef.current) {
-      supabase.removeChannel(presenceChannelRef.current);
-      presenceChannelRef.current = null;
-    }
-
-    const room = supabase.channel("online-users", {
-      config: {
-        presence: {
-          key: String(currentUserId),
-        },
-      },
+    const channel = supabase.channel("online-users", {
+      config: { presence: { key: String(currentUserId) } },
     });
 
-    room
+    channelRef.current = channel;
+
+    channel
       .on("presence", { event: "sync" }, () => {
-        const state = room.presenceState();
-        const online = {};
+        const state = channel.presenceState();
+        const onlineMap = {};
         Object.keys(state).forEach((key) => {
-          online[key] = true;
+          onlineMap[key] = true;
         });
-        setOnlineUsers(online);
+        setOnlineUsers(onlineMap);
       })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await room.track({
-            online_at: new Date().toISOString(),
-            user_id: currentUserId,
-          });
-        }
-      });
-
-    presenceChannelRef.current = room;
-
-    return () => {
-      if (presenceChannelRef.current) {
-        supabase.removeChannel(presenceChannelRef.current);
-        presenceChannelRef.current = null;
-      }
-    };
-  }, [currentUserId]);
-
-  // --- 5. REALTIME SUBSCRIPTION (Now safely below fetchInbox) ---
-  useEffect(() => {
-    if (!currentUserId) return;
-
-    // Cleanup previous channel to prevent duplicate listeners
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
-    channelRef.current = supabase
-      .channel("messages")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "messages",
-          // Filter removed as per Lead's "test" request
+          table: "direct_messages",
+          filter: `receiver_id=eq.${currentUserId}`,
         },
         (payload) => {
           const newMsg = payload.new;
-          const active = activeUserRef.current;
-          const activeId = active?.id || active?._id || active?.user_id;
-
-          const isFromActiveUser = active && String(activeId) === String(newMsg.sender_id);
-          const isFromMe = String(newMsg.sender_id) === String(currentUserId);
-
-          // UI Logic: Update current chat messages
-          // Only add messages from others (own messages handled by optimistic UI in handleSend)
-          if (!isFromMe && isFromActiveUser) {
+          if (activeUser && String(newMsg.sender_id) === String(activeUser.id || activeUser._id)) {
             setMessages((prev) => {
-              // Check for duplicates by ID
-              const isDuplicate = prev.some((m) => String(m.id) === String(newMsg.id));
-              if (isDuplicate) return prev;
+              if (prev.some((m) => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
-            markConversationAsRead(newMsg.sender_id).catch(() => {});
+            markConversationAsRead(activeUser.id || activeUser._id).catch(() => {});
           }
-
-          // UI Logic: Update Sidebar preview
-          setThreads((prev) => {
-            const partnerId = isFromMe ? newMsg.receiver_id : newMsg.sender_id;
-            const exists = prev.some(
-              (t) => String(t.other_user_id || t.user?.id) === String(partnerId)
-            );
-
-            let previewText = newMsg.content;
-            if (!previewText && newMsg.media_type === "image") previewText = "📷 Photo";
-            if (!previewText && newMsg.media_type === "video") previewText = "🎬 Video";
-
-            if (!exists) {
-              fetchInbox(); // Refresh if new user
-              return prev;
-            }
-
-            return prev.map((t) =>
-              String(t.other_user_id || t.user?.id) === String(partnerId)
-                ? {
-                    ...t,
-                    last_message: previewText,
-                    unread_count:
-                      active && String(activeId) === String(partnerId)
-                        ? 0
-                        : (t.unread_count || 0) + (isFromMe ? 0 : 1),
-                  }
-                : t
-            );
-          });
+          fetchInbox();
         }
       )
-      .subscribe((status) => {
-        // Realtime connection status
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({ online_at: new Date().toISOString() });
+        }
       });
 
     return () => {
@@ -253,9 +174,9 @@ export default function Messages() {
         channelRef.current = null;
       }
     };
-  }, [currentUserId, fetchInbox]);
+  }, [currentUserId, fetchInbox, activeUser]);
 
-  // --- 6. REMAINING HANDLERS ---
+  // --- 5. THREAD SELECTION ---
   const handleSelectThread = useCallback(async (user) => {
     setActiveUser(user);
     setView("chat");
@@ -274,10 +195,8 @@ export default function Messages() {
   }, []);
 
   useEffect(() => {
-    // If navigated from Feed with an active user, select them
     if (location.state?.activeUser) {
       handleSelectThread(location.state.activeUser);
-      // Optional: clear state to prevent re-trigger on refresh
       window.history.replaceState({}, document.title);
     }
   }, [location.state, handleSelectThread]);
@@ -339,14 +258,12 @@ export default function Messages() {
     return threads.filter((t) => t.username?.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [threads, searchQuery]);
 
-  // --- 7. RENDER ---
   return (
-    <div className="h-full bg-[#080810] flex flex-col overflow-hidden">
-      {/* 👇 ADD AUTH PROMPT MODAL */}
+    <div className="min-h-screen bg-[#080810] flex flex-col relative font-['Outfit']">
       <AuthPromptModal
         isOpen={authPromptOpen}
         onClose={() => setAuthPromptOpen(false)}
-        message="Sign in to send messages and connect with others."
+        message="Sign in to chat with friends, send media, and join conversations!"
       />
 
       {newConvoOpen && (
@@ -371,17 +288,16 @@ export default function Messages() {
         <div
           className={`
             ${view === "chat" ? "hidden md:flex" : "flex"}
-            w-full md:w-[300px] lg:w-[340px] shrink-0
-            bg-[#0d0d18] border-r border-white/5 flex-col
+            w-full md:w-[320px] lg:w-[360px] shrink-0
+            bg-[#0d0d18] border-r border-white/10 flex-col
           `}
         >
           {/* Inbox Header */}
           <div className="px-4 pt-4 pb-3 shrink-0">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-['Bebas_Neue'] text-[22px] tracking-widest text-white/90">
+              <h2 className="font-['Bebas_Neue'] text-[24px] tracking-widest text-white/90 m-0">
                 Inbox
               </h2>
-              {/* 👇 UPDATED: guard + button */}
               <button
                 onClick={() => {
                   if (!currentUserId) {
@@ -390,17 +306,18 @@ export default function Messages() {
                   }
                   setNewConvoOpen(true);
                 }}
-                className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#3b82f6] hover:bg-blue-500 active:scale-95 transition-all"
+                className="w-9 h-9 rounded-2xl flex items-center justify-center bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-500/25 active:scale-95 transition-all cursor-pointer"
                 aria-label="New conversation"
               >
-                <Plus size={16} className="text-white" />
+                <Plus size={18} className="text-white" />
               </button>
             </div>
-            {/* 👇 UPDATED: guard + search input */}
+
+            {/* Inbox Search input */}
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25"
-                size={13}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30"
+                size={14}
               />
               <input
                 type="text"
@@ -415,27 +332,28 @@ export default function Messages() {
                 onFocus={() => {
                   if (!currentUserId) setAuthPromptOpen(true);
                 }}
-                placeholder="Search..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-white text-xs outline-none focus:border-white/20 transition-colors"
+                placeholder="Search conversations..."
+                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-9 pr-3 py-2 text-white text-xs outline-none focus:border-blue-500/40 transition-colors"
                 readOnly={!currentUserId}
               />
             </div>
           </div>
 
           {/* Thread List */}
-          <div className="flex-1 overflow-y-auto px-2 pb-4">
+          <div className="flex-1 overflow-y-auto px-3 pb-4">
             {inboxLoading ? (
               <InboxListSkeleton count={6} />
             ) : filteredThreads.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-white/20">
+              <div className="flex flex-col items-center justify-center py-12 text-white/30">
                 <MessageSquare size={32} className="mb-2" />
-                <p className="text-xs">No conversations yet</p>
+                <p className="text-xs font-medium">No conversations yet</p>
               </div>
             ) : (
               filteredThreads.map((t) => {
                 const uId = t.other_user_id || t.user?.id;
                 const uName = t.username || t.user?.username;
                 const uAvatar = t.avatar_url || t.user?.avatar_url;
+                const isActive = activeUser?.id === uId || activeUser?._id === uId;
                 return (
                   <div
                     key={uId}
@@ -446,15 +364,15 @@ export default function Messages() {
                         avatar_url: uAvatar,
                       })
                     }
-                    className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-colors duration-200 ease-out mb-1 border-l-2 ${
-                      activeUser?.id === uId
-                        ? "bg-[#13132a] border-blue-500"
+                    className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl cursor-pointer transition-all duration-200 ease-out mb-1.5 border ${
+                      isActive
+                        ? "bg-[#16162c] border-blue-500/40 shadow-lg shadow-blue-500/10"
                         : "border-transparent hover:bg-white/5 active:bg-white/10"
                     }`}
                   >
                     <div className="relative flex-shrink-0">
                       <div
-                        className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-white text-sm overflow-hidden"
+                        className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-white text-sm overflow-hidden shadow-md"
                         style={{
                           background: uAvatar ? "transparent" : getAvatarGradient(uName),
                         }}
@@ -477,7 +395,7 @@ export default function Messages() {
                         )}
                       </div>
                       {onlineUsers[String(uId)] && (
-                        <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-[#0d0d18] rounded-full shadow-[0_0_5px_rgba(34,197,94,0.5)] z-10" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-[#0d0d18] rounded-full shadow-[0_0_6px_rgba(34,197,94,0.6)] z-10" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0 text-left">
@@ -490,7 +408,7 @@ export default function Messages() {
                             t.last_message_at ||
                             t.created_at ||
                             t.timestamp) && (
-                            <span className="text-[10px] text-white/30">
+                            <span className="text-[10px] text-white/30 font-medium">
                               {new Date(
                                 t.last_message_time ||
                                   t.last_message_at ||
@@ -503,15 +421,15 @@ export default function Messages() {
                             </span>
                           )}
                           {t.unread_count > 0 && (
-                            <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1.5 bg-red-500 rounded-full text-white text-[10px] font-semibold flex items-center justify-center">
+                            <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1.5 bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
                               {t.unread_count > 99 ? "99+" : t.unread_count}
                             </span>
                           )}
                         </div>
                       </div>
-                      <p className="text-[10px] text-white/40 truncate mt-0.5">
+                      <p className="text-[11px] text-white/40 truncate mt-0.5 font-light">
                         {t.last_message === "📷 Photo" || t.last_message === "🎬 Video" ? (
-                          <span className="text-blue-400">{t.last_message}</span>
+                          <span className="text-blue-400 font-medium">{t.last_message}</span>
                         ) : (
                           t.last_message || "Start chatting..."
                         )}
@@ -534,16 +452,16 @@ export default function Messages() {
           {activeUser ? (
             <>
               {/* Chat Header */}
-              <header className="h-[60px] md:h-[72px] px-3 md:px-6 border-b border-white/5 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <header className="h-[60px] md:h-[68px] px-4 md:px-6 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#080810]/90 backdrop-blur-xl">
+                <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={() => setView("list")}
-                    className="md:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 text-white/60 active:scale-95 transition-all"
+                    className="md:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 active:scale-95 transition-all"
                     aria-label="Back to inbox"
                   >
-                    <ChevronLeft size={22} />
+                    <ChevronLeft size={20} />
                   </button>
-                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold text-sm border border-blue-500/30 overflow-hidden">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold text-sm border border-blue-500/30 overflow-hidden shadow-md">
                     {activeUser.avatar_url ? (
                       <img
                         src={activeUser.avatar_url}
@@ -565,88 +483,89 @@ export default function Messages() {
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-white font-semibold text-sm md:text-base truncate">
+                      <h3 className="text-white font-semibold text-sm md:text-base truncate m-0">
                         {activeUser.username}
                       </h3>
                       {onlineUsers[String(activeUser.id || activeUser._id)] && (
                         <div
-                          className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                          className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
                           title="Online"
                         />
                       )}
                     </div>
-                    <p className="text-[10px] text-white/30 hidden sm:block">
+                    <p className="text-[11px] text-white/40 hidden sm:block m-0 font-light">
                       {onlineUsers[String(activeUser.id || activeUser._id)] ? (
-                        <span className="text-green-400">Online</span>
+                        <span className="text-green-400 font-medium">Online</span>
                       ) : (
                         "Offline"
                       )}
                     </p>
                   </div>
                 </div>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 text-white/30 transition-all">
-                  <MoreHorizontal size={18} />
-                </button>
               </header>
 
-              {/* Messages Scroll Area */}
+              {/* Chat Messages */}
               <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto px-3 md:px-6 py-3 md:py-4 flex flex-col gap-2"
+                className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"
+                style={{ maxHeight: "calc(100vh - 180px)" }}
               >
                 {chatLoading ? (
-                  <ChatMessagesSkeleton count={8} />
+                  <ChatMessagesSkeleton count={6} />
                 ) : messages.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-white/20 py-12">
-                    <MessageSquare size={36} />
-                    <p className="text-sm">Say hello to {activeUser.username}!</p>
+                  <div className="flex flex-col items-center justify-center h-full text-white/30">
+                    <MessageSquare size={40} className="mb-3 text-blue-500/40" />
+                    <p className="text-sm font-medium">No messages in this chat yet</p>
+                    <p className="text-xs text-white/20 mt-1">Say hi to {activeUser.username}!</p>
                   </div>
                 ) : (
-                  (() => {
-                    let lastDate = null;
-                    return messages.map((msg, index) => {
-                      const msgDate = new Date(msg.created_at).toDateString();
-                      const showDateHeader = msgDate !== lastDate;
-                      lastDate = msgDate;
+                  messages.map((msg, idx) => {
+                    const prevMsg = messages[idx - 1];
+                    const showDateSeparator =
+                      !prevMsg ||
+                      new Date(msg.created_at).toDateString() !==
+                        new Date(prevMsg.created_at).toDateString();
 
-                      const uniqueKey = msg.id ? `${msg.id}-${index}` : `msg-${index}`;
-                      return (
-                        <div key={uniqueKey} className="contents">
-                          {showDateHeader && (
-                            <div className="flex justify-center my-4">
-                              <div className="bg-[#1a1a2e] px-4 py-1.5 rounded-full text-[11px] text-white/50 font-medium">
-                                {formatChatDate(msg.created_at)}
-                              </div>
-                            </div>
-                          )}
-                          <MessageBubble
-                            msg={msg}
-                            isMe={String(msg.sender_id) === String(currentUserId)}
-                            onDelete={handleDelete}
-                            activeUser={activeUser}
-                          />
-                        </div>
-                      );
-                    });
-                  })()
+                    return (
+                      <div key={msg.id || idx}>
+                        {showDateSeparator && (
+                          <div className="flex items-center justify-center my-4">
+                            <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[11px] font-medium text-white/40 shadow-sm">
+                              {formatChatDate(msg.created_at)}
+                            </span>
+                          </div>
+                        )}
+                        <MessageBubble
+                          msg={msg}
+                          isMe={String(msg.sender_id) === String(currentUserId)}
+                          onDelete={handleDelete}
+                          activeUser={activeUser}
+                        />
+                      </div>
+                    );
+                  })
                 )}
               </div>
 
-              {/* Input Footer */}
-              <footer className="px-3 py-3 md:px-6 md:py-4 pb-[calc(0.75rem+56px)] md:pb-4 shrink-0 border-t border-white/5">
+              {/* Chat Input */}
+              <div className="p-3 md:p-4 bg-[#080810]/95 border-t border-white/10 backdrop-blur-xl shrink-0">
                 <MessageInput
                   value={inputValue}
                   onChange={setInputValue}
                   onSend={handleSend}
                   disabled={isSending}
                 />
-              </footer>
+              </div>
             </>
           ) : (
-            /* Empty state — only visible on md+ since mobile shows list instead */
-            <div className="flex-1 flex flex-col items-center justify-center text-white/20 gap-3">
-              <MessageSquare size={48} />
-              <p className="text-sm">Select a conversation</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-white/30 p-6">
+              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+                <MessageSquare size={28} className="text-white/40" />
+              </div>
+              <h3 className="text-lg font-semibold text-white/70 mb-1">Your Direct Messages</h3>
+              <p className="text-xs text-white/40 max-w-sm text-center">
+                Select a conversation from the inbox or start a new chat with fellow movie fans!
+              </p>
             </div>
           )}
         </div>

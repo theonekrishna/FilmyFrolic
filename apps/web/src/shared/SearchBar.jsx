@@ -120,21 +120,20 @@ export default function SearchBar({
         className={`flex items-center gap-[10px] h-[42px] px-4 box-border transition-all duration-200
       ${
         focused
-          ? "bg-[rgba(26,26,42,1)] border border-[rgba(245,197,24,0.5)] shadow-[0_0_0_3px_rgba(245,197,24,0.08),0_4px_20px_rgba(0,0,0,0.6)]"
-          : "bg-[rgba(26,26,42,0.85)] border border-[rgba(255,255,255,0.08)] shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+          ? "bg-[#161626] border border-[#3b82f6]/60 shadow-lg shadow-blue-500/10"
+          : "bg-[#12121e] border border-white/10 shadow-md"
       }
-      ${showDropdown ? "rounded-t-[10px]" : "rounded-[10px]"}
+      ${showDropdown ? "rounded-t-2xl" : "rounded-full"}
       `}
       >
         {/* Left icon */}
         <div className="flex items-center flex-shrink-0">
           {isLoading ? (
-            <Loader2 size={16} color="rgba(245,197,24,0.7)" className="animate-spin" />
+            <Loader2 size={16} className="animate-spin text-[#3b82f6]" />
           ) : (
             <Search
               size={16}
-              color={focused ? "#f5c518" : "rgba(240,240,248,0.35)"}
-              className="transition-colors duration-200"
+              className={`transition-colors duration-200 ${focused ? "text-[#3b82f6]" : "text-white/40"}`}
             />
           )}
         </div>
@@ -162,16 +161,16 @@ export default function SearchBar({
               e.preventDefault();
               handleClear();
             }}
-            className="bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.14)] border-none rounded-full w-[20px] h-[20px] flex items-center justify-center cursor-pointer flex-shrink-0 p-0 transition-colors duration-150"
+            className="bg-white/10 hover:bg-white/20 border-none rounded-full w-5 h-5 flex items-center justify-center cursor-pointer flex-shrink-0 p-0 transition-colors duration-150 text-white/50 hover:text-white"
           >
-            <X size={11} color="rgba(240,240,248,0.5)" />
+            <X size={11} />
           </button>
         )}
       </div>
 
       {/* Results dropdown */}
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 bg-[#0d0d18] border border-[rgba(245,197,24,0.3)] border-t-0 rounded-b-[10px] overflow-hidden z-[200] shadow-[0_8px_40px_rgba(0,0,0,0.8)] max-h-[420px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 bg-[#0d0d18] border border-[#3b82f6]/40 border-t-0 rounded-b-2xl overflow-hidden z-[200] shadow-2xl max-h-[420px] overflow-y-auto">
           {displayResults.map((r, i) => {
             const Icon = TYPE_ICON[r.type] || Film;
             const color = TYPE_COLOR[r.type] || "#f5c518";
@@ -190,8 +189,8 @@ export default function SearchBar({
                   setFocused(false);
                   setShowResults(false);
                 }}
-                className={`w-full flex items-center gap-3 py-[11px] px-4 bg-transparent border-none cursor-pointer text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] ${
-                  i > 0 ? "border-t border-[rgba(255,255,255,0.05)]" : ""
+                className={`w-full flex items-center gap-3 py-3 px-4 bg-transparent border-none cursor-pointer text-left transition-colors duration-150 hover:bg-white/5 ${
+                  i > 0 ? "border-t border-white/5" : ""
                 }`}
               >
                 {/* Thumbnail or Type chip */}
@@ -199,20 +198,20 @@ export default function SearchBar({
                   <img
                     src={r.image}
                     alt={r.title}
-                    className="w-[32px] h-[32px] rounded-[8px] object-cover flex-shrink-0 border border-[rgba(255,255,255,0.1)]"
+                    className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-white/10"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                     }}
                   />
                 ) : (
                   <div
-                    className="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{
                       background: `${color}18`,
                       border: `1px solid ${color}35`,
                     }}
                   >
-                    <Icon size={14} color={color} />
+                    <Icon size={15} color={color} />
                   </div>
                 )}
 
@@ -221,7 +220,7 @@ export default function SearchBar({
                   <div className="font-['Outfit',sans-serif] text-[13px] font-semibold text-[#f0f0f8] whitespace-nowrap overflow-hidden text-ellipsis flex items-center gap-2">
                     <span>{r.title}</span>
                     <span
-                      className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono font-bold tracking-wider"
+                      className="text-[9px] uppercase px-2 py-0.5 rounded-full font-mono font-bold tracking-wider"
                       style={{
                         background: `${color}20`,
                         color: color,
@@ -233,10 +232,7 @@ export default function SearchBar({
                   </div>
 
                   {r.subtitle && (
-                    <div
-                      className="font-['Outfit',sans-serif] text-[11px] mt-[2px] truncate"
-                      style={{ color: "rgba(240,240,248,0.45)" }}
-                    >
+                    <div className="font-['Outfit',sans-serif] text-[11px] text-white/40 mt-[2px] truncate font-light">
                       {r.subtitle}
                     </div>
                   )}
@@ -253,10 +249,10 @@ export default function SearchBar({
           })}
 
           {/* Footer hint */}
-          <div className="px-4 py-[8px] border-t border-[rgba(255,255,255,0.05)] font-['Outfit',sans-serif] text-[11px] text-[rgba(240,240,248,0.3)] flex items-center gap-[6px] bg-[#080810]">
-            <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">↵</span>
+          <div className="px-4 py-2 border-t border-white/5 font-['Outfit',sans-serif] text-[11px] text-white/30 flex items-center gap-1.5 bg-[#080810]">
+            <span className="bg-white/10 rounded-md px-1.5 py-0.5 text-[10px]">↵</span>
             to search movies/series ·
-            <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">#</span>
+            <span className="bg-white/10 rounded-md px-1.5 py-0.5 text-[10px]">#</span>
             for hashtags
           </div>
         </div>
