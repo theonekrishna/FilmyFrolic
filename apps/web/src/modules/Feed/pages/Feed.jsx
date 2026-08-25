@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit3, Loader2, TrendingUp, Flame, MessageSquare, X } from "lucide-react";
+import { Edit3, Loader2, TrendingUp, Flame, MessageSquare, X, Search } from "lucide-react";
 
 import PostCard from "../components/PostCard";
 import AuthPromptModal from "../components/Authpromptmodal ";
@@ -25,6 +25,23 @@ import {
 import { useToast } from "../../../shared/Toast";
 import { useAuth } from "../../../context/AuthContext";
 import TopBar from "../../../layout/TopBar";
+
+function formatTimeAgo(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(days / 365)}y ago`;
+}
 
 export default function SocialFeed() {
   const navigate = useNavigate();
@@ -64,6 +81,7 @@ export default function SocialFeed() {
   const [savedPostsData, setSavedPostsData] = useState([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const [feedSubTab, setFeedSubTab] = useState("all");
+  const [feedSearchQuery, setFeedSearchQuery] = useState("");
   const [composingPost, setComposingPost] = useState(false);
 
   // Mobile sidebar drawer
@@ -240,6 +258,20 @@ export default function SocialFeed() {
   useEffect(() => {
     if (feedSubTab === "saved") fetchSavedPosts();
   }, [feedSubTab]);
+
+  // Filter posts by local feed search query
+  const filteredPosts = useMemo(() => {
+    const list = feedSubTab === "saved" ? savedPostsData : posts;
+    if (!feedSearchQuery.trim()) return list;
+    const q = feedSearchQuery.toLowerCase().trim();
+    return list.filter(
+      (p) =>
+        p.content?.toLowerCase().includes(q) ||
+        p.user?.toLowerCase().includes(q) ||
+        p.username?.toLowerCase().includes(q) ||
+        p.attachedMovie?.title?.toLowerCase().includes(q)
+    );
+  }, [posts, savedPostsData, feedSubTab, feedSearchQuery]);
 
   const handleReact = useCallback(
     async (postId, emojiIdx) => {
@@ -565,8 +597,8 @@ export default function SocialFeed() {
       {/* ── TopBar (Single sticky global header) ── */}
       <TopBar title="Feed" subtitle="What's happening in the community" />
 
-      {/* ── Feed Header Sub-Bar (Sub-tabs & Compose) ── */}
-      <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-2.5 bg-[#080810]/95 backdrop-blur-xl border-b border-white/5 flex-shrink-0 sticky top-[56px] z-30">
+      {/* ── Feed Header Sub-Bar (Sub-tabs, Feed Filter & Compose) ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 py-2.5 bg-[#080810]/95 backdrop-blur-xl border-b border-white/5 flex-shrink-0 sticky top-[56px] z-30">
         {/* Feed Sub-tabs */}
         <div className="flex items-center gap-1.5 bg-[#12121e] border border-white/10 rounded-xl p-1">
           {[
@@ -588,6 +620,26 @@ export default function SocialFeed() {
               </button>
             );
           })}
+        </div>
+
+        {/* Inline Feed Search */}
+        <div className="relative flex-1 max-w-[280px] hidden sm:block">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            type="text"
+            value={feedSearchQuery}
+            onChange={(e) => setFeedSearchQuery(e.target.value)}
+            placeholder="Filter feed posts..."
+            className="w-full bg-[#12121e] border border-white/10 rounded-xl pl-9 pr-7 py-1.5 text-[12px] font-['Outfit'] text-[#f0f0f8] placeholder-white/30 outline-none focus:border-[#3b82f6] transition-all"
+          />
+          {feedSearchQuery && (
+            <button
+              onClick={() => setFeedSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
 
         {/* Right actions: Trending drawer toggle (mobile) & Compose button */}
@@ -676,10 +728,12 @@ export default function SocialFeed() {
             </div>
           )}
 
-          {!loading && !error && feedSubTab === "all" && posts.length === 0 && (
+          {!loading && !error && feedSubTab === "all" && filteredPosts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 px-4">
               <p className="text-[#f0f0f8]/50 text-sm text-center">
-                No posts yet. Be the first to share!
+                {feedSearchQuery
+                  ? `No posts matching "${feedSearchQuery}"`
+                  : "No posts yet. Be the first to share!"}
               </p>
             </div>
           )}
@@ -690,45 +744,22 @@ export default function SocialFeed() {
             </div>
           )}
 
-          {!savedLoading && feedSubTab === "saved" && savedPostsData.length === 0 && (
+          {!savedLoading && feedSubTab === "saved" && filteredPosts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 px-4">
-              <p className="text-[#f0f0f8]/50 text-sm text-center">No saved posts yet.</p>
+              <p className="text-[#f0f0f8]/50 text-sm text-center">No saved posts found.</p>
               <p className="text-[#f0f0f8]/30 text-xs text-center mt-1">
                 Posts you save will appear here.
               </p>
             </div>
           )}
 
-          {/* Posts — All */}
+          {/* Posts list */}
           {!loading &&
             !error &&
-            feedSubTab === "all" &&
-            posts.map((post) => (
+            filteredPosts.map((post) => (
               <PostCard
                 key={post.id}
                 post={{ ...post, saved: savedPosts.has(post.id) }}
-                onReact={handleReact}
-                onSave={handleSave}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-                onShare={handleShare}
-                onViewProfile={handleViewProfile}
-                onComment={openCommentModal}
-                isOwner={myProfile && post.userId === myProfile.id}
-                currentUserId={myProfile?.id}
-                isLoggedIn={isLoggedIn}
-                onRequireAuth={() => requireAuth("Sign in to report content! 🚩")}
-                loadingEmojiIdx={reactingState[post.id] ?? null}
-              />
-            ))}
-
-          {/* Posts — Saved */}
-          {!savedLoading &&
-            feedSubTab === "saved" &&
-            savedPostsData.map((post) => (
-              <PostCard
-                key={post.id}
-                post={{ ...post, saved: true }}
                 onReact={handleReact}
                 onSave={handleSave}
                 onDelete={handleDelete}
