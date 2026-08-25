@@ -57,7 +57,7 @@ export default function Articles() {
       <TopBar title="Pulse" />
 
       {/* ── STICKY HEADER ── */}
-      <div className="sticky top-[64px] z-30 w-full bg-[#080810]/95 backdrop-blur-xl border-b border-white/[0.05]">
+      <div className="sticky top-[60px] z-30 w-full bg-[#080810]/95 backdrop-blur-xl border-b border-white/[0.05]">
         <div className="w-full px-4 md:px-6 lg:px-10 py-4 md:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex bg-[#12121e] rounded-[14px] p-1 border border-white/[0.08] shadow-inner w-full sm:w-auto">
             {["articles"].map((tab) => (

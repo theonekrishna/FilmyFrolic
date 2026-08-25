@@ -49,7 +49,7 @@ export default function ArticleItemDetailsView() {
       <TopBar />
 
       {/* ── STICKY BREADCRUMB ── */}
-      <nav className="w-full px-4 md:px-6 lg:px-8 py-4 md:py-5 border-b border-white/5 bg-[#080810]/90 backdrop-blur-xl sticky top-[64px] z-40">
+      <nav className="w-full px-4 md:px-6 lg:px-8 py-4 md:py-5 border-b border-white/5 bg-[#080810]/90 backdrop-blur-xl sticky top-[60px] z-40">
         <div className="flex items-center justify-between w-full gap-4">
           <button
             onClick={() => navigate(-1)}
