@@ -12,9 +12,9 @@
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
-    "@filmyfrolic/shared": "workspace:*",
-    "@filmyfrolic/types": "workspace:*",
-    "@filmyfrolic/validation": "workspace:*",
+    "@filmyfrolic/shared": "file:../../packages/shared",
+    "@filmyfrolic/types": "file:../../packages/types",
+    "@filmyfrolic/validation": "file:../../packages/validation",
     "@supabase/supabase-js": "^2.48.0",
     "agora-access-token": "^2.0.4",
     "axios": "^1.7.9",
@@ -27,7 +27,7 @@
     "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@filmyfrolic/config": "workspace:*",
+    "@filmyfrolic/config": "file:../../packages/config",
     "eslint": "^9.39.4",
     "nodemon": "^3.1.9",
     "typescript": "^5.7.3"
