@@ -129,12 +129,37 @@ const formatMovieDTO = (movie) => {
   const formattedBudget = movie.budget ? `$${(movie.budget / 1000000).toFixed(0)}M` : null;
   const formattedRevenue = movie.revenue ? `$${(movie.revenue / 1000000).toFixed(0)}M` : null;
 
+  // OTT Watch Providers from TMDB
+  const watchProvidersObj = movie["watch/providers"]?.results;
+  const regionData =
+    watchProvidersObj?.US ||
+    watchProvidersObj?.IN ||
+    watchProvidersObj?.GB ||
+    Object.values(watchProvidersObj || {})[0];
+  const flatrateList = regionData?.flatrate || regionData?.rent || [];
+  const ottAvailability = flatrateList.map((p) => ({
+    platformName: p.provider_name,
+    link: `https://www.google.com/search?q=${encodeURIComponent((movie.title || movie.name) + " on " + p.provider_name)}`,
+  }));
+
+  // Reviews from TMDB
+  const reviewsResults = movie.reviews?.results || [];
+  const topReview = reviewsResults[0]?.content || null;
+
+  // Trailer Link
+  const trailerKey = movie.videos?.results?.find(
+    (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser")
+  )?.key;
+  const trailerUrl = trailerKey ? `https://www.youtube.com/watch?v=${trailerKey}` : null;
+  const trailerLink = trailerUrl ? [trailerUrl] : movie.trailerLink || [];
+
   return {
     id: movie.id,
     tmdb_id: movie.id,
     title: movie.title || movie.name,
     original_title: movie.original_title || movie.title,
     overview: movie.overview || "",
+    story: movie.overview || "",
     release_date: movie.release_date || movie.first_air_date || "",
     year: (movie.release_date || movie.first_air_date || movie.year || "").split("-")[0],
     rating:
@@ -161,6 +186,11 @@ const formatMovieDTO = (movie) => {
     languages: languagesList.length > 0 ? languagesList : movie.languages || ["English"],
     budget: formattedBudget || movie.budget || null,
     boxOffice: formattedRevenue || movie.boxOffice || movie.grossCollection || null,
+    ottAvailability: ottAvailability.length > 0 ? ottAvailability : movie.ottAvailability || [],
+    review: topReview || movie.review || null,
+    reviews: reviewsResults,
+    trailer_url: trailerUrl,
+    trailerLink,
     cast:
       movie.credits?.cast?.slice(0, 10).map((c) => ({
         id: c.id,
@@ -180,11 +210,6 @@ const formatMovieDTO = (movie) => {
       })) ||
       movie.crew ||
       [],
-    trailer_url:
-      movie.trailer_url ||
-      (movie.videos?.results?.find((v) => v.site === "YouTube" && v.type === "Trailer")?.key
-        ? `https://www.youtube.com/watch?v=${movie.videos.results.find((v) => v.site === "YouTube" && v.type === "Trailer").key}`
-        : null),
   };
 };
 
@@ -268,7 +293,7 @@ const getMovieDetails = async (movieId) => {
     const res = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
       params: {
         api_key: TMDB_API_KEY,
-        append_to_response: "credits,videos",
+        append_to_response: "credits,videos,watch/providers,reviews",
       },
       timeout: 3000,
     });

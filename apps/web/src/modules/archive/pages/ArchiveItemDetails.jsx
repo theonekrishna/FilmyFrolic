@@ -95,7 +95,14 @@ function normalizeMovieDetail(m) {
     })),
     awards: m.awards ?? [],
     ottAvailability: m.ottAvailability ?? [],
-    trailerLink: m.trailerLink ?? (m.trailer ? [m.trailer] : []),
+    trailerLink:
+      Array.isArray(m.trailerLink) && m.trailerLink.length > 0
+        ? m.trailerLink
+        : m.trailer_url
+          ? [m.trailer_url]
+          : m.trailer
+            ? [m.trailer]
+            : [],
     songsLink: m.songsLink ?? [],
     eventsLink: m.eventsLink ?? [],
     story: m.story ?? description,
