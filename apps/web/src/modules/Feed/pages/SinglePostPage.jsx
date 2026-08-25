@@ -10,7 +10,7 @@ import { useAuth } from "../../../context/AuthContext";
 import PostCard from "../components/PostCard";
 import CommentModal from "../components/CommentModal";
 import EditPostModal from "../components/EditPostModal";
-import AuthPromptModal from "../components/Authpromptmodal ";
+import AuthPromptModal from "../components/Authpromptmodal";
 
 const ACCENT = "#3b82f6";
 

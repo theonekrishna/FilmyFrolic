@@ -15,7 +15,7 @@ import {
   deleteMessage,
 } from "../services/messageService";
 import { supabase } from "../utils/supabaseClient";
-import AuthPromptModal from "../components/Authpromptmodal ";
+import AuthPromptModal from "../components/Authpromptmoda";
 
 // --- HELPERS (Keep these outside the component) ---
 const AVATAR_PALETTES = [

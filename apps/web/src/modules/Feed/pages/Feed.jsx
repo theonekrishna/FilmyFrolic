@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Edit3, Loader2, TrendingUp, Flame, MessageSquare, X, Search } from "lucide-react";
 
 import PostCard from "../components/PostCard";
-import AuthPromptModal from "../components/Authpromptmodal ";
+import AuthPromptModal from "../components/Authpromptmodal";
 
 // ── Lazy-load heavy modals — only downloaded when opened (~50 KB total) ────────
 const CommentModal = lazy(() => import("../components/CommentModal"));
