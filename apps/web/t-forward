@@ -1,0 +1,32 @@
+[33m546fee3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeep-gossip-section[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/deep-gossip-section[m[33m, [m[1;32mbackup-gossip[m[33m)[m HEAD@{0}: checkout: moving from backup-gossip to deep-gossip-section
+[33m546fee3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeep-gossip-section[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/deep-gossip-section[m[33m, [m[1;32mbackup-gossip[m[33m)[m HEAD@{1}: checkout: moving from deep-gossip-section to backup-gossip
+[33m546fee3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeep-gossip-section[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/deep-gossip-section[m[33m, [m[1;32mbackup-gossip[m[33m)[m HEAD@{2}: checkout: moving from deep-gossip-section to deep-gossip-section
+[33m546fee3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeep-gossip-section[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/deep-gossip-section[m[33m, [m[1;32mbackup-gossip[m[33m)[m HEAD@{3}: pull origin dev: Fast-forward
+[33mb334cf8[m HEAD@{4}: checkout: moving from deep-gossip-section to deep-gossip-section
+[33mb334cf8[m HEAD@{5}: commit (merge): Resolved merge conflicts with dev
+[33m4fe55fa[m HEAD@{6}: checkout: moving from dev to deep-gossip-section
+[33m687e49a[m[33m ([m[1;32mdev[m[33m)[m HEAD@{7}: commit: Resolved merge conflicts with dev
+[33mc3eaf16[m HEAD@{8}: pull origin dev: Fast-forward
+[33m05aceea[m HEAD@{9}: checkout: moving from dev to dev
+[33m05aceea[m HEAD@{10}: pull origin dev: Fast-forward
+[33mce60210[m HEAD@{11}: reset: moving to HEAD
+[33mce60210[m HEAD@{12}: pull origin dev: Fast-forward
+[33mdca28a1[m HEAD@{13}: checkout: moving from rooms-api-integrating to dev
+[33m358f5ae[m[33m ([m[1;31morigin/rooms-api-integrating[m[33m, [m[1;32mrooms-api-integrating[m[33m)[m HEAD@{14}: commit: update package-lock after dev sync
+[33mdca28a1[m HEAD@{15}: checkout: moving from rooms-api-integrating to rooms-api-integrating
+[33mdca28a1[m HEAD@{16}: checkout: moving from dev to rooms-api-integrating
+[33mdca28a1[m HEAD@{17}: pull origin dev: Fast-forward
+[33m6bd855f[m HEAD@{18}: checkout: moving from dev to dev
+[33m6bd855f[m HEAD@{19}: pull origin dev: Fast-forward
+[33m785ed87[m HEAD@{20}: checkout: moving from deep-gossip-section to dev
+[33m4fe55fa[m HEAD@{21}: commit: work in progress - gossip page changes
+[33m1d1820b[m HEAD@{22}: commit: Added gossip section UI
+[33m2910b09[m HEAD@{23}: commit: Added gossip section UI and API integration
+[33mc6e0ae7[m HEAD@{24}: commit: fix image uplodation
+[33m7c80285[m HEAD@{25}: checkout: moving from deep-gossip-section to deep-gossip-section
+[33m7c80285[m HEAD@{26}: pull origin dev: Fast-forward
+[33ma132a13[m HEAD@{27}: commit: fix added gossip section
+[33m7ef4850[m HEAD@{28}: commit: added gossip section api inegration
+[33m785ed87[m HEAD@{29}: checkout: moving from dev to deep-gossip-section
+[33m785ed87[m HEAD@{30}: checkout: moving from project-setup-srikanth to dev
+[33mcd8233e[m[33m ([m[1;31morigin/project-setup-srikanth[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mproject-setup-srikanth[m[33m)[m HEAD@{31}: clone: from github.com:TheKrishLabs/filmy-frolic-new-frontend.git

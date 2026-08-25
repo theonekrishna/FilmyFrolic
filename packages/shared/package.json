@@ -1,0 +1,13 @@
+{
+  "name": "@filmyfrolic/shared",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@filmyfrolic/config": "workspace:*",
+    "typescript": "^5.7.3"
+  },
+  "license": "ISC"
+}

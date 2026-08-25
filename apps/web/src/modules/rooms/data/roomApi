@@ -1,0 +1,26 @@
+import axios from "axios";
+
+const API = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL,
+  withCredentials: true,
+});
+
+// GET ROOMS
+export const getRoomsAPI = () =>
+  API.get(`https://filmy-frolic-new-backend.onrender.com/api/rooms`);
+
+// CREATE ROOM
+export const createRoomAPI = (data) => {
+  console.log("bibek jana");
+  API.post("/api/rooms", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+// JOIN ROOM
+export const joinRoomAPI = (data) => API.post("/api/rooms/join", data);
+
+// EXIT ROOM
+export const exitRoomAPI = (data) => API.post("/api/rooms/exit", data);
+
+export default API;

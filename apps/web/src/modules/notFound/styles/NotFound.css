@@ -1,0 +1,673 @@
+/* ── FilmyFrolic 404 Page ── */
+
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  --primary: #f5c518;
+  --primary-light: #ffd84d;
+  --primary-dark: #c99b00;
+
+  --bg: #0c0c0e;
+
+  --card: linear-gradient(160deg, rgba(245, 197, 24, 0.055) 0%, rgba(255, 255, 255, 0.02) 100%);
+
+  --border: rgba(245, 197, 24, 0.13);
+
+  --text: #f5f0e8;
+  --muted: rgba(245, 240, 232, 0.55);
+}
+
+/* ───────────────────────── */
+/* Global */
+/* ───────────────────────── */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  background: var(--bg);
+
+  overflow-x: hidden;
+
+  font-family: "DM Sans", sans-serif;
+}
+
+/* ───────────────────────── */
+/* Root */
+/* ───────────────────────── */
+
+.nf-root {
+  height: 100vh;
+
+  background: radial-gradient(circle at top, rgba(245, 197, 24, 0.1), transparent 40%), #0c0c0e;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  animation: nf-pageFade 0.5s ease;
+}
+
+/* ───────────────────────── */
+/* Film Strip */
+/* ───────────────────────── */
+
+.nf-filmstrip {
+  width: 100%;
+  height: 36px;
+
+  background: #141414;
+
+  border-top: 1px solid rgba(245, 197, 24, 0.12);
+  border-bottom: 1px solid rgba(245, 197, 24, 0.12);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 0 16px;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+}
+
+.nf-hole {
+  width: 20px;
+  height: 14px;
+
+  border-radius: 3px;
+
+  background: #0c0c0e;
+
+  border: 1px solid rgba(245, 197, 24, 0.15);
+
+  flex-shrink: 0;
+}
+
+/* ───────────────────────── */
+/* Main */
+/* ───────────────────────── */
+
+.nf-main {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  padding: 20px;
+}
+
+/* ───────────────────────── */
+/* Content */
+/* ───────────────────────── */
+
+.nf-content {
+  width: 100%;
+  max-width: 1100px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+/* ───────────────────────── */
+/* Brand */
+/* ───────────────────────── */
+
+.nf-brand {
+  border: none;
+  outline: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--primary-light);
+
+  font-size: 15px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 2px;
+
+  cursor: pointer;
+
+  margin-bottom: 16px;
+
+  transition: 0.2s;
+}
+
+.nf-brand:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.nf-brand-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: var(--primary);
+
+  box-shadow: 0 0 14px rgba(245, 197, 24, 0.7);
+}
+
+/* ───────────────────────── */
+/* Hero */
+/* ───────────────────────── */
+
+.nf-hero {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nf-spotlight {
+  position: absolute;
+
+  top: -80px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  width: 380px;
+  height: 380px;
+
+  border-radius: 50%;
+
+  background: radial-gradient(circle, rgba(245, 197, 24, 0.18) 0%, transparent 70%);
+
+  pointer-events: none;
+
+  animation: nf-breathe 5s ease-in-out infinite;
+}
+
+/* ───────────────────────── */
+/* Particles */
+/* ───────────────────────── */
+
+.nf-particles {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+}
+
+.nf-particle {
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: var(--primary-light);
+
+  opacity: 0.35;
+
+  animation: nf-float 8s linear infinite;
+}
+
+.nf-particle:nth-child(1) {
+  top: 10%;
+  left: 15%;
+}
+
+.nf-particle:nth-child(2) {
+  top: 25%;
+  right: 18%;
+}
+
+.nf-particle:nth-child(3) {
+  top: 65%;
+  left: 22%;
+}
+
+.nf-particle:nth-child(4) {
+  top: 75%;
+  right: 15%;
+}
+
+.nf-particle:nth-child(5) {
+  top: 50%;
+  left: 10%;
+}
+
+.nf-particle:nth-child(6) {
+  top: 20%;
+  left: 50%;
+}
+
+.nf-particle:nth-child(7) {
+  top: 80%;
+  left: 55%;
+}
+
+.nf-particle:nth-child(8) {
+  top: 40%;
+  right: 10%;
+}
+
+/* ───────────────────────── */
+/* 404 */
+/* ───────────────────────── */
+
+.nf-code {
+  display: flex;
+  align-items: center;
+
+  line-height: 1;
+
+  margin-bottom: 8px;
+
+  animation: nf-rise 0.6s ease;
+}
+
+.nf-code > span:not(.nf-reel) {
+  font-family: "Bebas Neue", cursive;
+
+  font-size: clamp(72px, 11vw, 120px);
+
+  color: white;
+
+  text-shadow: 0 0 22px rgba(245, 197, 24, 0.22);
+}
+
+.nf-reel {
+  width: clamp(60px, 8vw, 90px);
+  height: clamp(60px, 8vw, 90px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 6px;
+
+  animation: nf-spin 12s linear infinite;
+}
+
+/* ───────────────────────── */
+/* Text */
+/* ───────────────────────── */
+
+.nf-title {
+  font-family: "Bebas Neue", cursive;
+
+  font-size: clamp(26px, 4vw, 44px);
+
+  letter-spacing: 4px;
+
+  color: var(--primary-light);
+
+  margin: 0 0 10px;
+}
+
+.nf-sub {
+  max-width: 520px;
+
+  font-size: 14px;
+  line-height: 1.7;
+
+  color: var(--muted);
+
+  margin: 0 0 24px;
+}
+
+/* ───────────────────────── */
+/* Buttons */
+/* ───────────────────────── */
+
+.nf-actions {
+  display: flex;
+  gap: 12px;
+
+  flex-wrap: wrap;
+  justify-content: center;
+
+  margin-bottom: 24px;
+}
+
+.nf-btn-primary,
+.nf-btn-ghost {
+  height: 44px;
+
+  padding: 0 22px;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.nf-btn-primary {
+  border: 1px solid rgba(245, 197, 24, 0.18);
+
+  background: linear-gradient(160deg, rgba(245, 197, 24, 0.18) 0%, rgba(255, 255, 255, 0.05) 100%);
+
+  color: white;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.35) 0px 4px 24px,
+    rgba(245, 197, 24, 0.09) 0px 1px 0px inset;
+}
+
+.nf-btn-primary:hover {
+  transform: translateY(-2px);
+
+  background: linear-gradient(160deg, rgba(245, 197, 24, 0.24) 0%, rgba(255, 255, 255, 0.08) 100%);
+}
+
+.nf-btn-ghost {
+  background: rgba(255, 255, 255, 0.02);
+
+  border: 1px solid rgba(245, 197, 24, 0.13);
+
+  color: rgba(245, 240, 232, 0.8);
+
+  box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 4px 18px,
+    rgba(245, 197, 24, 0.04) 0px 1px 0px inset;
+}
+
+.nf-btn-ghost:hover {
+  border-color: rgba(245, 197, 24, 0.35);
+
+  color: var(--primary-light);
+
+  background: rgba(245, 197, 24, 0.06);
+
+  transform: translateY(-2px);
+}
+
+/* ───────────────────────── */
+/* Divider */
+/* ───────────────────────── */
+
+.nf-divider-wrap {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.nf-divider-line {
+  flex: 1;
+  height: 1px;
+
+  background: rgba(245, 197, 24, 0.12);
+}
+
+.nf-divider-text {
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+  color: rgba(245, 197, 24, 0.7);
+
+  white-space: nowrap;
+}
+
+/* ───────────────────────── */
+/* Description */
+/* ───────────────────────── */
+
+.nf-platform-desc {
+  max-width: 660px;
+
+  font-size: 13px;
+  line-height: 1.7;
+
+  color: rgba(245, 240, 232, 0.45);
+
+  margin: 0 0 18px;
+}
+
+/* ───────────────────────── */
+/* Features */
+/* ───────────────────────── */
+
+.nf-features {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+
+  gap: 10px;
+}
+
+.nf-feature-card {
+  text-decoration: none;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 6px;
+
+  padding: 14px;
+
+  background: linear-gradient(160deg, rgba(245, 197, 24, 0.055) 0%, rgba(255, 255, 255, 0.02) 100%);
+
+  border: 1px solid rgba(245, 197, 24, 0.13);
+
+  border-radius: 16px;
+
+  transition: 0.25s ease;
+
+  box-shadow:
+    rgba(0, 0, 0, 0.35) 0px 4px 24px,
+    rgba(245, 197, 24, 0.09) 0px 1px 0px inset;
+
+  overflow: visible;
+
+  min-height: 115px;
+}
+
+.nf-feature-card:hover {
+  transform: translateY(-4px);
+
+  border-color: rgba(245, 197, 24, 0.25);
+
+  background: linear-gradient(160deg, rgba(245, 197, 24, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+}
+
+.nf-feature-icon {
+  font-size: 20px;
+}
+
+.nf-feature-title {
+  color: white;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.nf-feature-desc {
+  color: rgba(245, 240, 232, 0.45);
+
+  font-size: 11px;
+  line-height: 1.5;
+
+  text-align: left;
+}
+
+/* ───────────────────────── */
+/* Animations */
+/* ───────────────────────── */
+
+@keyframes nf-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nf-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.08);
+  }
+}
+
+@keyframes nf-float {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translateY(-18px);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateY(0px);
+    opacity: 0.2;
+  }
+}
+
+@keyframes nf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nf-pageFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ───────────────────────── */
+/* Responsive */
+/* ───────────────────────── */
+
+@media (max-width: 1100px) {
+  html,
+  body {
+    overflow-y: auto;
+    height: auto;
+  }
+
+  .nf-root {
+    height: auto;
+    min-height: 100vh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .nf-main {
+    overflow: visible;
+
+    align-items: flex-start;
+
+    padding: 28px 18px;
+  }
+
+  .nf-content {
+    padding-bottom: 24px;
+  }
+
+  .nf-features {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .nf-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .nf-actions {
+    width: 100%;
+
+    flex-direction: column;
+  }
+
+  .nf-btn-primary,
+  .nf-btn-ghost {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .nf-main {
+    padding: 24px 14px;
+  }
+
+  .nf-content {
+    padding-bottom: 48px;
+  }
+
+  .nf-features {
+    grid-template-columns: 1fr;
+  }
+
+  .nf-title {
+    letter-spacing: 2px;
+  }
+
+  .nf-sub {
+    font-size: 13px;
+  }
+
+  .nf-platform-desc {
+    font-size: 12px;
+  }
+
+  .nf-filmstrip {
+    height: 30px;
+  }
+
+  .nf-hole {
+    width: 16px;
+    height: 11px;
+  }
+}

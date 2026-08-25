@@ -1,0 +1,9 @@
+{
+  "extends": "@filmyfrolic/config/tsconfig/library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true
+  },
+  "include": ["src/**/*"]
+}

@@ -1,0 +1,7 @@
+{
+  "extends": "@filmyfrolic/config/tsconfig/library.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["index.js"]
+}

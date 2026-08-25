@@ -1,0 +1,7 @@
+{
+  "extends": "@filmyfrolic/config/tsconfig/browser.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}

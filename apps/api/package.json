@@ -1,0 +1,35 @@
+{
+  "name": "@filmyfrolic/api",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "echo \"@filmyfrolic/api build ready\"",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@filmyfrolic/shared": "workspace:*",
+    "@filmyfrolic/types": "workspace:*",
+    "@filmyfrolic/validation": "workspace:*",
+    "@supabase/supabase-js": "^2.48.0",
+    "agora-access-token": "^2.0.4",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "express-rate-limit": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
+    "resend": "^4.1.0",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@filmyfrolic/config": "workspace:*",
+    "eslint": "^9.39.4",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.7.3"
+  }
+}
