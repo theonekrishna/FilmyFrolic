@@ -105,6 +105,30 @@ const formatMovieDTO = (movie) => {
     ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
     : movie.backdrop_url || null;
 
+  const directorObj = movie.credits?.crew?.find((c) => c.job === "Director");
+  const writerObjs = movie.credits?.crew?.filter(
+    (c) => c.department === "Writing" || c.job === "Writer" || c.job === "Screenplay"
+  );
+  const writersStr = writerObjs?.length
+    ? Array.from(new Set(writerObjs.map((w) => w.name)))
+        .slice(0, 3)
+        .join(", ")
+    : null;
+
+  const studioStr = movie.production_companies?.length
+    ? movie.production_companies
+        .map((p) => p.name)
+        .slice(0, 2)
+        .join(", ")
+    : null;
+
+  const languagesList = movie.spoken_languages?.length
+    ? movie.spoken_languages.map((l) => l.english_name || l.name)
+    : [];
+
+  const formattedBudget = movie.budget ? `$${(movie.budget / 1000000).toFixed(0)}M` : null;
+  const formattedRevenue = movie.revenue ? `$${(movie.revenue / 1000000).toFixed(0)}M` : null;
+
   return {
     id: movie.id,
     tmdb_id: movie.id,
@@ -131,6 +155,12 @@ const formatMovieDTO = (movie) => {
         : movie.genres.map((g) => g.name)
       : [],
     runtime: movie.runtime || null,
+    director: directorObj?.name || movie.director || null,
+    writers: writersStr || movie.writers || null,
+    studio: studioStr || movie.studio || null,
+    languages: languagesList.length > 0 ? languagesList : movie.languages || ["English"],
+    budget: formattedBudget || movie.budget || null,
+    boxOffice: formattedRevenue || movie.boxOffice || movie.grossCollection || null,
     cast:
       movie.credits?.cast?.slice(0, 10).map((c) => ({
         id: c.id,
@@ -139,6 +169,16 @@ const formatMovieDTO = (movie) => {
         profile_url: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null,
       })) ||
       movie.cast ||
+      [],
+    crew:
+      movie.credits?.crew?.slice(0, 10).map((c) => ({
+        id: c.id,
+        name: c.name,
+        job: c.job,
+        department: c.department,
+        profile_url: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null,
+      })) ||
+      movie.crew ||
       [],
     trailer_url:
       movie.trailer_url ||

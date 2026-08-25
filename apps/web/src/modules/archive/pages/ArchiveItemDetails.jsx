@@ -34,6 +34,28 @@ function normalizeMovieDetail(m) {
   const duration = m.runtime ? `${m.runtime} min` : m.movieDuration ? `${m.movieDuration} min` : "";
   const description = m.overview ?? m.synopsis ?? m.description ?? "";
 
+  const directorName =
+    typeof m.director === "string"
+      ? m.director
+      : (m.director?.name ??
+        m.director?.fullName ??
+        (Array.isArray(m.crew)
+          ? m.crew.find((c) => c.job === "Director" || c.role === "Director")?.name
+          : null));
+
+  const writersStr =
+    typeof m.writers === "string"
+      ? m.writers
+      : Array.isArray(m.crew)
+        ? m.crew
+            .filter(
+              (c) => c.department === "Writing" || c.job === "Writer" || c.role?.includes("Writ")
+            )
+            .map((c) => c.name || c.fullName)
+            .filter(Boolean)
+            .join(", ")
+        : null;
+
   return {
     id: m.id ?? m._id,
     title: m.title ?? m.name ?? "Untitled",
@@ -50,7 +72,11 @@ function normalizeMovieDetail(m) {
     type: m.type ?? "Movie",
     languages: m.languages ?? (m.original_language ? [m.original_language.toUpperCase()] : []),
     country: m.country ?? "",
-    director: m.director ?? null,
+    director: directorName,
+    writers: writersStr,
+    studio: m.studio ?? null,
+    budget: m.budget ?? null,
+    boxOffice: m.boxOffice ?? m.grossCollection ?? null,
     cast: (m.cast ?? []).map((c) => ({
       name: c.name ?? c.castMember?.fullName ?? "Unknown",
       role: c.character ?? c.role ?? c.characterName ?? "",
@@ -219,8 +245,8 @@ export default function ArchiveItemDetails() {
         {/* ── HERO: 360px full-bleed backdrop ── */}
         <div className="relative overflow-hidden h-[360px]">
           <img
-            src={movie.image}
-            alt=""
+            src={movie.backdrop || movie.image}
+            alt={movie.title}
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: "center 20%" }}
           />
@@ -268,7 +294,11 @@ export default function ArchiveItemDetails() {
                 boxShadow: "0 16px 48px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.08)",
               }}
             >
-              <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
+              <img
+                src={movie.poster || movie.image}
+                alt={movie.title}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div className="flex-1 min-w-0 pb-[4px]">
@@ -641,7 +671,7 @@ export default function ArchiveItemDetails() {
 
         <div className="relative h-[500px] overflow-hidden">
           <img
-            src={movie.image}
+            src={movie.backdrop || movie.image}
             alt=""
             className="absolute inset-0 w-full h-full object-cover opacity-[0.6]"
             style={{ filter: "blur(28px) scale(1.15)" }}
@@ -657,7 +687,11 @@ export default function ArchiveItemDetails() {
                 transform: "translateY(-10px)",
               }}
             >
-              <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
+              <img
+                src={movie.poster || movie.image}
+                alt={movie.title}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div className="flex-1 min-w-0">
