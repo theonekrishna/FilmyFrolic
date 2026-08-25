@@ -40,6 +40,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Core API Routes
+app.use("/api/search", require("./modules/search/search.routes"));
 app.use("/api/tmdb", require("./modules/tmdb/tmdb.routes"));
 app.use("/api/auth", require("./modules/auth/auth.routes"));
 app.use("/api/messages", require("./modules/messages/messages.routes"));

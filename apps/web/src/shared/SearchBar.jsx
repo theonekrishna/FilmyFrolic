@@ -1,13 +1,28 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, X, Loader2, Film, User, Tv } from "lucide-react";
+import { Search, X, Loader2, Film, User, Tv, Users, Hash, UserCheck } from "lucide-react";
 import { publicAxios } from "../utils/AxiosInstance";
 
-const TYPE_ICON = { movie: Film, actor: User, show: Tv };
-const TYPE_COLOR = { movie: "#f5c518", actor: "#1fd1a8", show: "#7c5cfc" };
+const TYPE_ICON = {
+  movie: Film,
+  show: Tv,
+  actor: UserCheck,
+  user: User,
+  community: Users,
+  hashtag: Hash,
+};
+
+const TYPE_COLOR = {
+  movie: "#f5c518",
+  show: "#7c5cfc",
+  actor: "#ec4899",
+  user: "#1fd1a8",
+  community: "#3b82f6",
+  hashtag: "#f97316",
+};
 
 export default function SearchBar({
-  placeholder = "Search movies, actors, shows...",
+  placeholder = "Search movies, users, communities, #hashtags...",
   initialValue = "",
   results: externalResults,
   loading: externalLoading,
@@ -29,7 +44,7 @@ export default function SearchBar({
   const displayResults = externalResults ?? searchResults;
   const hasResults = displayResults.length > 0 && focused && value.length > 1;
 
-  // Real API search with debounce
+  // Real API search calling globalSearch backend endpoint
   function handleChange(v) {
     setValue(v);
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -40,36 +55,17 @@ export default function SearchBar({
 
       timerRef.current = setTimeout(async () => {
         try {
-          const res = await publicAxios.get("/api/archive", { params: { search: v } });
-          const raw = res.data?.data ?? res.data?.movies ?? res.data;
-          const list = Array.isArray(raw) ? raw : [];
-
-          const formatted = list
-            .slice(0, 6)
-            .map((item) => {
-              const isSeries = item.type === "Series" || item.type === "series";
-              return {
-                id: item.id ?? item._id ?? item.tmdb_id,
-                type: isSeries ? "show" : "movie",
-                title: item.title ?? item.name ?? "Untitled",
-                subtitle: `${item.year || ""} ${item.genres?.[0] ? `· ${item.genres[0]}` : ""}`,
-                rating:
-                  (item.rating ?? item.vote_average)
-                    ? Number(item.rating ?? item.vote_average).toFixed(1)
-                    : undefined,
-              };
-            })
-            .filter((m) => m.id);
-
-          setSearchResults(formatted);
+          const res = await publicAxios.get("/api/search", { params: { q: v } });
+          const list = res.data?.data || [];
+          setSearchResults(list);
           setShowResults(true);
         } catch (err) {
-          console.warn("Header search error:", err);
+          console.warn("Global header search error:", err);
           setSearchResults([]);
         } finally {
           setInternalLoading(false);
         }
-      }, 350);
+      }, 300);
     } else if (v.length <= 1) {
       setInternalLoading(false);
       setShowResults(false);
@@ -91,7 +87,11 @@ export default function SearchBar({
     if (e.key === "Enter" && value.trim()) {
       setFocused(false);
       setShowResults(false);
-      navigate(`/content/archive?search=${encodeURIComponent(value.trim())}`);
+      if (value.startsWith("#")) {
+        navigate(`/social/feed?tag=${encodeURIComponent(value.trim().replace(/^#/, ""))}`);
+      } else {
+        navigate(`/content/archive?search=${encodeURIComponent(value.trim())}`);
+      }
     }
   }
 
@@ -171,48 +171,71 @@ export default function SearchBar({
 
       {/* Results dropdown */}
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 bg-[#0d0d18] border border-[rgba(245,197,24,0.3)] border-t-0 rounded-b-[10px] overflow-hidden z-[200] shadow-[0_8px_40px_rgba(0,0,0,0.8)]">
+        <div className="absolute top-full left-0 right-0 bg-[#0d0d18] border border-[rgba(245,197,24,0.3)] border-t-0 rounded-b-[10px] overflow-hidden z-[200] shadow-[0_8px_40px_rgba(0,0,0,0.8)] max-h-[420px] overflow-y-auto">
           {displayResults.map((r, i) => {
             const Icon = TYPE_ICON[r.type] || Film;
             const color = TYPE_COLOR[r.type] || "#f5c518";
             return (
               <button
-                key={r.id}
+                key={r.id || i}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   if (onResultClick) {
                     onResultClick(r);
+                  } else if (r.link) {
+                    navigate(r.link);
                   } else {
                     navigate(`/content/movie/${r.id}`);
                   }
                   setFocused(false);
                   setShowResults(false);
                 }}
-                className={`w-full flex items-center gap-3 py-[11px] px-4 bg-transparent border-none cursor-pointer text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.04)] ${
+                className={`w-full flex items-center gap-3 py-[11px] px-4 bg-transparent border-none cursor-pointer text-left transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] ${
                   i > 0 ? "border-t border-[rgba(255,255,255,0.05)]" : ""
                 }`}
               >
-                {/* Type chip */}
-                <div
-                  className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: `${color}14`,
-                    border: `1px solid ${color}28`,
-                  }}
-                >
-                  <Icon size={13} color={color} />
-                </div>
+                {/* Thumbnail or Type chip */}
+                {r.image ? (
+                  <img
+                    src={r.image}
+                    alt={r.title}
+                    className="w-[32px] h-[32px] rounded-[8px] object-cover flex-shrink-0 border border-[rgba(255,255,255,0.1)]"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="w-[32px] h-[32px] rounded-[8px] flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `${color}18`,
+                      border: `1px solid ${color}35`,
+                    }}
+                  >
+                    <Icon size={14} color={color} />
+                  </div>
+                )}
 
                 {/* Labels */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-['Outfit',sans-serif] text-[13px] font-semibold text-[#f0f0f8] whitespace-nowrap overflow-hidden text-ellipsis">
-                    {r.title}
+                  <div className="font-['Outfit',sans-serif] text-[13px] font-semibold text-[#f0f0f8] whitespace-nowrap overflow-hidden text-ellipsis flex items-center gap-2">
+                    <span>{r.title}</span>
+                    <span
+                      className="text-[9px] uppercase px-1.5 py-0.5 rounded font-mono font-bold tracking-wider"
+                      style={{
+                        background: `${color}20`,
+                        color: color,
+                        border: `1px solid ${color}40`,
+                      }}
+                    >
+                      {r.type}
+                    </span>
                   </div>
 
                   {r.subtitle && (
                     <div
-                      className="font-['Outfit',sans-serif] text-[11px] mt-[1px]"
-                      style={{ color: "rgba(240,240,248,0.38)" }}
+                      className="font-['Outfit',sans-serif] text-[11px] mt-[2px] truncate"
+                      style={{ color: "rgba(240,240,248,0.45)" }}
                     >
                       {r.subtitle}
                     </div>
@@ -228,12 +251,13 @@ export default function SearchBar({
               </button>
             );
           })}
+
           {/* Footer hint */}
-          <div className="px-4 py-[8px] border-t border-[rgba(255,255,255,0.05)] font-['Outfit',sans-serif] text-[11px] text-[rgba(240,240,248,0.25)] flex items-center gap-[6px]">
+          <div className="px-4 py-[8px] border-t border-[rgba(255,255,255,0.05)] font-['Outfit',sans-serif] text-[11px] text-[rgba(240,240,248,0.3)] flex items-center gap-[6px] bg-[#080810]">
             <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">↵</span>
-            to search all ·
-            <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">Esc</span>
-            to close
+            to search movies/series ·
+            <span className="bg-[rgba(255,255,255,0.08)] rounded-[4px] px-[5px] py-[1px]">#</span>
+            for hashtags
           </div>
         </div>
       )}
