@@ -132,6 +132,7 @@ export default function Archive() {
 
       <TopBar title="Discover" />
 
+      {/* Desktop Page Header */}
       <header
         className={`hidden md:block pt-8 ${CONTAINER_PADDING} pb-2 mx-auto w-full ${MAX_WIDTH}`}
       >
@@ -150,7 +151,8 @@ export default function Archive() {
         </div>
       </header>
 
-      <div className="sticky top-[56px] z-40 bg-[#080810]/90 backdrop-blur-xl py-4">
+      {/* Mobile Sticky Search Bar */}
+      <div className="md:hidden sticky top-[56px] z-40 bg-[#080810]/90 backdrop-blur-xl py-3">
         <div className={`mx-auto ${CONTAINER_PADDING} ${MAX_WIDTH}`}>
           <ArchiveSearchBar
             query={query}
@@ -220,6 +222,7 @@ export default function Archive() {
             filter={filter}
             setFilter={setFilter}
             query={query}
+            setQuery={setQuery}
           />
         )}
       </main>
