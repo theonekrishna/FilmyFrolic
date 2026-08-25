@@ -3,9 +3,9 @@ services:
   - type: web
     name: filmyfrolic-api
     env: node
-    rootDir: apps/api
-    buildCommand: npm install
-    startCommand: node src/index.js
+    rootDir: .
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter @filmyfrolic/api build
+    startCommand: node apps/api/src/index.js
     envVars:
       - key: PORT
         value: 5000
@@ -16,9 +16,9 @@ services:
   - type: web
     name: filmy-frolic-new-frontend
     env: static
-    rootDir: apps/web
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    rootDir: .
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter @filmyfrolic/web build
+    staticPublishPath: apps/web/dist
     routes:
       - type: rewrite
         source: /*
