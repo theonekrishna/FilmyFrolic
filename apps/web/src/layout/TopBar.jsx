@@ -25,80 +25,71 @@ export default function TopBar({ title, subtitle }) {
 
   return (
     <>
-      <header className="h-[56px] bg-[rgba(8,8,16,0.92)] backdrop-blur-[20px] border-b border-[rgba(255,255,255,0.07)] flex items-center px-4 gap-[10px] sticky top-0 z-40">
-        {/* ── Desktop: hamburger toggle ── */}
-        <button
-          className="ff-topbar-hamburger w-[36px] h-[36px] rounded-[10px] bg-transparent border border-[rgba(255,255,255,0.08)] flex items-center justify-center cursor-pointer shrink-0 p-0 transition"
-          onClick={fireSidebarToggle}
-          title="Toggle sidebar"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.07)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
-        >
-          <Menu size={16} color="rgba(240,240,248,0.6)" />
-        </button>
-
-        {/* ── Mobile logo ── */}
-        <NavLink
-          to="/"
-          className="ff-topbar-mobile-logo hidden items-center gap-2 no-underline shrink-0"
-        >
-          <div
-            className="w-[32px] h-[32px] rounded-[9px] flex items-center justify-center text-[16px] shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #f5c518, #e84545)",
-              boxShadow: "0 2px 10px rgba(245,197,24,0.3)",
-            }}
+      <header className="h-[60px] bg-[#080810]/95 backdrop-blur-xl border-b border-white/10 flex items-center px-4 md:px-6 justify-between gap-4 sticky top-0 z-40">
+        {/* ── Left cluster: Hamburger, Mobile Logo & Page Title ── */}
+        <div className="flex items-center gap-3 shrink-0 min-w-0">
+          {/* Desktop hamburger toggle */}
+          <button
+            className="ff-topbar-hamburger w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer shrink-0 p-0 transition-colors hover:bg-white/10"
+            onClick={fireSidebarToggle}
+            title="Toggle sidebar"
           >
-            🎬
-          </div>
-          <span
-            className="font-['Bebas_Neue'] text-[18px] tracking-[2px] leading-none"
-            style={{
-              color: "#f5c518",
-              textShadow: "0 0 20px rgba(245,197,24,0.3)",
-            }}
-          >
-            Filmy Frolic
-          </span>
-        </NavLink>
+            <Menu size={17} color="rgba(240,240,248,0.7)" />
+          </button>
 
-        {/* ── Page title (optional) ── */}
-        {title && (
-          <div className="shrink-0">
-            <h1
-              className="font-['Bebas_Neue'] text-[20px] tracking-[1.5px] leading-none m-0"
-              style={{ color: "#f0f0f8" }}
+          {/* Mobile logo */}
+          <NavLink
+            to="/"
+            className="ff-topbar-mobile-logo hidden items-center gap-2 no-underline shrink-0"
+          >
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-[15px] shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #f5c518, #e84545)",
+                boxShadow: "0 2px 10px rgba(245,197,24,0.3)",
+              }}
             >
-              {title}
-            </h1>
-            {subtitle && (
-              <p
-                className="font-['Outfit'] text-[11px] m-0 leading-[1.3] font-light whitespace-nowrap"
-                style={{ color: "rgba(240,240,248,0.38)" }}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
+              🎬
+            </div>
+            <span
+              className="font-['Bebas_Neue'] text-[18px] tracking-[1.5px] leading-none"
+              style={{
+                color: "#f5c518",
+                textShadow: "0 0 20px rgba(245,197,24,0.3)",
+              }}
+            >
+              Filmy Frolic
+            </span>
+          </NavLink>
+
+          {/* Page title (optional) */}
+          {title && (
+            <div className="shrink-0 flex flex-col justify-center min-w-0">
+              <h1 className="font-['Bebas_Neue',cursive] text-[20px] tracking-[1.5px] text-[#f0f0f8] leading-tight m-0">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="font-['Outfit',sans-serif] text-[11px] text-[rgba(240,240,248,0.45)] m-0 leading-none font-light whitespace-nowrap mt-0.5">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* ── Desktop: centered SearchBar ── */}
         <div className="ff-topbar-search flex-1 flex justify-center max-w-[480px] mx-auto">
-          <SearchBar placeholder="Search movies, actors, shows…" />
+          <SearchBar placeholder="Search movies, actors, users, communities, #hashtags..." />
         </div>
 
         {/* ── Mobile flex spacer ── */}
-        <div className="ff-topbar-spacer hidden flex-1"></div>
+        <div className="ff-topbar-spacer hidden flex-1" />
 
         {/* ── Right action cluster ── */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {/* Mobile: search icon button */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Mobile search icon button */}
           <button
-            className="ff-topbar-mobile-search-btn hidden w-[40px] h-[40px] rounded-[12px] bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.09)] flex items-center justify-center cursor-pointer p-0 flex-shrink-0 transition hover:bg-[rgba(255,255,255,0.1)]"
+            className="ff-topbar-mobile-search-btn hidden w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer p-0 flex-shrink-0 transition-colors hover:bg-white/10"
             aria-label="Search"
           >
             <Search size={17} color="rgba(240,240,248,0.7)" />
@@ -111,12 +102,12 @@ export default function TopBar({ title, subtitle }) {
             className="no-underline flex-shrink-0"
             onClick={() => window.dispatchEvent(new Event("ff-notifications-visited"))}
           >
-            <div className="relative w-[40px] h-[40px] rounded-[12px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center cursor-pointer transition hover:bg-[rgba(255,255,255,0.09)]">
+            <div className="relative w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer transition-colors hover:bg-white/10">
               <Bell size={17} color="rgba(240,240,248,0.7)" />
               {totalUnread > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-[3px] rounded-full flex items-center justify-center text-[9px] font-extrabold text-white leading-none"
-                  style={{ background: "#e84545", boxShadow: "0 0 6px rgba(232,69,69,0.6)" }}
+                  className="absolute -top-1 -right-1 min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white leading-none border border-[#080810]"
+                  style={{ background: "#e84545", boxShadow: "0 0 8px rgba(232,69,69,0.7)" }}
                 >
                   {totalUnread > 99 ? "99+" : totalUnread}
                 </span>
@@ -124,7 +115,7 @@ export default function TopBar({ title, subtitle }) {
             </div>
           </NavLink>
 
-          {/* Desktop: Avatar */}
+          {/* Desktop Avatar */}
           <NavLink to="/user/profile" className="ff-topbar-avatar no-underline flex-shrink-0">
             <UserAvatar name="John Doe" size="sm" status="online" accentColor={accent} />
           </NavLink>

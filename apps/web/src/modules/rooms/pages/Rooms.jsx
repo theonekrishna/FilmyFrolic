@@ -751,7 +751,7 @@ export default function Rooms() {
 
       {sidebarMounted && (
         <div className="fixed inset-0 z-[60] lg:hidden">
-          <div />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeSidebar} />
           <div
             className="sidebar-panel absolute top-0 right-0 h-full w-[290px] bg-[#0d0d18] border-l border-white/10 flex flex-col gap-3 p-4 overflow-y-auto z-10"
             style={{
@@ -770,8 +770,6 @@ export default function Rooms() {
                   border: "1px solid rgba(255,255,255,0.1)",
                   background: "rgba(255,255,255,0.04)",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
               >
                 <X size={15} color="rgba(240,240,248,0.6)" />
               </button>
@@ -783,39 +781,39 @@ export default function Rooms() {
 
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 pt-6 pb-16 px-4 sm:px-6 lg:px-[28px]">
         <div className="flex-1 min-w-0">
-          {/* ── Header row ── */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-            <div>
-              <h1 className="font-['Bebas_Neue',cursive] text-[26px] sm:text-[32px] lg:text-[36px] text-[#f0f0f8]">
-                {showMyRooms ? "My Rooms" : "Live Rooms"}
-              </h1>
-              <p className="text-white/40 text-sm sm:text-base">
-                {showMyRooms
-                  ? "Rooms you created or are hosting"
-                  : "Join a room in progress or host your own"}
-              </p>
+          {/* ── Rooms Control Sub-Bar ── */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5 bg-[#12121e] border border-white/10 rounded-2xl p-3 px-4">
+            {/* Toggle My Rooms vs All Rooms */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowMyRooms(false)}
+                className={`px-4 py-1.5 rounded-xl font-['Outfit'] text-[13px] font-medium transition-all ${
+                  !showMyRooms
+                    ? "bg-[#3b82f6] text-white shadow-md shadow-blue-500/20 font-semibold"
+                    : "text-[#f0f0f8]/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                All Rooms
+              </button>
+              <button
+                onClick={() => setShowMyRooms(true)}
+                className={`px-4 py-1.5 rounded-xl font-['Outfit'] text-[13px] font-medium transition-all ${
+                  showMyRooms
+                    ? "bg-[#3b82f6] text-white shadow-md shadow-blue-500/20 font-semibold"
+                    : "text-[#f0f0f8]/60 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                My Rooms ({myRoomsRaw.length})
+              </button>
             </div>
 
+            {/* Right actions: Stats toggle & Host a Room */}
             <div className="flex items-center gap-2">
               <button
                 onClick={openSidebar}
-                className="lg:hidden flex items-center gap-2 rounded-[10px] py-[9px] px-[13px] text-[13px] font-semibold transition-all active:scale-95"
-                style={{
-                  background: rightSidebarOpen ? "rgba(59,130,246,0.18)" : "rgba(255,255,255,0.06)",
-                  border: rightSidebarOpen
-                    ? "1px solid rgba(59,130,246,0.45)"
-                    : "1px solid rgba(255,255,255,0.1)",
-                  color: rightSidebarOpen ? "#93c5fd" : "rgba(240,240,248,0.6)",
-                  transition: "background 0.2s, border-color 0.2s, color 0.2s",
-                }}
+                className="lg:hidden flex items-center gap-2 rounded-xl py-2 px-3 text-[13px] font-semibold transition-all active:scale-95 bg-white/5 border border-white/10 text-white/70"
               >
-                <PanelRight
-                  size={15}
-                  style={{
-                    color: rightSidebarOpen ? "#93c5fd" : "rgba(240,240,248,0.5)",
-                    transition: "color 0.2s",
-                  }}
-                />
+                <PanelRight size={15} />
                 <span>Stats</span>
               </button>
 
@@ -826,74 +824,13 @@ export default function Rooms() {
                     () => setHostModalOpen(true)
                   )
                 }
-                className="flex items-center justify-center gap-[7px] rounded-[10px] py-[10px] px-[18px] text-white text-sm sm:text-base"
+                className="flex items-center justify-center gap-2 rounded-xl py-2 px-4 text-white text-xs sm:text-sm font-bold shadow-lg shadow-red-500/25 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                 style={{ background: RED }}
               >
-                <Plus size={14} />
-                Host a Room
+                <Plus size={15} />
+                <span>Host a Room</span>
               </button>
             </div>
-          </div>
-
-          {/* ── Search Bar ── */}
-          <div
-            className="flex items-center gap-3 rounded-[12px] px-4 py-0 mb-4 transition-all"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: searchFocused
-                ? "1px solid rgba(59,130,246,0.5)"
-                : "1px solid rgba(255,255,255,0.08)",
-              boxShadow: searchFocused ? "0 0 0 3px rgba(59,130,246,0.08)" : "none",
-              transition: "border-color 0.2s, box-shadow 0.2s",
-            }}
-          >
-            <Search
-              size={15}
-              style={{
-                color: searchFocused ? "#93c5fd" : "rgba(240,240,248,0.3)",
-                flexShrink: 0,
-                transition: "color 0.2s",
-              }}
-            />
-            <input
-              ref={searchInputRef}
-              className="search-bar-input flex-1 bg-transparent text-[14px] text-[rgba(240,240,248,0.85)] py-[11px]"
-              placeholder={
-                showMyRooms
-                  ? "Search my rooms — switch tabs to filter by type…"
-                  : "Search all rooms — switch tabs to filter by type…"
-              }
-              value={searchInput}
-              onChange={handleSearchChange}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-            />
-            {searchInput && (
-              <button
-                onClick={clearSearch}
-                className="flex items-center justify-center w-[20px] h-[20px] rounded-full transition-colors flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.08)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.15)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
-              >
-                <X size={11} color="rgba(240,240,248,0.5)" />
-              </button>
-            )}
-          </div>
-
-          {/* ── My Rooms toggle ── */}
-          <div className="flex mb-[18px]">
-            <button
-              onClick={handleToggleMyRooms}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{
-                background: showMyRooms ? ACCENT : "rgba(255,255,255,0.08)",
-                color: "#fff",
-                boxShadow: showMyRooms ? `0 0 12px ${ACCENT}55` : "none",
-              }}
-            >
-              {showMyRooms ? "All Rooms" : "My Rooms"}
-            </button>
           </div>
 
           {/* ── Tabs ── */}
