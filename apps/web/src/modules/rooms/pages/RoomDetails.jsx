@@ -194,16 +194,26 @@ export default function RoomDetails() {
   // ── init ──────────────────────────────────────────────────────────────────
   const init = async () => {
     try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+        return;
+      }
+
       // 🔥 INCLUDE INVITE CODE IF PRESENT
       const joinPayload = { room_id: id };
       if (inviteCode) {
         joinPayload.invite_code = inviteCode;
       }
 
-      const joinRes = await privateAxios.post(`/api/rooms/join`, joinPayload);
+      const joinRes = await privateAxios.post(`/api/rooms/join`, joinPayload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const joinData = joinRes.data.data;
 
-      const roomRes = await privateAxios.get(`/api/rooms/${id}`);
+      const roomRes = await privateAxios.get(`/api/rooms/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const isHost = roomRes.data.is_admin;
       const type = joinData.room_type || joinData.room?.room_type || "video_room";
 
@@ -219,6 +229,9 @@ export default function RoomDetails() {
       }, 0);
     } catch (err) {
       console.error("INIT ERROR:", err);
+      if (err.response?.status === 401) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
     }
   };
 

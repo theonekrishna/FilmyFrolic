@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, memo } from "react";
 import { Calendar, Users } from "lucide-react";
 import { TAG_COLORS } from "../data/rooms";
-import { joinRoomAPI } from "../data/roomApi";
+import { privateAxios } from "../../../utils/AxiosInstance";
 import { HostAvatar, FeaturedBadge, featuredCardStyle } from "./Roomhelpers";
 
 const ACCENT = "#3b82f6";
@@ -44,14 +44,28 @@ function ScheduledRoomCard({ room }) {
   const handleRSVP = useCallback(
     async (e) => {
       e.stopPropagation();
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("Please log in to RSVP for scheduled watch parties.");
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+        return;
+      }
+
       try {
-        await joinRoomAPI({ room_id: room.id, user_id: user._id });
+        await privateAxios.post("/api/rooms/join", { room_id: room.id }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setRsvpd(true);
       } catch (err) {
-        console.error(err);
+        console.error("RSVP error:", err);
+        const msg = err.response?.data?.message || err.response?.data?.error || "Failed to RSVP";
+        alert(msg);
+        if (err.response?.status === 401 || msg.includes("Unauthorized")) {
+          window.dispatchEvent(new CustomEvent("auth-expired"));
+        }
       }
     },
-    [room.id, user._id]
+    [room.id]
   );
 
   const handleImgLoad = useCallback(() => setImgLoaded(true), []);

@@ -196,7 +196,8 @@ function DiscussionCard({ room }) {
   );
 
   const handleJoin = useCallback(async () => {
-    if (!isLoggedIn) {
+    const token = localStorage.getItem("accessToken");
+    if (!isLoggedIn || !token) {
       setAuthPrompt({
         open: true,
         message: "Sign in to join this discussion and share your film thoughts with the community!",
@@ -207,7 +208,9 @@ function DiscussionCard({ room }) {
       setLoading(true);
       const joinPayload = { room_id: room.id };
       if (inviteCode) joinPayload.invite_code = inviteCode;
-      const res = await privateAxios.post(`/api/rooms/join`, joinPayload);
+      const res = await privateAxios.post(`/api/rooms/join`, joinPayload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.data.success === false) {
         setErrorMessage(res.data.message);
         setTimeout(() => setErrorMessage(""), 3000);
@@ -217,7 +220,11 @@ function DiscussionCard({ room }) {
         inviteCode ? `/social/rooms/${room.id}?code=${inviteCode}` : `/social/rooms/${room.id}`
       );
     } catch (err) {
-      setErrorMessage("Failed to join ❌");
+      const msg = err.response?.data?.error || err.response?.data?.message || "Failed to join ❌";
+      setErrorMessage(msg);
+      if (err.response?.status === 401 || msg.includes("Unauthorized")) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
       setTimeout(() => setErrorMessage(""), 3000);
     } finally {
       setLoading(false);

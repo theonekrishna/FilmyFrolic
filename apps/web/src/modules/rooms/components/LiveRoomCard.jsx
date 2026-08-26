@@ -218,7 +218,8 @@ function LiveRoomCard({ room }) {
   );
 
   const handleJoin = useCallback(async () => {
-    if (!isLoggedIn) {
+    const token = localStorage.getItem("accessToken");
+    if (!isLoggedIn || !token) {
       setAuthPrompt({
         open: true,
         message: "Sign in to join this room and watch together with the community!",
@@ -231,7 +232,10 @@ function LiveRoomCard({ room }) {
       const joinPayload = { room_id: room.id };
       if (inviteCode) joinPayload.invite_code = inviteCode;
       const res = await privateAxios.post(`/api/rooms/join`, joinPayload, {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (res.data.success === false) {
         setErrorMessage(res.data.message);
@@ -245,6 +249,9 @@ function LiveRoomCard({ room }) {
       const message =
         err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌";
       setErrorMessage(message);
+      if (err.response?.status === 401 || message.includes("Unauthorized")) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
       setTimeout(() => setErrorMessage(""), 3000);
     } finally {
       setLoading(false);

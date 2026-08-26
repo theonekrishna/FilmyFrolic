@@ -207,7 +207,8 @@ function WatchPartyCard({ party }) {
   );
 
   const handleJoin = useCallback(async () => {
-    if (!isLoggedIn) {
+    const token = localStorage.getItem("accessToken");
+    if (!isLoggedIn || !token) {
       setAuthPrompt({
         open: true,
         message: "Sign in to join this watch party and enjoy films with the community!",
@@ -218,7 +219,9 @@ function WatchPartyCard({ party }) {
       setLoading(true);
       const joinPayload = { room_id: party.id };
       if (inviteCode) joinPayload.invite_code = inviteCode;
-      const res = await privateAxios.post(`/api/rooms/join`, joinPayload);
+      const res = await privateAxios.post(`/api/rooms/join`, joinPayload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.data.success === false) {
         setErrorMessage(res.data.message);
         setTimeout(() => setErrorMessage(""), 3000);
@@ -228,7 +231,11 @@ function WatchPartyCard({ party }) {
         inviteCode ? `/social/rooms/${party.id}?code=${inviteCode}` : `/social/rooms/${party.id}`
       );
     } catch (err) {
-      setErrorMessage(err.response?.data?.error || "Failed to join ❌");
+      const msg = err.response?.data?.error || err.response?.data?.message || "Failed to join ❌";
+      setErrorMessage(msg);
+      if (err.response?.status === 401 || msg.includes("Unauthorized")) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
       setTimeout(() => setErrorMessage(""), 3000);
     } finally {
       setLoading(false);

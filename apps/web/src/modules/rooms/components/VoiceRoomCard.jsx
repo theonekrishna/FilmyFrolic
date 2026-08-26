@@ -194,7 +194,8 @@ function VoiceRoomCard({ room }) {
   );
 
   const handleJoin = useCallback(async () => {
-    if (!isLoggedIn) {
+    const token = localStorage.getItem("accessToken");
+    if (!isLoggedIn || !token) {
       setAuthPrompt({
         open: true,
         message: "Sign in to join this voice room and talk films with the community!",
@@ -207,15 +208,20 @@ function VoiceRoomCard({ room }) {
       const joinPayload = { room_id: room.id };
       if (inviteCode) joinPayload.invite_code = inviteCode;
       await privateAxios.post(`/api/rooms/join`, joinPayload, {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
       navigate(
         inviteCode ? `/social/rooms/${room.id}?code=${inviteCode}` : `/social/rooms/${room.id}`
       );
     } catch (err) {
-      showToast(
-        err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌"
-      );
+      const msg = err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌";
+      showToast(msg);
+      if (err.response?.status === 401 || msg.includes("Unauthorized")) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
     } finally {
       setLoading(false);
     }

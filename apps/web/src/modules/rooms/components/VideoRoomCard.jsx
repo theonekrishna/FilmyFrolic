@@ -192,7 +192,8 @@ function VideoRoomCard({ room }) {
   );
 
   const handleJoin = useCallback(async () => {
-    if (!isLoggedIn) {
+    const token = localStorage.getItem("accessToken");
+    if (!isLoggedIn || !token) {
       setAuthPrompt({
         open: true,
         message: "Sign in to join this video room and connect with fellow film fans!",
@@ -205,13 +206,20 @@ function VideoRoomCard({ room }) {
       await privateAxios.post(
         `/api/rooms/join`,
         { room_id: room.id },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       navigate(`/social/rooms/${room.id}`);
     } catch (err) {
-      showToast(
-        err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌"
-      );
+      const msg = err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌";
+      showToast(msg);
+      if (err.response?.status === 401 || msg.includes("Unauthorized")) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
     } finally {
       setLoading(false);
     }
