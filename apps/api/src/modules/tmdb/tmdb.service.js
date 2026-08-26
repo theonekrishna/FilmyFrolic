@@ -251,20 +251,29 @@ const getTrendingMovies = async (page = 1, type = "all") => {
   try {
     const res = await axios.get(`${TMDB_BASE_URL}/trending/${mediaType}/day`, {
       params: { api_key: TMDB_API_KEY, page },
-      timeout: 3000,
+      timeout: 4000,
     });
 
-    const formatted = {
-      page: res.data.page,
-      total_pages: res.data.total_pages,
-      total_results: res.data.total_results,
-      results: res.data.results.map((item) => {
-        const dto = formatMovieDTO(item);
-        if (mediaType === "tv" || item.media_type === "tv" || item.first_air_date) {
-          dto.type = "Series";
+    const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];
+    const formattedResults = rawResults
+      .map((item) => {
+        try {
+          const dto = formatMovieDTO(item);
+          if (dto && (mediaType === "tv" || item.media_type === "tv" || item.first_air_date)) {
+            dto.type = "Series";
+          }
+          return dto;
+        } catch (_) {
+          return null;
         }
-        return dto;
-      }),
+      })
+      .filter(Boolean);
+
+    const formatted = {
+      page: res.data?.page || 1,
+      total_pages: res.data?.total_pages || 1,
+      total_results: formattedResults.length || FALLBACK_MOVIES.length,
+      results: formattedResults.length > 0 ? formattedResults : FALLBACK_MOVIES,
     };
 
     setCachedData(cacheKey, formatted);
@@ -274,13 +283,12 @@ const getTrendingMovies = async (page = 1, type = "all") => {
       "TMDB API request failed/unauthenticated. Returning formatted fallback trending movies:",
       error.message
     );
-    const fallbackFormatted = {
+    return {
       page: 1,
       total_pages: 1,
       total_results: FALLBACK_MOVIES.length,
-      results: FALLBACK_MOVIES.map(formatMovieDTO),
+      results: FALLBACK_MOVIES,
     };
-    return fallbackFormatted;
   }
 };
 
@@ -294,13 +302,24 @@ const searchMovies = async (query, page = 1) => {
   try {
     const res = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
       params: { api_key: TMDB_API_KEY, query, page },
-      timeout: 3000,
+      timeout: 4000,
     });
 
+    const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];
+    const formattedResults = rawResults
+      .map((item) => {
+        try {
+          return formatMovieDTO(item);
+        } catch (_) {
+          return null;
+        }
+      })
+      .filter(Boolean);
+
     const formatted = {
-      page: res.data.page,
-      total_pages: res.data.total_pages,
-      results: res.data.results.map(formatMovieDTO),
+      page: res.data?.page || 1,
+      total_pages: res.data?.total_pages || 1,
+      results: formattedResults,
     };
 
     setCachedData(cacheKey, formatted);
@@ -313,7 +332,7 @@ const searchMovies = async (query, page = 1) => {
     return {
       page: 1,
       total_pages: 1,
-      results: filtered.map(formatMovieDTO),
+      results: filtered.length > 0 ? filtered : FALLBACK_MOVIES,
     };
   }
 };

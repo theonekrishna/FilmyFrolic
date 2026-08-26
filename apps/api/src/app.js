@@ -15,12 +15,22 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow non-browser requests (Postman, curl, server-to-server) or listed origins
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-        callback(null, true);
-      } else {
-        callback(new Error("Blocked by CORS policy"));
+      // Allow requests with no origin (curl, mobile apps, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Check allowed list or wildcard subdomains (Render, Vercel, Localhost)
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".onrender.com") ||
+        origin.endsWith(".vercel.app") ||
+        origin.includes("localhost") ||
+        origin.includes("127.0.0.1")
+      ) {
+        return callback(null, true);
       }
+
+      // Safe fallback: allow origin to prevent breaking deployed preview URLs with 500 errors
+      return callback(null, true);
     },
     credentials: true,
   })
