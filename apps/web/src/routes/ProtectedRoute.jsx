@@ -43,7 +43,8 @@ export default function ProtectedRoute() {
   }
 
   /* ── 2. Not authenticated → redirect to /login ─────────────────────── */
-  if (!user) {
+  const hasToken = typeof window !== "undefined" && !!localStorage.getItem("accessToken");
+  if (!user && !hasToken) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

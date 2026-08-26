@@ -88,10 +88,7 @@ function PageLoader() {
   );
 }
 
-const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = !!localStorage.getItem("accessToken");
-  return isLoggedIn ? children : <Navigate to="/" replace />;
-};
+import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
   const { isEnabled } = useModules();
@@ -108,69 +105,67 @@ export default function AppRoutes() {
 
         {/* ── App Layout ── */}
         <Route element={<AppLayout />}>
+          {/* ── PUBLIC ROUTES (Home & Archive only) ── */}
           {isEnabled("core") && <Route path="/" element={<Home />} />}
-
-          {isEnabled("social") && (
-            <>
-              <Route path="/social/feed" element={<SocialFeed />} />
-              <Route path="/social/feed/post/:id" element={<SinglePostPage />} />
-              <Route path="notifications" element={<Notifications />} />
-              <Route path="/social/messages" element={<Messages />} />
-              <Route path="social/rooms" element={<Rooms />} />
-              <Route path="social/rooms/:id" element={<RoomDetails />} />
-              <Route path="social/communities" element={<Communities />} />
-              <Route path="social/communities/:id" element={<CommunitySingleItem />} />
-            </>
-          )}
-
           {isEnabled("content") && (
             <>
               <Route path="content/archive" element={<Archive />} />
               <Route path="content/movie/:id" element={<ArchiveItemDetails />} />
-              <Route path="content/articles" element={<Articles />} />
-              <Route path="content/articles/:id" element={<ArticleItemDetailsView />} />
-              <Route path="content/gossip" element={<Gossips />} />
-              <Route path="/content/gossips/:id" element={<SingleGossip />} />
             </>
           )}
 
-          {isEnabled("entertainment") && (
-            <>
-              <Route path="entertain/games" element={<Games />} />
-              <Route path="entertain/memes" element={<Memes />} />
-              <Route path="entertain/memes/:id" element={<SingleMemePage />} />
-            </>
-          )}
+          {/* ── PROTECTED ROUTES (Require Login/Signup) ── */}
+          <Route element={<ProtectedRoute />}>
+            {isEnabled("social") && (
+              <>
+                <Route path="/social/feed" element={<SocialFeed />} />
+                <Route path="/social/feed/post/:id" element={<SinglePostPage />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="/social/messages" element={<Messages />} />
+                <Route path="social/rooms" element={<Rooms />} />
+                <Route path="social/rooms/:id" element={<RoomDetails />} />
+                <Route path="social/communities" element={<Communities />} />
+                <Route path="social/communities/:id" element={<CommunitySingleItem />} />
+              </>
+            )}
 
-          {isEnabled("user") && (
-            <>
-              <Route path="user/history" element={<UserHistory />} />
-              {/* <Route path="user/policies" element={<UserPolicies />} /> */}
-              <Route path="user/profile" element={<UserProfile />} />
-              <Route path="user/watchlist" element={<Watchlist />} />
-            </>
-          )}
+            {isEnabled("content") && (
+              <>
+                <Route path="content/articles" element={<Articles />} />
+                <Route path="content/articles/:id" element={<ArticleItemDetailsView />} />
+                <Route path="content/gossip" element={<Gossips />} />
+                <Route path="/content/gossips/:id" element={<SingleGossip />} />
+              </>
+            )}
 
-          <Route
-            path="settings"
-            element={
-              <ProtectedRoute>
-                <SettingsLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="account" replace />} />
-            <Route path="account" element={<AccountPage />} />
-            <Route path="preferences" element={<PreferencesPage />} />
-            <Route path="privacy" element={<PrivacyPage />} />
-            <Route path="blocked-users" element={<BlockedUsersPage />} />
-            <Route path="watch-history" element={<WatchHistoryPage />} />
-            <Route path="sessions" element={<SessionsPage />} />
-            <Route path="data-export" element={<DataExportPage />} />
-            <Route path="about" element={<AboutPage />} />
+            {isEnabled("entertainment") && (
+              <>
+                <Route path="entertain/games" element={<Games />} />
+                <Route path="entertain/memes" element={<Memes />} />
+                <Route path="entertain/memes/:id" element={<SingleMemePage />} />
+              </>
+            )}
 
-            {/* moving policies into inside settings */}
-            <Route path="policies" element={<UserPolicies />} />
+            {isEnabled("user") && (
+              <>
+                <Route path="user/history" element={<UserHistory />} />
+                <Route path="user/profile" element={<UserProfile />} />
+                <Route path="user/watchlist" element={<Watchlist />} />
+              </>
+            )}
+
+            <Route path="settings" element={<SettingsLayout />}>
+              <Route index element={<Navigate to="account" replace />} />
+              <Route path="account" element={<AccountPage />} />
+              <Route path="preferences" element={<PreferencesPage />} />
+              <Route path="privacy" element={<PrivacyPage />} />
+              <Route path="blocked-users" element={<BlockedUsersPage />} />
+              <Route path="watch-history" element={<WatchHistoryPage />} />
+              <Route path="sessions" element={<SessionsPage />} />
+              <Route path="data-export" element={<DataExportPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="policies" element={<UserPolicies />} />
+            </Route>
           </Route>
         </Route>
 

@@ -98,119 +98,142 @@ const setCachedData = (key, data) => {
 // Formatter to map TMDB response into FilmyFrolic movie DTO
 const formatMovieDTO = (movie) => {
   if (!movie) return null;
-  const posterPath = movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : movie.poster_url || null;
-  const backdropPath = movie.backdrop_path
-    ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
-    : movie.backdrop_url || null;
 
-  const directorObj = movie.credits?.crew?.find((c) => c.job === "Director");
-  const writerObjs = movie.credits?.crew?.filter(
-    (c) => c.department === "Writing" || c.job === "Writer" || c.job === "Screenplay"
-  );
-  const writersStr = writerObjs?.length
-    ? Array.from(new Set(writerObjs.map((w) => w.name)))
-        .slice(0, 3)
-        .join(", ")
-    : null;
+  try {
+    const posterPath = movie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+      : movie.poster_url || movie.image || null;
+    const backdropPath = movie.backdrop_path
+      ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}`
+      : movie.backdrop_url || null;
 
-  const studioStr = movie.production_companies?.length
-    ? movie.production_companies
-        .map((p) => p.name)
-        .slice(0, 2)
-        .join(", ")
-    : null;
+    const crewList = Array.isArray(movie.credits?.crew) ? movie.credits.crew : [];
+    const castList = Array.isArray(movie.credits?.cast) ? movie.credits.cast : [];
+    const companies = Array.isArray(movie.production_companies) ? movie.production_companies : [];
+    const languages = Array.isArray(movie.spoken_languages) ? movie.spoken_languages : [];
 
-  const languagesList = movie.spoken_languages?.length
-    ? movie.spoken_languages.map((l) => l.english_name || l.name)
-    : [];
+    const directorObj = crewList.find((c) => c?.job === "Director");
+    const writerObjs = crewList.filter(
+      (c) => c?.department === "Writing" || c?.job === "Writer" || c?.job === "Screenplay"
+    );
+    const writersStr = writerObjs.length
+      ? Array.from(new Set(writerObjs.map((w) => w?.name).filter(Boolean)))
+          .slice(0, 3)
+          .join(", ")
+      : null;
 
-  const formattedBudget = movie.budget ? `$${(movie.budget / 1000000).toFixed(0)}M` : null;
-  const formattedRevenue = movie.revenue ? `$${(movie.revenue / 1000000).toFixed(0)}M` : null;
+    const studioStr = companies.length
+      ? companies
+          .map((p) => p?.name)
+          .filter(Boolean)
+          .slice(0, 2)
+          .join(", ")
+      : null;
 
-  // OTT Watch Providers from TMDB
-  const watchProvidersObj = movie["watch/providers"]?.results;
-  const regionData =
-    watchProvidersObj?.US ||
-    watchProvidersObj?.IN ||
-    watchProvidersObj?.GB ||
-    Object.values(watchProvidersObj || {})[0];
-  const flatrateList = regionData?.flatrate || regionData?.rent || [];
-  const ottAvailability = flatrateList.map((p) => ({
-    platformName: p.provider_name,
-    link: `https://www.google.com/search?q=${encodeURIComponent((movie.title || movie.name) + " on " + p.provider_name)}`,
-  }));
+    const languagesList = languages.length
+      ? languages.map((l) => l?.english_name || l?.name).filter(Boolean)
+      : [];
 
-  // Reviews from TMDB
-  const reviewsResults = movie.reviews?.results || [];
-  const topReview = reviewsResults[0]?.content || null;
+    const formattedBudget = movie.budget ? `$${(movie.budget / 1000000).toFixed(0)}M` : null;
+    const formattedRevenue = movie.revenue ? `$${(movie.revenue / 1000000).toFixed(0)}M` : null;
 
-  // Trailer Link
-  const trailerKey = movie.videos?.results?.find(
-    (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser")
-  )?.key;
-  const trailerUrl = trailerKey ? `https://www.youtube.com/watch?v=${trailerKey}` : null;
-  const trailerLink = trailerUrl ? [trailerUrl] : movie.trailerLink || [];
+    // OTT Watch Providers from TMDB
+    const watchProvidersObj = movie["watch/providers"]?.results;
+    const regionData =
+      watchProvidersObj && typeof watchProvidersObj === "object"
+        ? watchProvidersObj.US || watchProvidersObj.IN || watchProvidersObj.GB || Object.values(watchProvidersObj)[0]
+        : null;
+    const flatrateList = Array.isArray(regionData?.flatrate)
+      ? regionData.flatrate
+      : Array.isArray(regionData?.rent)
+        ? regionData.rent
+        : [];
+    const ottAvailability = flatrateList
+      .filter((p) => p && p.provider_name)
+      .map((p) => ({
+        platformName: p.provider_name,
+        link: `https://www.google.com/search?q=${encodeURIComponent((movie.title || movie.name || "Movie") + " on " + p.provider_name)}`,
+      }));
 
-  return {
-    id: movie.id,
-    tmdb_id: movie.id,
-    title: movie.title || movie.name,
-    original_title: movie.original_title || movie.title,
-    overview: movie.overview || "",
-    story: movie.overview || "",
-    release_date: movie.release_date || movie.first_air_date || "",
-    year: (movie.release_date || movie.first_air_date || movie.year || "").split("-")[0],
-    rating:
-      typeof movie.vote_average === "number"
-        ? movie.vote_average.toFixed(1)
-        : movie.rating || "8.0",
-    vote_count: movie.vote_count || 1000,
-    popularity: movie.popularity || 100,
-    poster_path: movie.poster_path || null,
-    poster_url: posterPath,
-    image: posterPath,
-    backdrop_path: movie.backdrop_path || null,
-    backdrop_url: backdropPath,
-    genre_ids: movie.genre_ids || [],
-    genres: movie.genres
-      ? typeof movie.genres[0] === "string"
-        ? movie.genres
-        : movie.genres.map((g) => g.name)
-      : [],
-    runtime: movie.runtime || null,
-    director: directorObj?.name || movie.director || null,
-    writers: writersStr || movie.writers || null,
-    studio: studioStr || movie.studio || null,
-    languages: languagesList.length > 0 ? languagesList : movie.languages || ["English"],
-    budget: formattedBudget || movie.budget || null,
-    boxOffice: formattedRevenue || movie.boxOffice || movie.grossCollection || null,
-    ottAvailability: ottAvailability.length > 0 ? ottAvailability : movie.ottAvailability || [],
-    review: topReview || movie.review || null,
-    reviews: reviewsResults,
-    trailer_url: trailerUrl,
-    trailerLink,
-    cast:
-      movie.credits?.cast?.slice(0, 10).map((c) => ({
-        id: c.id,
-        name: c.name,
-        character: c.character,
-        profile_url: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null,
-      })) ||
-      movie.cast ||
-      [],
-    crew:
-      movie.credits?.crew?.slice(0, 10).map((c) => ({
-        id: c.id,
-        name: c.name,
-        job: c.job,
-        department: c.department,
-        profile_url: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null,
-      })) ||
-      movie.crew ||
-      [],
-  };
+    // Reviews from TMDB
+    const reviewsResults = Array.isArray(movie.reviews?.results) ? movie.reviews.results : [];
+    const topReview = reviewsResults[0]?.content || null;
+
+    // Trailer Link
+    const videoResults = Array.isArray(movie.videos?.results) ? movie.videos.results : [];
+    const trailerKey = videoResults.find(
+      (v) => v?.site === "YouTube" && (v?.type === "Trailer" || v?.type === "Teaser")
+    )?.key;
+    const trailerUrl = trailerKey ? `https://www.youtube.com/watch?v=${trailerKey}` : null;
+    const trailerLink = trailerUrl ? [trailerUrl] : Array.isArray(movie.trailerLink) ? movie.trailerLink : [];
+
+    const rawGenres = movie.genres;
+    const genresList = Array.isArray(rawGenres)
+      ? rawGenres.map((g) => (typeof g === "string" ? g : g?.name)).filter(Boolean)
+      : Array.isArray(movie.genre_ids)
+        ? movie.genre_ids
+        : [];
+
+    return {
+      id: movie.id,
+      tmdb_id: movie.id,
+      title: movie.title || movie.name || "Untitled",
+      original_title: movie.original_title || movie.title || movie.name || "Untitled",
+      overview: movie.overview || "",
+      story: movie.overview || "",
+      release_date: movie.release_date || movie.first_air_date || "",
+      year: String(movie.release_date || movie.first_air_date || movie.year || "").split("-")[0] || "2024",
+      rating:
+        typeof movie.vote_average === "number"
+          ? movie.vote_average.toFixed(1)
+          : String(movie.rating || "8.0"),
+      vote_count: movie.vote_count || 1000,
+      popularity: movie.popularity || 100,
+      poster_path: movie.poster_path || null,
+      poster_url: posterPath,
+      image: posterPath,
+      backdrop_path: movie.backdrop_path || null,
+      backdrop_url: backdropPath,
+      genre_ids: Array.isArray(movie.genre_ids) ? movie.genre_ids : [],
+      genres: genresList,
+      runtime: movie.runtime || null,
+      director: directorObj?.name || movie.director || null,
+      writers: writersStr || movie.writers || null,
+      studio: studioStr || movie.studio || null,
+      languages: languagesList.length > 0 ? languagesList : Array.isArray(movie.languages) ? movie.languages : ["English"],
+      budget: formattedBudget || movie.budget || null,
+      boxOffice: formattedRevenue || movie.boxOffice || movie.grossCollection || null,
+      ottAvailability: ottAvailability.length > 0 ? ottAvailability : Array.isArray(movie.ottAvailability) ? movie.ottAvailability : [],
+      review: topReview || movie.review || null,
+      reviews: reviewsResults,
+      trailer_url: trailerUrl,
+      trailerLink,
+      cast: castList.slice(0, 10).map((c) => ({
+        id: c?.id,
+        name: c?.name || "Actor",
+        character: c?.character || "",
+        profile_url: c?.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null,
+      })),
+      crew: crewList.slice(0, 10).map((c) => ({
+        id: c?.id,
+        name: c?.name || "Crew",
+        job: c?.job || "",
+        department: c?.department || "",
+        profile_url: c?.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null,
+      })),
+    };
+  } catch (err) {
+    console.error("Error formatting movie DTO:", err.message);
+    return {
+      id: movie.id || 1,
+      title: movie.title || movie.name || "Movie",
+      overview: movie.overview || "",
+      year: "2024",
+      rating: "8.0",
+      poster_url: movie.poster_url || movie.image || null,
+      genres: ["Drama"],
+    };
+  }
 };
 
 // 1. Fetch Trending Media (Movies / TV / All)
