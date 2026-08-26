@@ -2,6 +2,26 @@ const axios = require("axios");
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_API_KEY = process.env.TMDB_API_KEY || "84b706f97f7481283d5a499a0937a09d";
+const TMDB_READ_ACCESS_TOKEN = process.env.TMDB_READ_ACCESS_TOKEN;
+
+// Helper to construct request headers/params for TMDB authentication
+const getTMDBRequestConfig = (extraParams = {}) => {
+  const config = {
+    params: { ...extraParams },
+    headers: {},
+    timeout: 4000,
+  };
+
+  if (TMDB_READ_ACCESS_TOKEN) {
+    config.headers.Authorization = `Bearer ${TMDB_READ_ACCESS_TOKEN.replace(/^Bearer\s+/i, "")}`;
+  }
+
+  if (TMDB_API_KEY) {
+    config.params.api_key = TMDB_API_KEY;
+  }
+
+  return config;
+};
 
 // Fallback curated movie dataset when API Key is unauthenticated/expired
 const FALLBACK_MOVIES = [
@@ -249,10 +269,10 @@ const getTrendingMovies = async (page = 1, type = "all") => {
   if (cached) return cached;
 
   try {
-    const res = await axios.get(`${TMDB_BASE_URL}/trending/${mediaType}/day`, {
-      params: { api_key: TMDB_API_KEY, page },
-      timeout: 4000,
-    });
+    const res = await axios.get(
+      `${TMDB_BASE_URL}/trending/${mediaType}/day`,
+      getTMDBRequestConfig({ page })
+    );
 
     const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];
     const formattedResults = rawResults
@@ -300,10 +320,10 @@ const searchMovies = async (query, page = 1) => {
   if (cached) return cached;
 
   try {
-    const res = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
-      params: { api_key: TMDB_API_KEY, query, page },
-      timeout: 4000,
-    });
+    const res = await axios.get(
+      `${TMDB_BASE_URL}/search/movie`,
+      getTMDBRequestConfig({ query, page })
+    );
 
     const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];
     const formattedResults = rawResults
@@ -344,13 +364,10 @@ const getMovieDetails = async (movieId) => {
   if (cached) return cached;
 
   try {
-    const res = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
-      params: {
-        api_key: TMDB_API_KEY,
-        append_to_response: "credits,videos,watch/providers,reviews",
-      },
-      timeout: 3000,
-    });
+    const res = await axios.get(
+      `${TMDB_BASE_URL}/movie/${movieId}`,
+      getTMDBRequestConfig({ append_to_response: "credits,videos,watch/providers,reviews" })
+    );
 
     const formatted = formatMovieDTO(res.data);
     setCachedData(cacheKey, formatted);
@@ -373,10 +390,10 @@ const getGenres = async () => {
   if (cached) return cached;
 
   try {
-    const res = await axios.get(`${TMDB_BASE_URL}/genre/movie/list`, {
-      params: { api_key: TMDB_API_KEY },
-      timeout: 3000,
-    });
+    const res = await axios.get(
+      `${TMDB_BASE_URL}/genre/movie/list`,
+      getTMDBRequestConfig()
+    );
 
     setCachedData(cacheKey, res.data.genres);
     return res.data.genres;
