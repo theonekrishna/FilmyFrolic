@@ -145,9 +145,15 @@ const getQuestionsByGame = async (req, res) => {
 
 const submitGame = async (req, res) => {
   try {
+    const { answers, startTime } = req.body;
+
+    if (startTime && Date.now() - Number(startTime) < 500) {
+      return res.status(400).json({ success: false, error: "Invalid submission speed detected." });
+    }
+
     const result = await GameService.processSubmission(
       req.params.game_id,
-      req.body.answers,
+      answers,
       req.user.id
     );
 

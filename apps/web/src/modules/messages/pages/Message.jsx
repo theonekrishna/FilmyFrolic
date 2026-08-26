@@ -123,52 +123,70 @@ export default function Messages() {
     fetchInbox();
   }, [fetchInbox]);
 
-  // --- 4. SUPABASE REALTIME & PRESENCE ---
+  // --- 4. SUPABASE REALTIME & PRESENCE WITH AUTO-RECONNECT ---
   useEffect(() => {
     if (!currentUserId) return;
 
-    const channel = supabase.channel("online-users", {
-      config: { presence: { key: String(currentUserId) } },
-    });
+    let retryTimeout = null;
+    let attempts = 0;
 
-    channelRef.current = channel;
+    const setupChannel = () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
 
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        const onlineMap = {};
-        Object.keys(state).forEach((key) => {
-          onlineMap[key] = true;
-        });
-        setOnlineUsers(onlineMap);
-      })
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "direct_messages",
-          filter: `receiver_id=eq.${currentUserId}`,
-        },
-        (payload) => {
-          const newMsg = payload.new;
-          if (activeUser && String(newMsg.sender_id) === String(activeUser.id || activeUser._id)) {
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === newMsg.id)) return prev;
-              return [...prev, newMsg];
-            });
-            markConversationAsRead(activeUser.id || activeUser._id).catch(() => {});
-          }
-          fetchInbox();
-        }
-      )
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({ online_at: new Date().toISOString() });
-        }
+      const channel = supabase.channel(`online-users-${currentUserId}`, {
+        config: { presence: { key: String(currentUserId) } },
       });
 
+      channelRef.current = channel;
+
+      channel
+        .on("presence", { event: "sync" }, () => {
+          const state = channel.presenceState();
+          const onlineMap = {};
+          Object.keys(state).forEach((key) => {
+            onlineMap[key] = true;
+          });
+          setOnlineUsers(onlineMap);
+        })
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "direct_messages",
+            filter: `receiver_id=eq.${currentUserId}`,
+          },
+          (payload) => {
+            const newMsg = payload.new;
+            if (activeUser && String(newMsg.sender_id) === String(activeUser.id || activeUser._id)) {
+              setMessages((prev) => {
+                if (prev.some((m) => m.id === newMsg.id)) return prev;
+                return [...prev, newMsg];
+              });
+              markConversationAsRead(activeUser.id || activeUser._id).catch(() => {});
+            }
+            fetchInbox();
+          }
+        )
+        .subscribe(async (status) => {
+          if (status === "SUBSCRIBED") {
+            attempts = 0;
+            await channel.track({ online_at: new Date().toISOString() });
+          } else if (status === "CHANNEL_ERROR" || status === "CLOSED") {
+            attempts += 1;
+            const delay = Math.min(1000 * Math.pow(2, attempts), 30000);
+            console.warn(`[MESSAGES] Realtime disconnected (${status}). Reconnecting in ${delay}ms...`);
+            retryTimeout = setTimeout(setupChannel, delay);
+          }
+        });
+    };
+
+    setupChannel();
+
     return () => {
+      if (retryTimeout) clearTimeout(retryTimeout);
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;

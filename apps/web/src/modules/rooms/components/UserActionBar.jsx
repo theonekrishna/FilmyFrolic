@@ -14,6 +14,7 @@ export default function UserActionBar({
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [handRaised, setHandRaised] = useState(false);
+  const [screenSharing, setScreenSharing] = useState(false);
   const [loadingMic, setLoadingMic] = useState(false);
   const [loadingCam, setLoadingCam] = useState(false);
   const [loadingHand, setLoadingHand] = useState(false);
@@ -215,6 +216,45 @@ export default function UserActionBar({
               {loadingHand ? <span className="spinner-small"></span> : "✋"}
             </span>
             <span className="control-btn-label">{handRaised ? "Lower" : "Raise"}</span>
+          </button>
+        )}
+
+        {/* Screen Share for Desktop Watch Parties */}
+        {is_speaker && roomType === "watch_party" && (
+          <button
+            onClick={async () => {
+              try {
+                if (!screenSharing) {
+                  const screenTrack = await AgoraRTC.createScreenVideoTrack({ encoderConfig: "1080p_1" });
+                  if (localTracks.current.video) {
+                    await clientRef.current.unpublish([localTracks.current.video]);
+                  }
+                  await clientRef.current.publish([screenTrack]);
+                  localTracks.current.screen = screenTrack;
+                  setScreenSharing(true);
+                  screenTrack.on("track-ended", async () => {
+                    await clientRef.current.unpublish([screenTrack]);
+                    setScreenSharing(false);
+                  });
+                } else {
+                  if (localTracks.current.screen) {
+                    await clientRef.current.unpublish([localTracks.current.screen]);
+                    localTracks.current.screen.close();
+                    localTracks.current.screen = null;
+                  }
+                  setScreenSharing(false);
+                }
+              } catch (err) {
+                console.error("Screen share error:", err);
+              }
+            }}
+            className={`control-btn ${screenSharing ? "control-btn--warn" : "control-btn--on"}`}
+            title={screenSharing ? "Stop Sharing Screen" : "Share Screen"}
+          >
+            <span className="control-btn-icon" style={{ fontSize: "18px" }}>
+              📺
+            </span>
+            <span className="control-btn-label">{screenSharing ? "Stop Share" : "Share Screen"}</span>
           </button>
         )}
       </div>

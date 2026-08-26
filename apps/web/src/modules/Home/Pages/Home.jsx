@@ -53,7 +53,7 @@ export default function Home() {
         {loading ? (
           <SectionSkeleton />
         ) : (
-          <div className="pt-6">
+          <div className="pt-6 flex flex-col gap-8 pb-12">
             <DesktopCategoryRow
               title="Top Movies & Series"
               movies={allTitles}
@@ -62,6 +62,29 @@ export default function Home() {
               navigate={navigate}
               onSeeAll={() => navigate("/content/archive")}
             />
+
+            {/* Quick Gossip Highlights Banner */}
+            <div className="px-4 md:px-8">
+              <div className="bg-gradient-to-r from-orange-950/40 via-red-950/20 to-purple-950/40 border border-orange-500/20 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-orange-400 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/20">
+                    🔥 Hot Community Buzz
+                  </span>
+                  <h3 className="text-lg md:text-xl font-bold text-white mt-2 font-['Outfit']">
+                    Fan Theories & Industry Rumors
+                  </h3>
+                  <p className="text-xs md:text-sm text-white/60 mt-1 max-w-xl">
+                    Explore unverified fan speculation, casting rumors, and vote your stance on the latest entertainment topics.
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate("/content/gossip")}
+                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold text-xs md:text-sm px-5 py-2.5 rounded-xl hover:brightness-110 transition-all shrink-0"
+                >
+                  Explore Gossips
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
