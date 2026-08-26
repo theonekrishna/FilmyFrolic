@@ -269,10 +269,20 @@ const getTrendingMovies = async (page = 1, type = "all") => {
   if (cached) return cached;
 
   try {
+    const authType = TMDB_READ_ACCESS_TOKEN ? "Bearer Token (v4)" : TMDB_API_KEY ? "API Key (v3)" : "None";
+    console.log("[HOME] Calling TMDB");
+    console.log(`TMDB endpoint: ${TMDB_BASE_URL}/trending/${mediaType}/day`);
+    console.log(`HTTP method: GET`);
+    console.log(`authentication type: ${authType}`);
+
     const res = await axios.get(
       `${TMDB_BASE_URL}/trending/${mediaType}/day`,
       getTMDBRequestConfig({ page })
     );
+
+    console.log("[HOME] TMDB response received");
+    console.log(`[HOME] TMDB status: ${res.status}`);
+    console.log("[HOME] Processing TMDB response");
 
     const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];
     const formattedResults = rawResults
@@ -299,10 +309,14 @@ const getTrendingMovies = async (page = 1, type = "all") => {
     setCachedData(cacheKey, formatted);
     return formatted;
   } catch (error) {
-    console.warn(
-      "TMDB API request failed/unauthenticated. Returning formatted fallback trending movies:",
-      error.message
-    );
+    console.error("[HOME ERROR]");
+    console.error(`message: ${error.message}`);
+    console.error(`name: ${error.name}`);
+    console.error(`code: ${error.code || "N/A"}`);
+    console.error(`tmdbStatus: ${error.response?.status || "N/A"}`);
+    console.error(`tmdbError: ${JSON.stringify(error.response?.data || {})}`);
+    console.error(`stack: ${error.stack}`);
+
     return {
       page: 1,
       total_pages: 1,

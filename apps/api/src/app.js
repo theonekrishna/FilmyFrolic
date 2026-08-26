@@ -36,18 +36,49 @@ app.use(
   })
 );
 
-// Security: Global Rate Limiting
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Limit each IP to 300 requests per 15 mins
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, message: "Too many requests from this IP, please try again later." },
+// Request Logging Middleware for Production Diagnostics (No secrets logged)
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`[REQUEST] ${req.method} ${req.originalUrl}`);
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`[RESPONSE] ${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`);
+  });
+
+  next();
 });
 
 app.use("/api/", globalLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Safe Health & Diagnostic Endpoints
+app.get("/api/health/tmdb", async (req, res) => {
+  const tmdbApiKeyConfigured = !!process.env.TMDB_API_KEY;
+  const tmdbTokenConfigured = !!process.env.TMDB_READ_ACCESS_TOKEN;
+  
+  try {
+    const tmdbService = require("./modules/tmdb/tmdb.service");
+    const testRes = await tmdbService.getTrendingMovies(1, "all");
+    const tmdbReachable = Array.isArray(testRes?.results) && testRes.results.length > 0;
+    
+    return res.json({
+      success: true,
+      tmdbConfigured: tmdbApiKeyConfigured || tmdbTokenConfigured,
+      tmdbApiKeyConfigured,
+      tmdbTokenConfigured,
+      tmdbReachable,
+      resultsCount: testRes?.results?.length || 0,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      tmdbConfigured: tmdbApiKeyConfigured || tmdbTokenConfigured,
+      error: err.message,
+    });
+  }
+});
 
 // Core API Routes
 app.use("/api/search", require("./modules/search/search.routes"));

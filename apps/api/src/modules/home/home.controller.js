@@ -2,9 +2,15 @@ const filmyService = require("./home.filmydock.service");
 
 // Home: only movies, limit 15
 exports.getHomeMovies = async (req, res) => {
+  console.log("\n[HOME] Request received");
+  console.log("[HOME] Checking configuration");
+  console.log(`[HOME] TMDB_API_KEY configured: ${!!process.env.TMDB_API_KEY}`);
+  console.log(`[HOME] TMDB_READ_ACCESS_TOKEN configured: ${!!process.env.TMDB_READ_ACCESS_TOKEN}`);
+
   try {
     const { Page = 1, limit = 15, featured = true } = req.query;
 
+    console.log("[HOME] Calling TMDB service");
     const data = (await filmyService.getMovies({
       Page: Number(Page),
       limit: Number(limit),
@@ -16,56 +22,21 @@ exports.getHomeMovies = async (req, res) => {
       total: 0,
     };
 
+    console.log("[HOME] Returning movie data");
     return res.status(200).json(data);
   } catch (err) {
-    console.error("getHomeMovies error:", err.message);
+    console.error("[HOME ERROR]");
+    console.error(`message: ${err.message}`);
+    console.error(`name: ${err.name}`);
+    console.error(`code: ${err.code || "N/A"}`);
+    console.error(`status: ${err.status || err.statusCode || 500}`);
+    console.error(`tmdbStatus: ${err.response?.status || "N/A"}`);
+    console.error(`tmdbError: ${JSON.stringify(err.response?.data || {})}`);
+    console.error(`stack: ${err.stack}`);
 
-    return res.status(200).json({
-      success: true,
-      data: [
-        {
-          id: 27205,
-          title: "Inception",
-          year: "2010",
-          rating: "8.4",
-          poster_url: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-          backdrop_url: "https://image.tmdb.org/t/p/w780/8ZTVqvKDQ8emSGUEMjsR4yHAoaw.jpg",
-          genres: ["Action", "Sci-Fi", "Adventure"],
-          overview: "Cobb, a skilled thief who steals information from targets by entering their dreams.",
-        },
-        {
-          id: 155,
-          title: "The Dark Knight",
-          year: "2008",
-          rating: "8.5",
-          poster_url: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-          backdrop_url: "https://image.tmdb.org/t/p/w780/nMK2819TyZMo7RuvlTHr83Ym22E.jpg",
-          genres: ["Action", "Crime", "Drama"],
-          overview: "Batman raises the stakes in his war on crime.",
-        },
-        {
-          id: 157336,
-          title: "Interstellar",
-          year: "2014",
-          rating: "8.4",
-          poster_url: "https://image.tmdb.org/t/p/w500/gEU2QniL6C8z19uVOtYnZ5UYj7d.jpg",
-          backdrop_url: "https://image.tmdb.org/t/p/w780/pBRDqaYiSpviTXW1wEG9dG2943b.jpg",
-          genres: ["Sci-Fi", "Drama"],
-          overview: "Adventures of space explorers searching for a new home.",
-        },
-        {
-          id: 680,
-          title: "Pulp Fiction",
-          year: "1994",
-          rating: "8.5",
-          poster_url: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
-          backdrop_url: "https://image.tmdb.org/t/p/w780/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg",
-          genres: ["Crime", "Drama"],
-          overview: "Stories of hitmen and mobsters in Los Angeles.",
-        },
-      ],
-      page: 1,
-      total: 4,
+    return res.status(500).json({
+      success: false,
+      message: "Home API failed",
     });
   }
 };
