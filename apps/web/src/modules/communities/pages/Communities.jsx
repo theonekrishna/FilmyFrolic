@@ -70,20 +70,12 @@ export default function Communities() {
     [isLoggedIn]
   );
 
-  // Helper to open community detail (requires login)
+  // Helper to open community detail (Public read allowed for guests)
   const openCommunityDetail = useCallback(
     function openCommunityDetail(community) {
-      if (!isLoggedIn) {
-        setAuthPrompt({
-          open: true,
-          message:
-            "Sign in to explore communities, read posts, and connect with fellow cinephiles!",
-        });
-        return;
-      }
       setDetailCommunity(community);
     },
-    [isLoggedIn]
+    []
   );
 
   const [userActivity, setUserActivity] = useState({

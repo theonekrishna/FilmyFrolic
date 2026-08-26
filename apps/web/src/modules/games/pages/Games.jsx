@@ -10,7 +10,7 @@ import StreakBadge from "../components/StreakBadge";
 import DailyChallengeBanner from "../components/DailyChallengeBanner";
 import GameCard from "../components/GameCard";
 import LeaderboardWidget from "../components/LeaderboardWidget";
-import AuthPromptModal from "../components/Authpromptmoda";
+import AuthPromptModal from "../../../shared/AuthPromptModal";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast, ToastContainer } from "../../../shared/Toast";
 

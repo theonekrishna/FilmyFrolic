@@ -20,10 +20,14 @@ import { ARTICLES, CATEGORY_FILTERS } from "../data/articles";
 import ArticleListCard from "../components/ArticleListCard";
 import CreateArticleModal from "../components/CreateArticleModal";
 
+import AuthPromptModal from "../../../shared/AuthPromptModal";
+import { useAuthGate } from "../../../hooks/useAuthGate";
+
 const ACCENT = "#f5c518";
 
 export default function Articles() {
   const navigate = useNavigate();
+  const { requireAuth, authPromptProps } = useAuthGate();
 
   // ── State ──
   const [filterCat, setFilterCat] = useState("all");
@@ -70,6 +74,8 @@ export default function Articles() {
         ::-webkit-scrollbar-thumb:hover { background: #f5c518; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
+
+      <AuthPromptModal {...authPromptProps} />
 
       {createOpen && (
         <CreateArticleModal
@@ -118,7 +124,11 @@ export default function Articles() {
             </div>
 
             <button
-              onClick={() => setCreateOpen(true)}
+              onClick={() =>
+                requireAuth("Sign in to write your own articles, reviews, and film analysis!", () =>
+                  setCreateOpen(true)
+                )
+              }
               className="flex items-center justify-center gap-2 bg-[#f5c518] text-[#080810] px-4 md:px-6 py-2 rounded-xl text-[11px] font-black hover:scale-[1.03] active:scale-[0.98] transition-all shadow-[0_4px_20px_rgba(245,197,24,0.2)] uppercase tracking-wider shrink-0"
             >
               <Plus size={15} strokeWidth={3} /> Write

@@ -6,16 +6,16 @@ import MemeCard from "../components/MemeCard";
 import { memeService } from "../services/memeService";
 import { useAuth } from "../../../context/AuthContext";
 
-// Lazy-load the modal — only downloaded when a logged-in user opens it
-const SubmitMemeModal = lazy(() => import("../components/SubmitMemeModal"));
-
-// ─── Constants ────────────────────────────────────────────────────────────────
+import AuthPromptModal from "../../../shared/AuthPromptModal";
+import { useAuthGate } from "../../../hooks/useAuthGate";
 
 const ACCENT = "#7c5cfc";
 
 export default function Memes() {
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
+  const { requireAuth, authPromptProps } = useAuthGate();
+
   const [feedTab, setFeedTab] = useState("hot"); // "hot" | "new" | "top" | "saved"
   const [allMemes, setAllMemes] = useState([]);
   const [trendingTags, setTrendingTags] = useState([]);
@@ -338,6 +338,8 @@ export default function Memes() {
 
   return (
     <div className="min-h-screen bg-[#080810]">
+      <AuthPromptModal {...authPromptProps} />
+
       {submitOpen && (
         <Suspense
           fallback={
@@ -391,23 +393,18 @@ export default function Memes() {
                 </button>
               ))}
             </div>
-            {currentUser ? (
-              <button
-                onClick={() => setSubmitOpen(true)}
-                className="flex items-center justify-center gap-2 bg-[#7c5cfc] text-white text-[13px] font-outfit font-bold px-4 py-2.5 sm:py-2 rounded-lg transition-all duration-200 hover:bg-[#8b6dfc] hover:-translate-y-0.5 shadow-[0_4px_14px_rgba(124,92,252,0.3)] hover:shadow-[0_6px_20px_rgba(124,92,252,0.4)] active:scale-95 cursor-pointer w-full sm:w-auto"
-              >
-                <Plus size={15} strokeWidth={2.5} />
-                Submit Meme
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate("/login")}
-                className="flex items-center justify-center gap-2 bg-[#7c5cfc]/10 border border-[#7c5cfc]/30 text-[#7c5cfc] text-[13px] font-outfit font-bold px-4 py-2.5 sm:py-2 rounded-lg transition-all duration-200 hover:bg-[#7c5cfc]/20 cursor-pointer w-full sm:w-auto"
-              >
-                <LogIn size={15} strokeWidth={2.5} />
-                Login to Post Meme
-              </button>
-            )}
+
+            <button
+              onClick={() =>
+                requireAuth("Sign in or create a free account to post memes and join the community!", () =>
+                  setSubmitOpen(true)
+                )
+              }
+              className="flex items-center justify-center gap-2 bg-[#7c5cfc] text-white text-[13px] font-outfit font-bold px-4 py-2.5 sm:py-2 rounded-lg transition-all duration-200 hover:bg-[#8b6dfc] hover:-translate-y-0.5 shadow-[0_4px_14px_rgba(124,92,252,0.3)] hover:shadow-[0_6px_20px_rgba(124,92,252,0.4)] active:scale-95 cursor-pointer w-full sm:w-auto"
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              Submit Meme
+            </button>
           </div>
 
           {/* Mobile Sidebar */}

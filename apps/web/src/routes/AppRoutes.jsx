@@ -105,51 +105,55 @@ export default function AppRoutes() {
 
         {/* ── App Layout ── */}
         <Route element={<AppLayout />}>
-          {/* ── PUBLIC ROUTES (Home & Archive only) ── */}
+          {/* ── PUBLIC READ ROUTES (Accessible by unauthenticated guests) ── */}
           {isEnabled("core") && <Route path="/" element={<Home />} />}
+          
           {isEnabled("content") && (
             <>
               <Route path="content/archive" element={<Archive />} />
               <Route path="content/movie/:id" element={<ArchiveItemDetails />} />
+              <Route path="content/articles" element={<Articles />} />
+              <Route path="content/articles/:id" element={<ArticleItemDetailsView />} />
+              <Route path="content/gossip" element={<Gossips />} />
+              <Route path="content/gossips/:id" element={<SingleGossip />} />
             </>
           )}
 
-          {/* ── PROTECTED ROUTES (Require Login/Signup) ── */}
+          {isEnabled("social") && (
+            <>
+              <Route path="social/feed" element={<SocialFeed />} />
+              <Route path="social/feed/post/:id" element={<SinglePostPage />} />
+              <Route path="social/rooms" element={<Rooms />} />
+              <Route path="social/rooms/:id" element={<RoomDetails />} />
+              <Route path="social/communities" element={<Communities />} />
+              <Route path="social/communities/:id" element={<CommunitySingleItem />} />
+            </>
+          )}
+
+          {isEnabled("entertainment") && (
+            <>
+              <Route path="entertain/games" element={<Games />} />
+              <Route path="entertain/memes" element={<Memes />} />
+              <Route path="entertain/memes/:id" element={<SingleMemePage />} />
+            </>
+          )}
+
+          {isEnabled("user") && (
+            <Route path="user/profile" element={<UserProfile />} />
+          )}
+
+          {/* ── PROTECTED USER ROUTES (Require Login / Active Session) ── */}
           <Route element={<ProtectedRoute />}>
             {isEnabled("social") && (
               <>
-                <Route path="/social/feed" element={<SocialFeed />} />
-                <Route path="/social/feed/post/:id" element={<SinglePostPage />} />
                 <Route path="notifications" element={<Notifications />} />
-                <Route path="/social/messages" element={<Messages />} />
-                <Route path="social/rooms" element={<Rooms />} />
-                <Route path="social/rooms/:id" element={<RoomDetails />} />
-                <Route path="social/communities" element={<Communities />} />
-                <Route path="social/communities/:id" element={<CommunitySingleItem />} />
-              </>
-            )}
-
-            {isEnabled("content") && (
-              <>
-                <Route path="content/articles" element={<Articles />} />
-                <Route path="content/articles/:id" element={<ArticleItemDetailsView />} />
-                <Route path="content/gossip" element={<Gossips />} />
-                <Route path="/content/gossips/:id" element={<SingleGossip />} />
-              </>
-            )}
-
-            {isEnabled("entertainment") && (
-              <>
-                <Route path="entertain/games" element={<Games />} />
-                <Route path="entertain/memes" element={<Memes />} />
-                <Route path="entertain/memes/:id" element={<SingleMemePage />} />
+                <Route path="social/messages" element={<Messages />} />
               </>
             )}
 
             {isEnabled("user") && (
               <>
                 <Route path="user/history" element={<UserHistory />} />
-                <Route path="user/profile" element={<UserProfile />} />
                 <Route path="user/watchlist" element={<Watchlist />} />
               </>
             )}
