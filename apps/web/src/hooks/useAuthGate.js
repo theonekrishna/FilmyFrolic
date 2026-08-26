@@ -16,6 +16,19 @@ export function useAuthGate() {
     pendingCallback: null,
   });
 
+  // Listen for global session expiration (e.g. 401 token refresh failure)
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setAuthPrompt({
+        isOpen: true,
+        message: "Your session has expired. Please sign in again to continue.",
+        pendingCallback: null,
+      });
+    };
+    window.addEventListener("auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("auth-expired", handleAuthExpired);
+  }, []);
+
   /**
    * Require authentication before executing a callback.
    * If logged in, executes callback immediately.

@@ -58,16 +58,18 @@ privateAxios.interceptors.response.use(
           return privateAxios(originalRequest);
         } catch (err) {
           console.error("Token refresh failed:", err);
-          // Clear tokens and redirect to login on refresh failure
+          // Clear tokens and notify app of expired session
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
-          // window.location.href = '/login';
+          window.dispatchEvent(new CustomEvent("auth-expired"));
           return Promise.reject(err);
         }
       } else {
-        // Handle unauthorized access, e.g., redirect to login page
-        console.error("Unauthorized access - redirecting to login");
-        // window.location.href = "/login";
+        // Handle unauthorized access when no refresh token exists
+        console.error("Unauthorized access - session expired");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.dispatchEvent(new CustomEvent("auth-expired"));
         return Promise.reject(error);
       }
     }

@@ -71,6 +71,12 @@ export default function HostRoomModel({ onClose }) {
 
       // ✅ API CALL
       const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("Your session has expired. Please log in again to host a room.");
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+        return;
+      }
+
       const res = await privateAxios.post(`/api/rooms`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -82,9 +88,15 @@ export default function HostRoomModel({ onClose }) {
       setTimeout(() => {
         setSubmitted(false);
         onClose();
+        window.location.reload();
       }, 1200);
     } catch (err) {
-      console.error("Create Room Error:", err.response?.data || err.message);
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to create room";
+      console.error("Create Room Error:", errorMsg);
+      alert(`Room Creation Error: ${errorMsg}`);
+      if (err.response?.status === 401 || errorMsg.includes("Invalid Refresh Token") || errorMsg.includes("Unauthorized")) {
+        window.dispatchEvent(new CustomEvent("auth-expired"));
+      }
     } finally {
       setSubmitting(false);
     }
