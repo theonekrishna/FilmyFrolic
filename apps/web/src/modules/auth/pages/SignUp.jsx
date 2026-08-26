@@ -19,7 +19,7 @@ import StepDots from "../components/StepDots";
 import PasswordStrength from "../components/PasswordStrength";
 import { useAuth } from "../../../context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
-const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmy-frolic-new-backend.onrender.com").replace(/\/+$/, "");
+const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
 const BG_IMAGE =
   "https://images.unsplash.com/photo-1563381013529-1c922c80ac8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080";
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmy-frolic-new-backend.onrender.com").replace(/\/+$/, "");
+const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
 const ARCHIVE_API_BASE_URL = import.meta.env.VITE_ARCHIVE_API_BASE_URL;
 const publicAxios = axios.create({
   baseURL: BASE_URL,

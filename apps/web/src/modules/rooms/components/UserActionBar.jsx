@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { privateAxios, publicAxios } from "../../../utils/AxiosInstance";
-const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmy-frolic-new-backend.onrender.com").replace(/\/+$/, "");
+const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
 
 export default function UserActionBar({
   localTracks,

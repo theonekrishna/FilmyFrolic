@@ -4,7 +4,7 @@ import { ROOM_TYPES, MOVIE_SUGGESTIONS, PRIVACY_OPTS } from "../data/rooms";
 import axios from "axios";
 import { privateAxios, publicAxios } from "../../../utils/AxiosInstance";
 const RED = "#e84545";
-const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmy-frolic-new-backend.onrender.com").replace(/\/+$/, "");
+const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
 
 export default function HostRoomModel({ onClose }) {
   const [roomType, setRoomType] = useState("watch_party"); // ✅ FIX ENUM
