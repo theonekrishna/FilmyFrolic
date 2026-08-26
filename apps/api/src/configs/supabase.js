@@ -15,14 +15,25 @@ const rawUrl = process.env.SUPABASE_URL;
 const supabaseUrl = formatSupabaseUrl(rawUrl);
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+let supabase = null;
+let supabaseAdmin = null;
+
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey);
+    supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    console.log("[SUPABASE] client initialized successfully");
+  } catch (err) {
+    console.error("[SUPABASE ERROR] client initialization failed:", err.message);
+  }
+} else {
+  console.warn("[SUPABASE WARNING] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured");
+  // Return dummy client to prevent runtime crash
+  const dummyClient = createClient("https://placeholder.supabase.co", "placeholder-key");
+  supabase = dummyClient;
+  supabaseAdmin = dummyClient;
 }
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
 
 module.exports = { supabase, supabaseAdmin };

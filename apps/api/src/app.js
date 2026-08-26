@@ -62,6 +62,15 @@ app.use("/api/", globalLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Startup Environment Validation Diagnostics (No secrets printed)
+console.log(`\n=== SERVER STARTUP DIAGNOSTICS ===`);
+console.log(`NODE_ENV configured: ${!!process.env.NODE_ENV} (${process.env.NODE_ENV || "development"})`);
+console.log(`SUPABASE_URL configured: ${!!process.env.SUPABASE_URL}`);
+console.log(`SUPABASE_SERVICE_ROLE_KEY configured: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
+console.log(`TMDB_API_KEY configured: ${!!process.env.TMDB_API_KEY}`);
+console.log(`TMDB_READ_ACCESS_TOKEN configured: ${!!process.env.TMDB_READ_ACCESS_TOKEN}`);
+console.log(`==================================\n`);
+
 // Safe Health & Diagnostic Endpoints
 app.get("/api/health/tmdb", async (req, res) => {
   const tmdbApiKeyConfigured = !!process.env.TMDB_API_KEY;
@@ -84,6 +93,42 @@ app.get("/api/health/tmdb", async (req, res) => {
     return res.status(500).json({
       success: false,
       tmdbConfigured: tmdbApiKeyConfigured || tmdbTokenConfigured,
+      error: err.message,
+    });
+  }
+});
+
+app.get("/api/health/supabase", async (req, res) => {
+  const supabaseUrlConfigured = !!process.env.SUPABASE_URL;
+  const supabaseKeyConfigured = !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.SUPABASE_ANON_KEY;
+
+  try {
+    const { supabase } = require("./configs/supabase");
+    console.log("[SUPABASE] connection test started");
+    const { data, error } = await supabase.from("profiles").select("id").limit(1);
+    
+    if (error) {
+      console.error("[SUPABASE ERROR]", { status: error.status, message: error.message, code: error.code });
+      return res.status(500).json({
+        success: false,
+        supabaseConfigured: supabaseUrlConfigured && supabaseKeyConfigured,
+        error: error.message,
+        code: error.code,
+      });
+    }
+
+    console.log("[SUPABASE] connection test successful");
+    return res.json({
+      success: true,
+      supabaseConfigured: supabaseUrlConfigured && supabaseKeyConfigured,
+      supabaseReachable: true,
+      sampleCount: Array.isArray(data) ? data.length : 0,
+    });
+  } catch (err) {
+    console.error("[SUPABASE ERROR]", { message: err.message });
+    return res.status(500).json({
+      success: false,
+      supabaseConfigured: supabaseUrlConfigured && supabaseKeyConfigured,
       error: err.message,
     });
   }
