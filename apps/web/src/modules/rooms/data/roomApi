@@ -1,18 +1,18 @@
 import axios from "axios";
 
+const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmy-frolic-new-backend.onrender.com").replace(/\/+$/, "");
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL,
+  baseURL: BASE_URL,
   withCredentials: true,
 });
 
 // GET ROOMS
-export const getRoomsAPI = () =>
-  API.get(`https://filmy-frolic-new-backend.onrender.com/api/rooms`);
+export const getRoomsAPI = () => API.get(`/api/rooms`);
 
 // CREATE ROOM
 export const createRoomAPI = (data) => {
-  console.log("bibek jana");
-  API.post("/api/rooms", data, {
+  return API.post("/api/rooms", data, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
