@@ -321,7 +321,7 @@ export const searchMoviesOMDB = async (query) => {
       return { results: [], all: [] };
     }
 
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+    const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_BASE_URL ? `${import.meta.env.VITE_BASE_URL}/api` : "https://filmy-frolic-new-backend.onrender.com/api");
     const res = await fetch(`${API_BASE_URL}/tmdb/search?query=${encodeURIComponent(query)}`);
     const data = await res.json();
 
@@ -352,7 +352,7 @@ export const searchMoviesOMDB = async (query) => {
 // Get popular/default movie suggestions from backend TMDB trending
 export const getMovieSuggestions = async () => {
   try {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+    const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_BASE_URL ? `${import.meta.env.VITE_BASE_URL}/api` : "https://filmy-frolic-new-backend.onrender.com/api");
     const res = await fetch(`${API_BASE_URL}/tmdb/trending`);
     const data = await res.json();
 
