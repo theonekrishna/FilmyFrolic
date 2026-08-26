@@ -622,26 +622,6 @@ export default function SocialFeed() {
           })}
         </div>
 
-        {/* Inline Feed Search */}
-        <div className="relative flex-1 max-w-[280px] hidden sm:block">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-          <input
-            type="text"
-            value={feedSearchQuery}
-            onChange={(e) => setFeedSearchQuery(e.target.value)}
-            placeholder="Filter feed posts..."
-            className="w-full bg-[#12121e] border border-white/10 rounded-xl pl-9 pr-7 py-1.5 text-[12px] font-['Outfit'] text-[#f0f0f8] placeholder-white/30 outline-none focus:border-[#3b82f6] transition-all"
-          />
-          {feedSearchQuery && (
-            <button
-              onClick={() => setFeedSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
-            >
-              <X size={12} />
-            </button>
-          )}
-        </div>
-
         {/* Right actions: Trending drawer toggle (mobile) & Compose button */}
         <div className="flex items-center gap-2">
           <button

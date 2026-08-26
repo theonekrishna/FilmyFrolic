@@ -649,43 +649,8 @@ export default function Communities() {
                 ))}
               </div>
 
-              {/* Search Bar & Create Button */}
+              {/* Create Button */}
               <div className="flex items-center gap-3">
-                <div
-                  className={`flex items-center gap-2 h-9 rounded-xl px-3 transition-all duration-200 min-w-[220px] ${
-                    searchFocused
-                      ? "bg-[#12121e] border border-[#3b82f6]"
-                      : "bg-white/5 border border-white/10"
-                  }`}
-                >
-                  <Search
-                    size={14}
-                    className={`shrink-0 transition-colors duration-200 ${
-                      searchFocused ? "text-[#3b82f6]" : "text-white/40"
-                    }`}
-                  />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => setSearchFocused(false)}
-                    placeholder="Search communities..."
-                    autoComplete="off"
-                    className="flex-1 bg-transparent border-none outline-none font-['Outfit'] text-[13px] text-[#f0f0f8] placeholder:text-white/30 caret-[#3b82f6] min-w-0"
-                  />
-                  {searchQuery && (
-                    <button
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setSearchQuery("");
-                      }}
-                      className="flex items-center justify-center w-4 h-4 rounded-full bg-white/10 text-white/50 hover:text-white shrink-0"
-                    >
-                      <X size={10} />
-                    </button>
-                  )}
-                </div>
 
                 <button
                   onClick={() =>
