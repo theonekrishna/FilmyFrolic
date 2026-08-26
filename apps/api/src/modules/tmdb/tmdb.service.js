@@ -281,7 +281,9 @@ const getTrendingMovies = async (page = 1, type = "all") => {
     );
 
     console.log("[HOME] TMDB response received");
-    console.log(`[HOME] TMDB status: ${res.status}`);
+    console.log(`TMDB HTTP status: ${res.status}`);
+    console.log(`TMDB response type: ${typeof res.data}`);
+    console.log(`TMDB result count: ${Array.isArray(res.data?.results) ? res.data.results.length : 0}`);
     console.log("[HOME] Processing TMDB response");
 
     const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];

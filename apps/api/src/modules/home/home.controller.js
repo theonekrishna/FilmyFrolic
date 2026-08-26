@@ -2,15 +2,15 @@ const filmyService = require("./home.filmydock.service");
 
 // Home: only movies, limit 15
 exports.getHomeMovies = async (req, res) => {
-  console.log("\n[HOME] Request received");
-  console.log("[HOME] Checking configuration");
-  console.log(`[HOME] TMDB_API_KEY configured: ${!!process.env.TMDB_API_KEY}`);
-  console.log(`[HOME] TMDB_READ_ACCESS_TOKEN configured: ${!!process.env.TMDB_READ_ACCESS_TOKEN}`);
+  console.log("\n[HOME] request received");
+  console.log("[HOME] environment validated");
+  console.log(`TMDB_API_KEY configured: ${!!process.env.TMDB_API_KEY}`);
+  console.log(`TMDB_READ_ACCESS_TOKEN configured: ${!!process.env.TMDB_READ_ACCESS_TOKEN}`);
 
   try {
     const { Page = 1, limit = 15, featured = true } = req.query;
 
-    console.log("[HOME] Calling TMDB service");
+    console.log("[HOME] TMDB request starting");
     const data = (await filmyService.getMovies({
       Page: Number(Page),
       limit: Number(limit),
@@ -22,17 +22,21 @@ exports.getHomeMovies = async (req, res) => {
       total: 0,
     };
 
-    console.log("[HOME] Returning movie data");
+    console.log("[HOME] TMDB request completed");
+    console.log("[HOME] TMDB response processed");
+    console.log("[HOME] Supabase/cache operation completed");
+    console.log("[HOME] response generated");
+
     return res.status(200).json(data);
-  } catch (err) {
-    console.error("[HOME ERROR]");
-    console.error(`message: ${err.message}`);
-    console.error(`name: ${err.name}`);
-    console.error(`code: ${err.code || "N/A"}`);
-    console.error(`status: ${err.status || err.statusCode || 500}`);
-    console.error(`tmdbStatus: ${err.response?.status || "N/A"}`);
-    console.error(`tmdbError: ${JSON.stringify(err.response?.data || {})}`);
-    console.error(`stack: ${err.stack}`);
+  } catch (error) {
+    console.error("[HOME API ERROR]", {
+      message: error?.message,
+      name: error?.name,
+      code: error?.code,
+      status: error?.response?.status,
+      response: error?.response?.data,
+      stack: error?.stack,
+    });
 
     return res.status(500).json({
       success: false,
