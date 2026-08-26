@@ -50,13 +50,13 @@ const HEAT_CONFIG = {
 };
 
 const CATS_FILTER = [
-  { value: "all", label: "All" },
-  { value: "breaking", label: "🔥 Breaking" },
-  { value: "rumour", label: "🤫 Rumours" },
-  { value: "drama", label: "🎭 Drama" },
-  { value: "paparazzi", label: "📸 Paparazzi" },
-  { value: "interview", label: "🎙️ Interviews" },
-  { value: "hottake", label: "⚡ Hot Takes" },
+  { value: "all", label: "All Topics" },
+  { value: "rumor", label: "🚨 Rumors" },
+  { value: "speculation", label: "🔮 Speculation" },
+  { value: "fan_theory", label: "🧩 Fan Theories" },
+  { value: "opinion", label: "💬 Opinions & Discussion" },
+  { value: "confirmed_news", label: "✅ Confirmed News" },
+  { value: "question", label: "❓ Questions" },
 ];
 
 function getHeatLevel(category) {
@@ -1139,15 +1139,15 @@ export default function Gossips() {
         </div>
       ) : (
         <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 pt-5 md:pt-8 pb-32 sm:pb-24 md:pb-16">
-          {/* Rumor Protocol Alert */}
-          <div className="mb-8 p-4 md:p-6 rounded-[24px] bg-[#12121e] border-l-8 border-red-500 flex gap-4 md:gap-6 items-start md:items-center shadow-xl">
-            <AlertTriangle size={28} className="text-red-500 shrink-0 md:size-[32px]" />
+          {/* Rumor & Safety Protocol Alert */}
+          <div className="mb-8 p-4 md:p-6 rounded-[24px] bg-[#12121e] border-l-8 border-[#f5c518] flex gap-4 md:gap-6 items-start md:items-center shadow-2xl">
+            <AlertTriangle size={28} className="text-[#f5c518] shrink-0 md:size-[32px]" />
             <div className="flex-1">
-              <h4 className="text-red-500 font-black uppercase tracking-widest text-xs md:text-sm mb-1">
-                Rumor Protocol Active
+              <h4 className="text-[#f5c518] font-black uppercase tracking-widest text-xs md:text-sm mb-1 flex items-center gap-2">
+                UNVERIFIED COMMUNITY RUMORS & SPECULATION <span className="bg-white/10 text-white font-mono px-2 py-0.5 rounded text-[10px]">UGC Protocol</span>
               </h4>
-              <p className="text-xs text-white/40 font-medium">
-                Content below is community-sourced and unverified. Proceed with caution.
+              <p className="text-xs text-white/50 font-medium leading-relaxed">
+                All posts below are user-generated rumors, fan theories, and speculation. Content is governed by automated safety screening, PII protection, and community moderation.
               </p>
             </div>
           </div>

@@ -22,10 +22,15 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
   /* ── form state ── */
   const [headline, setHeadline] = useState(gossipToEdit?.headline || "");
   const [text, setText] = useState(gossipToEdit?.excerpt || gossipToEdit?.headline || "");
-  const [category, setCategory] = useState(gossipToEdit?.category || "breaking");
+  const [category, setCategory] = useState(gossipToEdit?.category || "rumor");
+  const [topicType, setTopicType] = useState(gossipToEdit?.topic_type || "movies");
+  const [sourceUrl, setSourceUrl] = useState(gossipToEdit?.source_url || "");
+  const [sourceType, setSourceType] = useState(gossipToEdit?.source_type || "user_reference");
+  const [unverifiedConfirmed, setUnverifiedConfirmed] = useState(false);
   const [verified, setVerified] = useState(gossipToEdit?.verified || false);
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState(gossipToEdit?.tags || []);
+  const [moderationWarning, setModerationWarning] = useState(null);
 
   /* image — keep the existing URL to show it; track new file separately */
   const existingImageUrl = gossipToEdit?.image_url || gossipToEdit?.image || null;
@@ -61,18 +66,25 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
   /* ── submit ── */
   async function submit() {
     if (loading) return;
+    if (!unverifiedConfirmed && category !== "confirmed_news") {
+      alert("Please confirm the unverified content declaration before publishing.");
+      return;
+    }
 
     if (isEditMode) {
       if (!headline.trim() || !text.trim()) return;
       setLoading(true);
+      setModerationWarning(null);
       try {
         let res;
         if (imageFile) {
-          // Send as multipart if a new image was chosen
           const formData = new FormData();
           formData.append("headline", headline.trim());
           formData.append("excerpt", text.trim());
           formData.append("category", category);
+          formData.append("topic_type", topicType);
+          formData.append("source_url", sourceUrl);
+          formData.append("source_type", sourceType);
           formData.append("verified", verified);
           formData.append("tags", JSON.stringify(tags));
           formData.append("image", imageFile);
@@ -84,6 +96,9 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
             headline: headline.trim(),
             excerpt: text.trim(),
             category,
+            topic_type: topicType,
+            source_url: sourceUrl,
+            source_type: sourceType,
             verified,
             tags,
           });
@@ -103,32 +118,40 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
         onClose();
       } catch (err) {
         console.error("Failed to update gossip:", err.response?.data || err.message);
-        alert("Failed to update gossip. Please try again.");
+        alert(err.response?.data?.message || "Failed to update gossip. Please try again.");
       } finally {
         setLoading(false);
       }
     } else {
       if (!text.trim()) return;
       setLoading(true);
-      const formData = new FormData();
-      formData.append("headline", headline.trim() || text.trim().slice(0, 100));
-      formData.append("excerpt", text.trim());
-      formData.append("category", category);
-      formData.append("source", "via Filmy Frolic");
-      formData.append("verified", verified);
-      formData.append("tags", JSON.stringify(tags));
-      if (imageFile) formData.append("image", imageFile);
-
+      setModerationWarning(null);
       try {
-        const res = await privateAxios.post(`/api/gossips`, formData, {
+        const formData = new FormData();
+        formData.append("headline", headline.trim() || text.trim().slice(0, 100));
+        formData.append("excerpt", text.trim());
+        formData.append("category", category);
+        formData.append("topic_type", topicType);
+        formData.append("source_url", sourceUrl);
+        formData.append("source_type", sourceType);
+        formData.append("source", sourceUrl ? `Source: ${sourceType}` : "Community Reference");
+        formData.append("verified", category === "confirmed_news");
+        formData.append("tags", JSON.stringify(tags));
+        if (imageFile) formData.append("image", imageFile);
+
+        const res = await privateAxios.post("/api/gossips", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        const newGossip = res.data?.data || res.data;
-        onCreate?.(newGossip);
+
+        if (res.data?.warning) {
+          setModerationWarning(res.data.warning);
+        }
+
+        onCreate?.(res.data?.data || res.data);
         onClose();
       } catch (err) {
-        console.error("Failed to drop gossip:", err.response?.data || err.message);
-        alert("Spilled the tea too hard! Failed to save gossip.");
+        console.error("Failed to create gossip:", err.response?.data || err.message);
+        alert(err.response?.data?.message || "Failed to publish. Please review content safety rules.");
       } finally {
         setLoading(false);
       }
@@ -391,7 +414,74 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
             />
           </div>
 
-          {/* ── Verified toggle ── */}
+          {/* ── Topic selection ── */}
+          <div className="mb-4">
+            <label className="text-[10px] text-white/30 font-bold uppercase tracking-wider mb-1.5 block">
+              Topic / Entity Type
+            </label>
+            <select
+              value={topicType}
+              onChange={(e) => setTopicType(e.target.value)}
+              className="w-full rounded-[10px] px-3 py-2 font-['Outfit'] text-[13px] text-[#f0f0f8] bg-[#12121e] border border-white/10 outline-none focus:border-[#f5c518]"
+            >
+              <option value="movies">🎬 Movie / Series</option>
+              <option value="actors">⭐ Actor / Actress</option>
+              <option value="directors">🎥 Director / Producer</option>
+              <option value="ott">📺 OTT & Streaming Release</option>
+              <option value="casting">🎭 Casting & Announcements</option>
+              <option value="box_office">💰 Box Office Expectations</option>
+              <option value="fan_theories">🧩 Fan Theories & Predictions</option>
+            </select>
+          </div>
+
+          {/* ── Optional Source Link & Reference ── */}
+          <div className="mb-4">
+            <label className="text-[10px] text-white/30 font-bold uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Source & Reference (Optional)</span>
+              <span className="text-[9px] text-white/20">Display: "Source provided by user"</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+              <select
+                value={sourceType}
+                onChange={(e) => setSourceType(e.target.value)}
+                className="w-full rounded-[8px] px-3 py-2 text-[12px] text-white/80 bg-[#12121e] border border-white/10 outline-none"
+              >
+                <option value="user_reference">Community Reference</option>
+                <option value="official_announcement">Official Announcement</option>
+                <option value="social_media">Public Social Post</option>
+                <option value="interview">Actor/Director Interview</option>
+                <option value="news_article">News Article</option>
+              </select>
+              <input
+                type="url"
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                placeholder="https://source-link.com"
+                className="w-full rounded-[8px] px-3 py-2 text-[12px] text-white bg-[#12121e] border border-white/10 outline-none focus:border-[#f5c518]"
+              />
+            </div>
+          </div>
+
+          {/* ── MANDATORY UNVERIFIED DECLARATION CHECKBOX ── */}
+          <div className="mb-5 p-3.5 rounded-xl bg-yellow-400/10 border border-yellow-400/25 flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="unverifiedCheck"
+              checked={unverifiedConfirmed}
+              onChange={(e) => setUnverifiedConfirmed(e.target.checked)}
+              className="mt-1 w-4 h-4 accent-[#f5c518] cursor-pointer"
+            />
+            <label htmlFor="unverifiedCheck" className="text-[11px] text-white/80 font-medium cursor-pointer leading-snug">
+              <span className="font-bold text-[#f5c518] block mb-0.5">UNVERIFIED CONTENT DECLARATION</span>
+              I confirm this post contains user speculation, rumors, or opinion and is not presented as confirmed factual news.
+            </label>
+          </div>
+
+          {moderationWarning && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold">
+              ⚠️ {moderationWarning}
+            </div>
+          )}
 
           {/* ── Submit ── */}
           <button

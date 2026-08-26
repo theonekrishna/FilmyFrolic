@@ -13,6 +13,8 @@ const {
   getTrendingTags,
   getBookmarked,
   createGossip,
+  voteGossip,
+  reportGossip,
   reactToGossip,
   bookmarkGossip,
   addComment,
@@ -78,6 +80,8 @@ router.post(
 );
 
 router.post("/:id/react", protect, validateUUID, validateReaction, reactToGossip);
+router.post("/:id/vote", protect, validateUUID, voteGossip);
+router.post("/:id/report", protect, validateUUID, reportGossip);
 router.put(
   "/:id",
   protect,

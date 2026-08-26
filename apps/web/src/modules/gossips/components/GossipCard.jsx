@@ -257,24 +257,31 @@ const GossipCard = memo(function GossipCard({
       )}
 
       <div className="p-[14px_16px]">
-        {/* Category + verified + time */}
+        {/* Category + Unverified Label + Time */}
         <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-          <span
-            className="flex items-center gap-1.5 rounded-full px-[10px] py-[3px] font-[Outfit] text-[10px] font-bold"
-            style={{
-              background: `${cfg.color}15`,
-              border: `1px solid ${cfg.color}40`,
-              color: cfg.color,
-            }}
-          >
-            {cfg.emoji} {cfg.label.toUpperCase()}
-          </span>
-          {gossip.verified && (
-            <span className="flex items-center gap-[3px] font-[Outfit] text-[10px] font-semibold text-[#2ecc71]">
-              <CheckCircle size={11} fill="#2ecc71" color="#2ecc71" /> VERIFIED
+          {gossip.category === "confirmed_news" ? (
+            <span className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-['Outfit'] text-[10px] font-extrabold bg-green-500/15 border border-green-500/40 text-green-400">
+              <CheckCircle size={11} fill="#2ecc71" color="#12121e" /> CONFIRMED NEWS
+            </span>
+          ) : gossip.category === "speculation" ? (
+            <span className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-['Outfit'] text-[10px] font-extrabold bg-purple-500/15 border border-purple-500/40 text-purple-400">
+              🔮 SPECULATION — NOT CONFIRMED
+            </span>
+          ) : gossip.category === "fan_theory" ? (
+            <span className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-['Outfit'] text-[10px] font-extrabold bg-blue-500/15 border border-blue-500/40 text-blue-400">
+              🧩 FAN THEORY
+            </span>
+          ) : gossip.category === "question" ? (
+            <span className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-['Outfit'] text-[10px] font-extrabold bg-cyan-500/15 border border-cyan-500/40 text-cyan-400">
+              ❓ QUESTION
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-['Outfit'] text-[10px] font-extrabold bg-yellow-400/15 border border-yellow-400/40 text-yellow-400 shadow-[0_0_12px_rgba(245,197,24,0.15)]">
+              🚨 UNVERIFIED — FAN RUMOR
             </span>
           )}
-          <span className="font-[Outfit] text-[11px] text-[rgba(240,240,248,0.3)] ml-auto">
+
+          <span className="font-['Outfit'] text-[11px] text-[rgba(240,240,248,0.3)] ml-auto">
             {gossip.timeAgo || "recently"}
           </span>
         </div>
@@ -316,12 +323,54 @@ const GossipCard = memo(function GossipCard({
           </div>
         )}
 
-        {/* Source */}
-        {gossip.source && (
-          <div className="font-[Outfit] text-[11px] italic text-[rgba(240,240,248,0.28)] mb-3">
-            {gossip.source}
+        {/* Source Badge Indicator */}
+        <div className="flex items-center justify-between text-[11px] font-medium text-white/40 mb-3 bg-white/[0.02] border border-white/[0.05] p-2 rounded-xl">
+          <span className="flex items-center gap-1.5">
+            🌐 {gossip.source_url ? (
+              <a href={gossip.source_url} target="_blank" rel="noopener noreferrer" className="text-[#f5c518] hover:underline" onClick={(e) => e.stopPropagation()}>
+                Source provided by user
+              </a>
+            ) : (
+              <span>Source: {gossip.source || "User Reference"}</span>
+            )}
+          </span>
+          <span className="text-[10px] text-white/30 uppercase tracking-widest font-mono">UGC</span>
+        </div>
+
+        {/* Community Plausibility Stance Bar */}
+        <div className="mb-3.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="flex items-center justify-between text-[11px] font-bold mb-1.5">
+            <span className="text-[#f5c518] flex items-center gap-1">
+              📊 Community Plausibility
+            </span>
+            <span className="text-white/60 font-mono text-[10px]">72% find plausible</span>
           </div>
-        )}
+          <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mb-2">
+            <div className="h-full bg-gradient-to-r from-yellow-400 via-amber-500 to-green-400 rounded-full" style={{ width: "72%" }} />
+          </div>
+
+          {/* Voting Action Buttons */}
+          <div className="flex items-center gap-1.5 text-[10px]">
+            <button
+              onClick={(e) => { e.stopPropagation(); alert("Recorded stance: Believe it"); }}
+              className="flex-1 py-1 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 font-bold hover:bg-green-500/20 transition-all"
+            >
+              👍 Believe it
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); alert("Recorded stance: Doubt it"); }}
+              className="flex-1 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 font-bold hover:bg-red-500/20 transition-all"
+            >
+              🤔 Doubt it
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); alert("Recorded stance: Need source"); }}
+              className="flex-1 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold hover:bg-yellow-500/20 transition-all"
+            >
+              🔎 Need Source
+            </button>
+          </div>
+        </div>
 
         {/* Actions */}
         <div className="flex items-center border-t border-[rgba(255,255,255,0.06)] pt-2.5">

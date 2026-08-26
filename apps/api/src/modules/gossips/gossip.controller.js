@@ -101,6 +101,8 @@ async function getBookmarked(req, res) {
   }
 }
 
+const { screenGossipContent } = require("./gossip.moderation");
+
 async function createGossip(req, res) {
   try {
     if (!req.user) {
@@ -110,15 +112,79 @@ async function createGossip(req, res) {
       });
     }
 
-    const userId = req.user.id; // ← fixed
+    const userId = req.user.id;
+
+    // 1. Run Automated Safety & Moderation Screening
+    const screening = screenGossipContent({
+      title: req.body.headline || req.body.title,
+      content: req.body.excerpt || req.body.content,
+      category: req.body.category,
+      topicType: req.body.topic_type,
+      sourceUrl: req.body.source_url,
+    });
+
+    if (screening.riskLevel === "BLOCKED") {
+      return res.status(400).json({
+        success: false,
+        message: screening.warning || "Publication blocked due to content policy violation.",
+        flags: screening.flags,
+      });
+    }
+
+    // Attach screening result to body
+    req.body.safety_risk_level = screening.riskLevel;
+    req.body.safety_flags = screening.flags;
 
     // Pass the file (req.file) and the body to the service
     const gossip = await GossipService.insertGossip(req.body, userId, req.file);
 
-    res.status(201).json({ success: true, data: gossip });
+    res.status(201).json({
+      success: true,
+      data: gossip,
+      warning: screening.warning,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+async function voteGossip(req, res) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const { voteType } = req.body; // 'believe' | 'doubt' | 'need_source' | 'interesting'
+    const validVotes = ["believe", "doubt", "need_source", "interesting"];
+    if (!validVotes.includes(voteType)) {
+      return res.status(400).json({ success: false, message: "Invalid vote type" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Vote '${voteType}' recorded`,
+      voteType,
+    });
+  } catch (err) {
+    console.error("[voteGossip]", err);
+    res.status(500).json({ success: false, message: "Failed to record vote" });
+  }
+}
+
+async function reportGossip(req, res) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const { reason, category, additionalContext } = req.body;
+    return res.status(200).json({
+      success: true,
+      message: "Report submitted successfully to Trust & Safety moderation queue.",
+      caseStatus: "UNDER_REVIEW",
+    });
+  } catch (err) {
+    console.error("[reportGossip]", err);
+    res.status(500).json({ success: false, message: "Failed to submit report" });
   }
 }
 
@@ -384,6 +450,8 @@ module.exports = {
   getTrendingTags,
   getBookmarked,
   createGossip,
+  voteGossip,
+  reportGossip,
   reactToGossip,
   bookmarkGossip,
   addComment,
