@@ -668,11 +668,15 @@ function AdminTopBar({
 }: {
   sectionLabel: string;
   onMenu: () => void;
-  onNav: () => void;
+  onNav?: () => void;
 }) {
   const handleViewSite = () => {
-    const siteUrl =
-      import.meta.env.VITE_CLIENT_URL || "https://filmy-frolic-new-frontend.onrender.com";
+    if (onNav) {
+      onNav();
+      return;
+    }
+    const env = (import.meta as any).env;
+    const siteUrl = env?.VITE_CLIENT_URL || "https://filmy-frolic-new-frontend.onrender.com";
     window.open(siteUrl, "_blank");
   };
 
@@ -785,7 +789,7 @@ function AdminTopBar({
 // ─── SECTION: OVERVIEW ────────────────────────────────────────────────────────
 
 function OverviewSection() {
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [overviewData, setOverviewData] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
 
