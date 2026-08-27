@@ -405,11 +405,47 @@ function AdminSidebar({
   onSection: (s: Section) => void;
   collapsed: boolean;
 }) {
+  const adminUser = (() => {
+    try {
+      const demo = localStorage.getItem("ff_admin_auth");
+      if (demo) {
+        const parsed = JSON.parse(demo);
+        return {
+          name: parsed.user?.name || "Demo Admin",
+          email: parsed.user?.email || "admin@filmyfrolic.com",
+          role: (parsed.role || "admin").toUpperCase(),
+        };
+      }
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsed = JSON.parse(user);
+        return {
+          name: parsed.displayName || parsed.username || "Admin User",
+          email: parsed.email || "admin@filmyfrolic.com",
+          role: (parsed.role || "admin").toUpperCase(),
+        };
+      }
+    } catch {
+      // fallback
+    }
+    return { name: "Super Admin", email: "admin@filmyfrolic.app", role: "ADMIN" };
+  })();
+
+  const handleLogout = () => {
+    localStorage.removeItem("ff_admin_auth");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    supabase.auth.signOut();
+    window.location.href = "/login";
+  };
+
   return (
     <aside
       style={{
         width: collapsed ? 0 : 230,
-        minHeight: "100vh",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
         background: "#09090f",
         borderRight: "1px solid rgba(255,255,255,0.06)",
         display: "flex",
@@ -417,13 +453,16 @@ function AdminSidebar({
         overflow: "hidden",
         transition: "width 0.25s",
         flexShrink: 0,
+        zIndex: 40,
       }}
     >
+      {/* Sidebar Header */}
       <div
         style={{
-          padding: "20px 16px 14px",
+          padding: "16px 16px 14px",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           whiteSpace: "nowrap" as const,
+          flexShrink: 0,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -463,6 +502,7 @@ function AdminSidebar({
         </div>
       </div>
 
+      {/* Nav Menu */}
       <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
         {NAV.map((item) => {
           const active = item.id === section;
@@ -527,11 +567,14 @@ function AdminSidebar({
         })}
       </nav>
 
+      {/* Fixed Profile Card Pinned At Bottom */}
       <div
         style={{
           padding: "12px 10px",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           whiteSpace: "nowrap" as const,
+          flexShrink: 0,
+          background: "#09090f",
         }}
       >
         <div
@@ -546,29 +589,70 @@ function AdminSidebar({
         >
           <div
             style={{
-              width: 28,
-              height: 28,
+              width: 32,
+              height: 32,
               borderRadius: 8,
               background: `linear-gradient(135deg,${GOLD},${RED})`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontFamily: B,
-              fontSize: 11,
+              fontSize: 13,
               color: "#fff",
               flexShrink: 0,
             }}
           >
-            S
+            {adminUser.name.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: F, fontSize: 12, fontWeight: 600, color: "#f0f0f8" }}>
-              Super Admin
+            <div
+              style={{
+                fontFamily: F,
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#f0f0f8",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {adminUser.name}
             </div>
-            <div style={{ fontFamily: F, fontSize: 10, color: "rgba(240,240,248,0.35)" }}>
-              admin@filmyfrolic.app
+            <div
+              style={{
+                fontFamily: F,
+                fontSize: 10,
+                color: "rgba(240,240,248,0.35)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {adminUser.email}
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            title="Sign Out"
+            style={{
+              background: "rgba(232,69,69,0.12)",
+              border: "1px solid rgba(232,69,69,0.25)",
+              borderRadius: 8,
+              padding: "6px 8px",
+              color: RED,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.background = "rgba(232,69,69,0.25)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.background = "rgba(232,69,69,0.12)")
+            }
+          >
+            <Lock size={13} />
+          </button>
         </div>
       </div>
     </aside>
@@ -586,6 +670,20 @@ function AdminTopBar({
   onMenu: () => void;
   onNav: () => void;
 }) {
+  const handleViewSite = () => {
+    const siteUrl =
+      import.meta.env.VITE_CLIENT_URL || "https://filmy-frolic-new-frontend.onrender.com";
+    window.open(siteUrl, "_blank");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("ff_admin_auth");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    supabase.auth.signOut();
+    window.location.href = "/login";
+  };
+
   return (
     <div
       style={{
@@ -597,6 +695,9 @@ function AdminTopBar({
         gap: 14,
         background: "#09090f",
         flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 30,
       }}
     >
       <button
@@ -621,7 +722,7 @@ function AdminTopBar({
         {sectionLabel}
       </span>
       <div style={{ flex: 1 }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span
           style={{
             background: `${A}15`,
@@ -634,10 +735,11 @@ function AdminTopBar({
             color: A,
           }}
         >
-          ⬡ ADMIN
+          ⬡ ADMIN CONSOLE
         </span>
+
         <button
-          onClick={onNav}
+          onClick={handleViewSite}
           style={{
             display: "flex",
             alignItems: "center",
@@ -648,12 +750,32 @@ function AdminTopBar({
             padding: "6px 12px",
             fontFamily: F,
             fontSize: 12,
-            color: "rgba(240,240,248,0.5)",
+            color: "rgba(240,240,248,0.75)",
             cursor: "pointer",
             minHeight: "unset",
           }}
         >
-          <Globe size={13} /> View Site
+          <Globe size={13} /> View Site ↗
+        </button>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "rgba(232,69,69,0.1)",
+            border: "1px solid rgba(232,69,69,0.25)",
+            borderRadius: 8,
+            padding: "6px 12px",
+            fontFamily: F,
+            fontSize: 12,
+            color: RED,
+            cursor: "pointer",
+            minHeight: "unset",
+          }}
+        >
+          <Lock size={13} /> Logout
         </button>
       </div>
     </div>
