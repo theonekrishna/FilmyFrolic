@@ -64,7 +64,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Startup Environment Validation Diagnostics (No secrets printed)
 console.log(`\n=== SERVER STARTUP DIAGNOSTICS ===`);
-console.log(`NODE_ENV configured: ${!!process.env.NODE_ENV} (${process.env.NODE_ENV || "development"})`);
+console.log(
+  `NODE_ENV configured: ${!!process.env.NODE_ENV} (${process.env.NODE_ENV || "development"})`
+);
 console.log(`SUPABASE_URL configured: ${!!process.env.SUPABASE_URL}`);
 console.log(`SUPABASE_SERVICE_ROLE_KEY configured: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
 console.log(`TMDB_API_KEY configured: ${!!process.env.TMDB_API_KEY}`);
@@ -75,12 +77,12 @@ console.log(`==================================\n`);
 app.get("/api/health/tmdb", async (req, res) => {
   const tmdbApiKeyConfigured = !!process.env.TMDB_API_KEY;
   const tmdbTokenConfigured = !!process.env.TMDB_READ_ACCESS_TOKEN;
-  
+
   try {
     const tmdbService = require("./modules/tmdb/tmdb.service");
     const testRes = await tmdbService.getTrendingMovies(1, "all");
     const tmdbReachable = Array.isArray(testRes?.results) && testRes.results.length > 0;
-    
+
     return res.json({
       success: true,
       tmdbConfigured: tmdbApiKeyConfigured || tmdbTokenConfigured,
@@ -100,15 +102,20 @@ app.get("/api/health/tmdb", async (req, res) => {
 
 app.get("/api/health/supabase", async (req, res) => {
   const supabaseUrlConfigured = !!process.env.SUPABASE_URL;
-  const supabaseKeyConfigured = !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.SUPABASE_ANON_KEY;
+  const supabaseKeyConfigured =
+    !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.SUPABASE_ANON_KEY;
 
   try {
     const { supabase } = require("./configs/supabase");
     console.log("[SUPABASE] connection test started");
     const { data, error } = await supabase.from("profiles").select("id").limit(1);
-    
+
     if (error) {
-      console.error("[SUPABASE ERROR]", { status: error.status, message: error.message, code: error.code });
+      console.error("[SUPABASE ERROR]", {
+        status: error.status,
+        message: error.message,
+        code: error.code,
+      });
       return res.status(500).json({
         success: false,
         supabaseConfigured: supabaseUrlConfigured && supabaseKeyConfigured,

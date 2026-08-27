@@ -23,3 +23,15 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  # ── 3. Admin Dashboard Static Site ──
+  - type: web
+    name: filmyfrolic-admin
+    env: static
+    rootDir: .
+    buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile && pnpm --filter @filmyfrolic/admin build
+    staticPublishPath: apps/admin/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

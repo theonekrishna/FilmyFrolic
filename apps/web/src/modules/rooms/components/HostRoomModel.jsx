@@ -4,7 +4,10 @@ import { ROOM_TYPES, MOVIE_SUGGESTIONS, PRIVACY_OPTS } from "../data/rooms";
 import axios from "axios";
 import { privateAxios, publicAxios } from "../../../utils/AxiosInstance";
 const RED = "#e84545";
-const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
+const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(
+  /\/+$/,
+  ""
+);
 
 export default function HostRoomModel({ onClose }) {
   const [roomType, setRoomType] = useState("watch_party"); // ✅ FIX ENUM
@@ -91,10 +94,18 @@ export default function HostRoomModel({ onClose }) {
         window.location.reload();
       }, 1200);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to create room";
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to create room";
       console.error("Create Room Error:", errorMsg);
       alert(`Room Creation Error: ${errorMsg}`);
-      if (err.response?.status === 401 || errorMsg.includes("Invalid Refresh Token") || errorMsg.includes("Unauthorized")) {
+      if (
+        err.response?.status === 401 ||
+        errorMsg.includes("Invalid Refresh Token") ||
+        errorMsg.includes("Unauthorized")
+      ) {
         window.dispatchEvent(new CustomEvent("auth-expired"));
       }
     } finally {

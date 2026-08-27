@@ -47,7 +47,8 @@ export default function Articles() {
   // ── Filter Logic ──
   const filteredArticles = useMemo(() => {
     return ARTICLES.filter((a) => {
-      const matchesCat = filterCat === "all" || a.category.toLowerCase() === filterCat.toLowerCase();
+      const matchesCat =
+        filterCat === "all" || a.category.toLowerCase() === filterCat.toLowerCase();
       const matchesSearch =
         !searchQuery.trim() ||
         a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,10 +79,7 @@ export default function Articles() {
       <AuthPromptModal {...authPromptProps} />
 
       {createOpen && (
-        <CreateArticleModal
-          onClose={() => setCreateOpen(false)}
-          onCreate={() => {}}
-        />
+        <CreateArticleModal onClose={() => setCreateOpen(false)} onCreate={() => {}} />
       )}
 
       <TopBar title="Articles & Insights" />
@@ -96,16 +94,24 @@ export default function Articles() {
             </div>
             <div>
               <h1 className="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                FILM PULSE <span className="text-[10px] bg-white/10 text-yellow-400 font-mono px-2 py-0.5 rounded-full uppercase tracking-wider">Editorial</span>
+                FILM PULSE{" "}
+                <span className="text-[10px] bg-white/10 text-yellow-400 font-mono px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Editorial
+                </span>
               </h1>
-              <p className="text-[11px] text-white/40 font-medium">Exclusive features, reviews & industry analysis</p>
+              <p className="text-[11px] text-white/40 font-medium">
+                Exclusive features, reviews & industry analysis
+              </p>
             </div>
           </div>
 
           {/* Search & Actions */}
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+              <Search
+                size={14}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30"
+              />
               <input
                 type="text"
                 value={searchQuery}
@@ -178,7 +184,7 @@ export default function Articles() {
                 alt={featured.title}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-[#080810]/60 to-transparent" />
-              
+
               {/* Featured Badge */}
               <div className="absolute top-6 left-6 flex items-center gap-2">
                 <span className="bg-[#f5c518] text-[#080810] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg flex items-center gap-1">
@@ -228,7 +234,9 @@ export default function Articles() {
             <div className="p-12 text-center bg-[#12121e] rounded-3xl border border-white/5">
               <BookOpen size={36} className="mx-auto text-white/20 mb-3" />
               <h3 className="text-base font-bold text-white mb-1">No articles found</h3>
-              <p className="text-xs text-white/40">Try adjusting your topic filter or search keyword.</p>
+              <p className="text-xs text-white/40">
+                Try adjusting your topic filter or search keyword.
+              </p>
             </div>
           )}
         </div>
@@ -242,7 +250,9 @@ export default function Articles() {
                 <TrendingUp size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Pulse Index</h3>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Pulse Index
+                </h3>
                 <p className="text-[10px] text-white/30">Trending stories right now</p>
               </div>
             </div>
@@ -274,7 +284,9 @@ export default function Articles() {
           <div className="p-6 rounded-[24px] bg-[#12121e] border border-white/[0.08] shadow-2xl">
             <div className="flex items-center gap-2 mb-4">
               <Flame size={18} className="text-red-500" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Most Reacted</h3>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                Most Reacted
+              </h3>
             </div>
             <div className="space-y-3">
               {[
@@ -290,7 +302,9 @@ export default function Articles() {
                   <span className="text-[12px] font-medium text-white/70 line-clamp-1 flex-1 pr-2">
                     {item.title}
                   </span>
-                  <span className="text-[11px] font-black text-red-400 shrink-0">{item.reactions}</span>
+                  <span className="text-[11px] font-black text-red-400 shrink-0">
+                    {item.reactions}
+                  </span>
                 </div>
               ))}
             </div>
@@ -300,7 +314,9 @@ export default function Articles() {
           <div className="p-6 rounded-[24px] bg-[#12121e] border border-white/[0.08] shadow-2xl">
             <div className="flex items-center gap-2 mb-4">
               <Award size={18} className="text-[#f5c518]" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Top Contributors</h3>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                Top Contributors
+              </h3>
             </div>
             <div className="space-y-3">
               {[
@@ -308,7 +324,10 @@ export default function Articles() {
                 { name: "CineVault_Alex", role: "Senior Analyst", avatar: "CA" },
                 { name: "ReelTalk_Juno", role: "Feature Writer", avatar: "RJ" },
               ].map((w, i) => (
-                <div key={i} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03]">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03]"
+                >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-600 text-[#080810] font-black text-xs flex items-center justify-center">
                     {w.avatar}
                   </div>

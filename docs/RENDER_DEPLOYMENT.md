@@ -6,11 +6,11 @@ This guide explains step-by-step how to deploy all three applications of the **F
 
 ## Architecture Overview
 
-| Application | Render Service Type | Build Command | Publish / Start Command | Environment Variables Needed |
-| :--- | :--- | :--- | :--- | :--- |
-| **`apps/api`** | **Web Service** (Node.js) | `pnpm install` | `pnpm --filter @filmyfrolic/api start` | `PORT`, `NODE_ENV`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TMDB_API_KEY`, `ALLOWED_ORIGINS` |
-| **`apps/admin`** | **Static Site** (Vite + React) | `pnpm install && pnpm --filter @filmyfrolic/admin build` | `apps/admin/dist` | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
-| **`apps/web`** | **Static Site** (Vite + React) | `pnpm install && pnpm --filter @filmyfrolic/web build` | `apps/web/dist` | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+| Application      | Render Service Type            | Build Command                                            | Publish / Start Command                | Environment Variables Needed                                                                       |
+| :--------------- | :----------------------------- | :------------------------------------------------------- | :------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| **`apps/api`**   | **Web Service** (Node.js)      | `pnpm install`                                           | `pnpm --filter @filmyfrolic/api start` | `PORT`, `NODE_ENV`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TMDB_API_KEY`, `ALLOWED_ORIGINS` |
+| **`apps/admin`** | **Static Site** (Vite + React) | `pnpm install && pnpm --filter @filmyfrolic/admin build` | `apps/admin/dist`                      | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`                                      |
+| **`apps/web`**   | **Static Site** (Vite + React) | `pnpm install && pnpm --filter @filmyfrolic/web build`   | `apps/web/dist`                        | `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`                                      |
 
 ---
 
@@ -80,6 +80,7 @@ This guide explains step-by-step how to deploy all three applications of the **F
 ## Step 4: Configure CORS on Backend API
 
 Make sure the backend API `ALLOWED_ORIGINS` variable includes both frontend domains:
+
 ```env
 ALLOWED_ORIGINS=https://filmyfrolic-admin.onrender.com,https://filmyfrolic-web.onrender.com
 ```

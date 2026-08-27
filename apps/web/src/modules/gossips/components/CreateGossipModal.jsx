@@ -151,7 +151,9 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
         onClose();
       } catch (err) {
         console.error("Failed to create gossip:", err.response?.data || err.message);
-        alert(err.response?.data?.message || "Failed to publish. Please review content safety rules.");
+        alert(
+          err.response?.data?.message || "Failed to publish. Please review content safety rules."
+        );
       } finally {
         setLoading(false);
       }
@@ -471,9 +473,15 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
               onChange={(e) => setUnverifiedConfirmed(e.target.checked)}
               className="mt-1 w-4 h-4 accent-[#f5c518] cursor-pointer"
             />
-            <label htmlFor="unverifiedCheck" className="text-[11px] text-white/80 font-medium cursor-pointer leading-snug">
-              <span className="font-bold text-[#f5c518] block mb-0.5">UNVERIFIED CONTENT DECLARATION</span>
-              I confirm this post contains user speculation, rumors, or opinion and is not presented as confirmed factual news.
+            <label
+              htmlFor="unverifiedCheck"
+              className="text-[11px] text-white/80 font-medium cursor-pointer leading-snug"
+            >
+              <span className="font-bold text-[#f5c518] block mb-0.5">
+                UNVERIFIED CONTENT DECLARATION
+              </span>
+              I confirm this post contains user speculation, rumors, or opinion and is not presented
+              as confirmed factual news.
             </label>
           </div>
 

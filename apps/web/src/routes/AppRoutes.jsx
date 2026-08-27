@@ -107,7 +107,7 @@ export default function AppRoutes() {
         <Route element={<AppLayout />}>
           {/* ── PUBLIC READ ROUTES (Accessible by unauthenticated guests) ── */}
           {isEnabled("core") && <Route path="/" element={<Home />} />}
-          
+
           {isEnabled("content") && (
             <>
               <Route path="content/archive" element={<Archive />} />
@@ -138,9 +138,7 @@ export default function AppRoutes() {
             </>
           )}
 
-          {isEnabled("user") && (
-            <Route path="user/profile" element={<UserProfile />} />
-          )}
+          {isEnabled("user") && <Route path="user/profile" element={<UserProfile />} />}
 
           {/* ── PROTECTED USER ROUTES (Require Login / Active Session) ── */}
           <Route element={<ProtectedRoute />}>

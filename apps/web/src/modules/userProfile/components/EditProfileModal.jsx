@@ -7,7 +7,10 @@ const ACCENT = "#1fd1a8";
 const GOLD = "#f5c518";
 import axios from "axios";
 import { privateAxios } from "../../../utils/AxiosInstance.jsx";
-const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
+const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(
+  /\/+$/,
+  ""
+);
 
 function SectionLabel({ children }) {
   return (

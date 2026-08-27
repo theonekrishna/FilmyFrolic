@@ -2,7 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { supabase } from "../services/supabase";
 
-const STAFF_ROLES = ["admin", "super_admin", "content_manager", "community_moderator", "support_staff", "moderator", "article_writer"];
+const STAFF_ROLES = [
+  "admin",
+  "super_admin",
+  "content_manager",
+  "community_moderator",
+  "support_staff",
+  "moderator",
+  "article_writer",
+];
 
 export default function ProtectedAdminRoute() {
   const [loading, setLoading] = useState(true);
@@ -23,7 +31,9 @@ export default function ProtectedAdminRoute() {
         }
 
         // 2. Check Supabase session
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session?.user) {
           setIsAuthenticated(false);
           setLoading(false);
@@ -123,8 +133,16 @@ export default function ProtectedAdminRoute() {
           >
             403 ACCESS DENIED
           </div>
-          <p style={{ color: "rgba(240,240,248,0.7)", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-            Your account does not have staff or administrator privileges to access the FilmyFrolic Admin Console.
+          <p
+            style={{
+              color: "rgba(240,240,248,0.7)",
+              fontSize: 14,
+              lineHeight: 1.6,
+              marginBottom: 24,
+            }}
+          >
+            Your account does not have staff or administrator privileges to access the FilmyFrolic
+            Admin Console.
           </p>
           <button
             onClick={() => {

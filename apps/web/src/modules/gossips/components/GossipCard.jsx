@@ -326,8 +326,15 @@ const GossipCard = memo(function GossipCard({
         {/* Source Badge Indicator */}
         <div className="flex items-center justify-between text-[11px] font-medium text-white/40 mb-3 bg-white/[0.02] border border-white/[0.05] p-2 rounded-xl">
           <span className="flex items-center gap-1.5">
-            🌐 {gossip.source_url ? (
-              <a href={gossip.source_url} target="_blank" rel="noopener noreferrer" className="text-[#f5c518] hover:underline" onClick={(e) => e.stopPropagation()}>
+            🌐{" "}
+            {gossip.source_url ? (
+              <a
+                href={gossip.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#f5c518] hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
                 Source provided by user
               </a>
             ) : (
@@ -346,25 +353,37 @@ const GossipCard = memo(function GossipCard({
             <span className="text-white/60 font-mono text-[10px]">72% find plausible</span>
           </div>
           <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mb-2">
-            <div className="h-full bg-gradient-to-r from-yellow-400 via-amber-500 to-green-400 rounded-full" style={{ width: "72%" }} />
+            <div
+              className="h-full bg-gradient-to-r from-yellow-400 via-amber-500 to-green-400 rounded-full"
+              style={{ width: "72%" }}
+            />
           </div>
 
           {/* Voting Action Buttons */}
           <div className="flex items-center gap-1.5 text-[10px]">
             <button
-              onClick={(e) => { e.stopPropagation(); alert("Recorded stance: Believe it"); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                alert("Recorded stance: Believe it");
+              }}
               className="flex-1 py-1 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 font-bold hover:bg-green-500/20 transition-all"
             >
               👍 Believe it
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); alert("Recorded stance: Doubt it"); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                alert("Recorded stance: Doubt it");
+              }}
               className="flex-1 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 font-bold hover:bg-red-500/20 transition-all"
             >
               🤔 Doubt it
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); alert("Recorded stance: Need source"); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                alert("Recorded stance: Need source");
+              }}
               className="flex-1 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold hover:bg-yellow-500/20 transition-all"
             >
               🔎 Need Source

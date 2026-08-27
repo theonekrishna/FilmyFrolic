@@ -1144,10 +1144,14 @@ export default function Gossips() {
             <AlertTriangle size={28} className="text-[#f5c518] shrink-0 md:size-[32px]" />
             <div className="flex-1">
               <h4 className="text-[#f5c518] font-black uppercase tracking-widest text-xs md:text-sm mb-1 flex items-center gap-2">
-                UNVERIFIED COMMUNITY RUMORS & SPECULATION <span className="bg-white/10 text-white font-mono px-2 py-0.5 rounded text-[10px]">UGC Protocol</span>
+                UNVERIFIED COMMUNITY RUMORS & SPECULATION{" "}
+                <span className="bg-white/10 text-white font-mono px-2 py-0.5 rounded text-[10px]">
+                  UGC Protocol
+                </span>
               </h4>
               <p className="text-xs text-white/50 font-medium leading-relaxed">
-                All posts below are user-generated rumors, fan theories, and speculation. Content is governed by automated safety screening, PII protection, and community moderation.
+                All posts below are user-generated rumors, fan theories, and speculation. Content is
+                governed by automated safety screening, PII protection, and community moderation.
               </p>
             </div>
           </div>

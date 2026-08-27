@@ -160,7 +160,10 @@ export default function Messages() {
           },
           (payload) => {
             const newMsg = payload.new;
-            if (activeUser && String(newMsg.sender_id) === String(activeUser.id || activeUser._id)) {
+            if (
+              activeUser &&
+              String(newMsg.sender_id) === String(activeUser.id || activeUser._id)
+            ) {
               setMessages((prev) => {
                 if (prev.some((m) => m.id === newMsg.id)) return prev;
                 return [...prev, newMsg];
@@ -177,7 +180,9 @@ export default function Messages() {
           } else if (status === "CHANNEL_ERROR" || status === "CLOSED") {
             attempts += 1;
             const delay = Math.min(1000 * Math.pow(2, attempts), 30000);
-            console.warn(`[MESSAGES] Realtime disconnected (${status}). Reconnecting in ${delay}ms...`);
+            console.warn(
+              `[MESSAGES] Realtime disconnected (${status}). Reconnecting in ${delay}ms...`
+            );
             retryTimeout = setTimeout(setupChannel, delay);
           }
         });

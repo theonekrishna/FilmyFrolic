@@ -43,7 +43,9 @@ export function useAuthGate() {
       if (!isLoggedIn) {
         setAuthPrompt({
           isOpen: true,
-          message: promptMessage || "Sign in or create a free account to participate in discussions and interact with content.",
+          message:
+            promptMessage ||
+            "Sign in or create a free account to participate in discussions and interact with content.",
           pendingCallback: typeof actionCallback === "function" ? actionCallback : null,
         });
         return true; // Blocked

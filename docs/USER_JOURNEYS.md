@@ -3,6 +3,7 @@
 ## Core User Journey Verification
 
 ### 1. Guest Journey: Unauthenticated Public Exploration & Action Auth Gating
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -18,7 +19,7 @@ sequenceDiagram
     TMDB-->>API: Data Payload
     API-->>UI: 200 OK Response
     UI-->>Guest: Render Full Page & Content Cards (Read Access)
-    
+
     Guest->>UI: Clicks "Drop Gossip" or "Like Post" or "Join Room"
     UI->>Gate: Trigger requireAuth(actionHandler)
     Gate-->>UI: User Unauthenticated -> Open AuthPromptModal
@@ -26,6 +27,7 @@ sequenceDiagram
 ```
 
 ### 2. Gossip Creation Journey: Fan-Created Rumor Protection & Stance Staking
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -51,6 +53,7 @@ sequenceDiagram
 ```
 
 ### 3. Movie Discovery to Gossip & Community Integration Journey
+
 ```mermaid
 sequenceDiagram
     autonumber

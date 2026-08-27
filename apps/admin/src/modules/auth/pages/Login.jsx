@@ -45,10 +45,13 @@ export function Login() {
   };
 
   const handleDemoSignIn = (role = "admin") => {
-    localStorage.setItem("ff_admin_auth", JSON.stringify({
-      user: { email: `${role}@filmyfrolic.com`, name: "Demo Admin" },
-      role,
-    }));
+    localStorage.setItem(
+      "ff_admin_auth",
+      JSON.stringify({
+        user: { email: `${role}@filmyfrolic.com`, name: "Demo Admin" },
+        role,
+      })
+    );
     navigate("/");
   };
 
@@ -110,7 +113,15 @@ export function Login() {
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(240,240,248,0.5)", marginBottom: 6 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: 12,
+                fontWeight: 600,
+                color: "rgba(240,240,248,0.5)",
+                marginBottom: 6,
+              }}
+            >
               ADMIN EMAIL
             </label>
             <input
@@ -133,7 +144,15 @@ export function Login() {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(240,240,248,0.5)", marginBottom: 6 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: 12,
+                fontWeight: 600,
+                color: "rgba(240,240,248,0.5)",
+                marginBottom: 6,
+              }}
+            >
               PASSWORD
             </label>
             <input

@@ -161,7 +161,10 @@ const formatMovieDTO = (movie) => {
     const watchProvidersObj = movie["watch/providers"]?.results;
     const regionData =
       watchProvidersObj && typeof watchProvidersObj === "object"
-        ? watchProvidersObj.US || watchProvidersObj.IN || watchProvidersObj.GB || Object.values(watchProvidersObj)[0]
+        ? watchProvidersObj.US ||
+          watchProvidersObj.IN ||
+          watchProvidersObj.GB ||
+          Object.values(watchProvidersObj)[0]
         : null;
     const flatrateList = Array.isArray(regionData?.flatrate)
       ? regionData.flatrate
@@ -185,7 +188,11 @@ const formatMovieDTO = (movie) => {
       (v) => v?.site === "YouTube" && (v?.type === "Trailer" || v?.type === "Teaser")
     )?.key;
     const trailerUrl = trailerKey ? `https://www.youtube.com/watch?v=${trailerKey}` : null;
-    const trailerLink = trailerUrl ? [trailerUrl] : Array.isArray(movie.trailerLink) ? movie.trailerLink : [];
+    const trailerLink = trailerUrl
+      ? [trailerUrl]
+      : Array.isArray(movie.trailerLink)
+        ? movie.trailerLink
+        : [];
 
     const rawGenres = movie.genres;
     const genresList = Array.isArray(rawGenres)
@@ -202,7 +209,9 @@ const formatMovieDTO = (movie) => {
       overview: movie.overview || "",
       story: movie.overview || "",
       release_date: movie.release_date || movie.first_air_date || "",
-      year: String(movie.release_date || movie.first_air_date || movie.year || "").split("-")[0] || "2024",
+      year:
+        String(movie.release_date || movie.first_air_date || movie.year || "").split("-")[0] ||
+        "2024",
       rating:
         typeof movie.vote_average === "number"
           ? movie.vote_average.toFixed(1)
@@ -220,10 +229,20 @@ const formatMovieDTO = (movie) => {
       director: directorObj?.name || movie.director || null,
       writers: writersStr || movie.writers || null,
       studio: studioStr || movie.studio || null,
-      languages: languagesList.length > 0 ? languagesList : Array.isArray(movie.languages) ? movie.languages : ["English"],
+      languages:
+        languagesList.length > 0
+          ? languagesList
+          : Array.isArray(movie.languages)
+            ? movie.languages
+            : ["English"],
       budget: formattedBudget || movie.budget || null,
       boxOffice: formattedRevenue || movie.boxOffice || movie.grossCollection || null,
-      ottAvailability: ottAvailability.length > 0 ? ottAvailability : Array.isArray(movie.ottAvailability) ? movie.ottAvailability : [],
+      ottAvailability:
+        ottAvailability.length > 0
+          ? ottAvailability
+          : Array.isArray(movie.ottAvailability)
+            ? movie.ottAvailability
+            : [],
       review: topReview || movie.review || null,
       reviews: reviewsResults,
       trailer_url: trailerUrl,
@@ -269,7 +288,11 @@ const getTrendingMovies = async (page = 1, type = "all") => {
   if (cached) return cached;
 
   try {
-    const authType = TMDB_READ_ACCESS_TOKEN ? "Bearer Token (v4)" : TMDB_API_KEY ? "API Key (v3)" : "None";
+    const authType = TMDB_READ_ACCESS_TOKEN
+      ? "Bearer Token (v4)"
+      : TMDB_API_KEY
+        ? "API Key (v3)"
+        : "None";
     console.log("[HOME] Calling TMDB");
     console.log(`TMDB endpoint: ${TMDB_BASE_URL}/trending/${mediaType}/day`);
     console.log(`HTTP method: GET`);
@@ -283,7 +306,9 @@ const getTrendingMovies = async (page = 1, type = "all") => {
     console.log("[HOME] TMDB response received");
     console.log(`TMDB HTTP status: ${res.status}`);
     console.log(`TMDB response type: ${typeof res.data}`);
-    console.log(`TMDB result count: ${Array.isArray(res.data?.results) ? res.data.results.length : 0}`);
+    console.log(
+      `TMDB result count: ${Array.isArray(res.data?.results) ? res.data.results.length : 0}`
+    );
     console.log("[HOME] Processing TMDB response");
 
     const rawResults = Array.isArray(res.data?.results) ? res.data.results : [];
@@ -406,10 +431,7 @@ const getGenres = async () => {
   if (cached) return cached;
 
   try {
-    const res = await axios.get(
-      `${TMDB_BASE_URL}/genre/movie/list`,
-      getTMDBRequestConfig()
-    );
+    const res = await axios.get(`${TMDB_BASE_URL}/genre/movie/list`, getTMDBRequestConfig());
 
     setCachedData(cacheKey, res.data.genres);
     return res.data.genres;

@@ -11,12 +11,14 @@ All requested features have been implemented for role-based access, community en
 ### User Roles
 
 **Standard User Roles:**
+
 - `user` - Regular platform user
 - `article_writer` - Users granted permission to write/edit articles
 - `moderator` - Community moderators
 - `admin` - Platform administrators
 
 **Admin Roles** (for admin users only):
+
 - `super_admin` - Full platform access
 - `content_manager` - Manages all content and articles
 - `community_moderator` - Manages communities and social features
@@ -31,15 +33,17 @@ All requested features have been implemented for role-based access, community en
 ❌ Moderators (unless also granted article_writer role)
 
 **Implementation:**
+
 - `AdminUser` interface now includes:
   - `role: UserRole` - Primary role
   - `adminRole?: AdminRole` - For admin-specific permissions
   - `canWriteArticles?: boolean` - Explicit article writing permission
 
 **Sample Users:**
+
 - **Alex Chen** (`alexc`) - Admin with Super Admin role → Can write articles
 - **Sarah Kim** (`sarahk`) - Article Writer → Can write articles
-- **James Okafor** (`jokaf`) - Article Writer → Can write articles  
+- **James Okafor** (`jokaf`) - Article Writer → Can write articles
 - **Chloe Martin** (`chloem`) - Admin with Content Manager role → Can write articles
 - **Marco Rossi** (`marcor`) - Moderator with Community Moderator role → Cannot write articles (unless granted)
 
@@ -50,16 +54,19 @@ All requested features have been implemented for role-based access, community en
 ### Enhanced Community Data
 
 **New Fields:**
+
 - `image` - Community banner/avatar image URL
 - `description` - Brief community description
 
 **Visual Improvements:**
+
 - ✨ 48x48px community images in admin dashboard
 - ✨ Community descriptions shown below name
 - ✨ Better visual hierarchy and spacing
 - ✨ Fallback image for communities without custom images
 
 **Sample Communities:**
+
 1. **Sci-Fi Fanatics** - Space/tech themed image
 2. **Drama & Art House** - Theater/artistic image
 3. **Horror Collective** - Dark/spooky themed image
@@ -74,6 +81,7 @@ All requested features have been implemented for role-based access, community en
 ### Report Types
 
 Expanded from 4 to 7 types:
+
 - `post` - User posts in communities
 - `review` - Movie/content reviews
 - `user` - User profiles/behavior
@@ -85,6 +93,7 @@ Expanded from 4 to 7 types:
 ### Report Reasons
 
 **11 Standard Reasons** (matching major social platforms):
+
 1. **spam** - Unsolicited commercial content, repeated posts
 2. **harassment** - Targeted attacks, bullying, threats
 3. **hate_speech** - Discriminatory or hateful language
@@ -117,6 +126,7 @@ Expanded from 4 to 7 types:
 ### User Actions (for future implementation)
 
 **Defined Types:**
+
 - `follow` / `unfollow` - Subscribe to user's content
 - `block` / `unblock` - Prevent interactions
 - `mute` / `unmute` - Hide content without blocking
@@ -131,6 +141,7 @@ These actions are defined in the type system and ready for implementation in use
 ### Users Section
 
 **Enhancements:**
+
 - Role filter now includes "Article Writer"
 - Role dropdown shows: User, Writer, Mod, Admin
 - Admin roles displayed below primary role (e.g., "Super Admin", "Content Manager")
@@ -143,6 +154,7 @@ These actions are defined in the type system and ready for implementation in use
 ### Communities Section
 
 **Visual Improvements:**
+
 - Community images (48x48px rounded)
 - Description text below community name
 - Enhanced grid layout: Image | Name & Description | Topic | Members | Posts | Moderator | Status | Actions
@@ -151,6 +163,7 @@ These actions are defined in the type system and ready for implementation in use
 ### Moderation Section
 
 **Report Card Enhancements:**
+
 - Type badges (Post, User, Community, Article, Message, etc.)
 - Reason badges with appropriate colors
 - Severity badges (High/Medium/Low)
@@ -174,9 +187,20 @@ export type UserRole = "user" | "moderator" | "admin" | "article_writer";
 export type AdminRole = "super_admin" | "content_manager" | "community_moderator" | "support_staff";
 
 // Report System
-export type ReportType = "post" | "review" | "user" | "comment" | "community" | "article" | "message";
-export type ReportReason = "spam" | "harassment" | "hate_speech" | "misinformation" | "copyright" | 
-                           "nudity" | "violence" | "self_harm" | "scam" | "impersonation" | "other";
+export type ReportType =
+  "post" | "review" | "user" | "comment" | "community" | "article" | "message";
+export type ReportReason =
+  | "spam"
+  | "harassment"
+  | "hate_speech"
+  | "misinformation"
+  | "copyright"
+  | "nudity"
+  | "violence"
+  | "self_harm"
+  | "scam"
+  | "impersonation"
+  | "other";
 
 // Social Actions
 export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | "unmute" | "report";
@@ -185,6 +209,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ### Updated Interfaces
 
 **AdminUser:**
+
 ```typescript
 {
   role: UserRole;
@@ -195,6 +220,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ```
 
 **AdminCommunity:**
+
 ```typescript
 {
   image?: string;
@@ -204,6 +230,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ```
 
 **AdminReport:**
+
 ```typescript
 {
   reason: ReportReason;
@@ -220,17 +247,20 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ## 7. Mock Data Updates
 
 ### Users (10 total)
+
 - 2 Admins (Super Admin, Content Manager)
 - 3 Article Writers
 - 2 Moderators (Community Moderator, Support Staff)
 - 3 Regular Users
 
 ### Communities (6 total)
+
 - All now have images and descriptions
 - Mix of verified/unverified
 - One suspended community for testing moderation
 
 ### Reports (10 total)
+
 - Covers all 7 report types
 - Examples of spam, harassment, hate speech, misinformation, copyright, scam, violence
 - Mix of high/medium/low severity
@@ -243,6 +273,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ### Reporting (Matches Industry Standards)
 
 **Our Platform ✅** | **Facebook/Instagram ✅** | **Twitter/X ✅** | **Reddit ✅**
+
 - Spam | ✓ | ✓ | ✓
 - Harassment | ✓ | ✓ | ✓
 - Hate Speech | ✓ | ✓ | ✓
@@ -257,11 +288,13 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ### Role System (Granular & Flexible)
 
 **Our Platform:**
+
 - User → Article Writer → Moderator → Admin
 - Admin sub-roles for specialized permissions
 - Clear article writing restrictions
 
 **Similar to:**
+
 - **Medium** - Writers vs. Publications vs. Curators
 - **Stack Overflow** - Reputation-based permissions
 - **Discord** - Role hierarchy with specific permissions
@@ -270,16 +303,16 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 
 ## 9. Permission Matrix
 
-| Action | User | Article Writer | Moderator | Admin |
-|--------|------|----------------|-----------|-------|
-| View Content | ✅ | ✅ | ✅ | ✅ |
-| Post/Comment | ✅ | ✅ | ✅ | ✅ |
-| Write Articles | ❌ | ✅ | ❌* | ✅ |
-| Moderate Posts | ❌ | ❌ | ✅ | ✅ |
-| Manage Communities | ❌ | ❌ | ✅** | ✅ |
-| Handle Reports | ❌ | ❌ | ✅ | ✅ |
-| Manage Users | ❌ | ❌ | Limited | ✅ |
-| Platform Settings | ❌ | ❌ | ❌ | ✅ |
+| Action             | User | Article Writer | Moderator | Admin |
+| ------------------ | ---- | -------------- | --------- | ----- |
+| View Content       | ✅   | ✅             | ✅        | ✅    |
+| Post/Comment       | ✅   | ✅             | ✅        | ✅    |
+| Write Articles     | ❌   | ✅             | ❌*       | ✅    |
+| Moderate Posts     | ❌   | ❌             | ✅        | ✅    |
+| Manage Communities | ❌   | ❌             | ✅**      | ✅    |
+| Handle Reports     | ❌   | ❌             | ✅        | ✅    |
+| Manage Users       | ❌   | ❌             | Limited   | ✅    |
+| Platform Settings  | ❌   | ❌             | ❌        | ✅    |
 
 *Moderators can write articles if also granted `article_writer` role  
 **Community-specific moderators only manage their assigned communities
@@ -289,6 +322,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ## 10. Next Steps (Optional Enhancements)
 
 ### User-Facing Features
+
 1. **Article Editor** - Rich text editor with permissions check
 2. **Report Modal** - User-friendly reporting interface
 3. **Community Images** - Upload and crop community avatars
@@ -296,6 +330,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 5. **Block/Mute** - Privacy controls for users
 
 ### Admin Features
+
 6. **Permission Manager** - Visual interface to grant/revoke permissions
 7. **Audit Log** - Track admin actions and role changes
 8. **Bulk Actions** - Handle multiple reports at once
@@ -303,6 +338,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 10. **Analytics** - Report trends, most reported content, etc.
 
 ### Integration
+
 11. **External Moderation Tools** - Connect to services like Perspective API
 12. **Appeal System** - Let users appeal bans and content removal
 13. **Transparency Reports** - Public stats on moderation actions
@@ -313,6 +349,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ## 11. Files Modified
 
 ### `src/app/pages/admin/AdminData.ts`
+
 - ✅ Added 3 new user role types
 - ✅ Added 2 new admin role types
 - ✅ Added 3 new report types (7 total)
@@ -324,6 +361,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 - ✅ Enhanced mock data (10 users, 6 communities, 10 reports)
 
 ### `src/app/pages/admin/AdminDashboard.tsx`
+
 - ✅ Imported new types (AdminRole, ReportReason, ReportType)
 - ✅ Updated Users section with article writer role
 - ✅ Added admin role display below primary role
@@ -345,7 +383,7 @@ export type UserAction = "follow" | "unfollow" | "block" | "unblock" | "mute" | 
 ✅ **Severity Levels**: High/Medium/Low for prioritization  
 ✅ **Social Actions**: Defined types for follow, block, mute systems  
 ✅ **Visual Consistency**: Enhanced UI with images and proper spacing  
-✅ **Industry Standards**: Matches reporting systems of Facebook, Twitter, Reddit  
+✅ **Industry Standards**: Matches reporting systems of Facebook, Twitter, Reddit
 
 ---
 

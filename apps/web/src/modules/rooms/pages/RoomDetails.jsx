@@ -10,7 +10,10 @@ import RoomActionBar from "../components/RoomActionBar";
 import UserActionBar from "../components/UserActionBar";
 import ReportButton from "../../Reports/components/ReportButton";
 
-const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
+const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(
+  /\/+$/,
+  ""
+);
 
 const SLOTS_DESKTOP = 9;
 const SLOTS_MOBILE = 6;

@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { privateAxios, publicAxios } from "../../../utils/AxiosInstance";
-const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
+const baseURL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(
+  /\/+$/,
+  ""
+);
 
 export default function UserActionBar({
   localTracks,
@@ -225,7 +228,9 @@ export default function UserActionBar({
             onClick={async () => {
               try {
                 if (!screenSharing) {
-                  const screenTrack = await AgoraRTC.createScreenVideoTrack({ encoderConfig: "1080p_1" });
+                  const screenTrack = await AgoraRTC.createScreenVideoTrack({
+                    encoderConfig: "1080p_1",
+                  });
                   if (localTracks.current.video) {
                     await clientRef.current.unpublish([localTracks.current.video]);
                   }
@@ -254,7 +259,9 @@ export default function UserActionBar({
             <span className="control-btn-icon" style={{ fontSize: "18px" }}>
               📺
             </span>
-            <span className="control-btn-label">{screenSharing ? "Stop Share" : "Share Screen"}</span>
+            <span className="control-btn-label">
+              {screenSharing ? "Stop Share" : "Share Screen"}
+            </span>
           </button>
         )}
       </div>

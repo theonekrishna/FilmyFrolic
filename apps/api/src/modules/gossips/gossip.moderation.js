@@ -71,7 +71,8 @@ function screenGossipContent(payload) {
       return {
         riskLevel: "BLOCKED",
         flags,
-        warning: "Publication blocked: Strict protections prohibit sensitive rumors regarding minors.",
+        warning:
+          "Publication blocked: Strict protections prohibit sensitive rumors regarding minors.",
       };
     }
     flags.push("INVOLVES_MINOR");

@@ -35,7 +35,9 @@ export default function UserProfile() {
   const [tab, setTab] = useState("activity");
   const [editOpen, setEditOpen] = useState(false);
   const [postsCount, setPostsCount] = useState(0);
-  const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
+  const BASE_URL = (
+    import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com"
+  ).replace(/\/+$/, "");
 
   // Live follow counts — keyed on user.id from AuthContext
   const { counts: followCounts } = useFollowCounts(user?.id);

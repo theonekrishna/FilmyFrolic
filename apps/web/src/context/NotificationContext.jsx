@@ -18,7 +18,9 @@ export function NotificationProvider({ children }) {
     const token = localStorage.getItem("accessToken");
     if (!token || !userId) return;
     try {
-      const base = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(/\/+$/, "");
+      const base = (
+        import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com"
+      ).replace(/\/+$/, "");
       const res = await fetch(`${base}/api/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -20,7 +20,10 @@ const getMovies = async (params = {}) => {
     }
     throw new Error("No TMDB trending results returned");
   } catch (error) {
-    console.warn("[HOME WARNING] TMDB request failed/empty. Attempting Filmydock fallback:", error.message);
+    console.warn(
+      "[HOME WARNING] TMDB request failed/empty. Attempting Filmydock fallback:",
+      error.message
+    );
     try {
       const res = await axios.get(`${BASE_URL}/api/filmyfrolic/movies`, {
         params,

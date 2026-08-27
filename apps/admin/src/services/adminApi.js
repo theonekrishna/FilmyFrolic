@@ -1,7 +1,10 @@
 import axios from "axios";
 import { supabase } from "./supabase";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BASE_URL ? `${import.meta.env.VITE_BASE_URL}/api` : "https://filmyfrolic-api.onrender.com/api");
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || import.meta.env.VITE_BASE_URL
+    ? `${import.meta.env.VITE_BASE_URL}/api`
+    : "https://filmyfrolic-api.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,7 +14,9 @@ const api = axios.create({
 // Interceptor to attach Supabase JWT token
 api.interceptors.request.use(async (config) => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`;
     }

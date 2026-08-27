@@ -71,12 +71,9 @@ export default function Communities() {
   );
 
   // Helper to open community detail (Public read allowed for guests)
-  const openCommunityDetail = useCallback(
-    function openCommunityDetail(community) {
-      setDetailCommunity(community);
-    },
-    []
-  );
+  const openCommunityDetail = useCallback(function openCommunityDetail(community) {
+    setDetailCommunity(community);
+  }, []);
 
   const [userActivity, setUserActivity] = useState({
     communitiesJoined: 0,
@@ -643,7 +640,6 @@ export default function Communities() {
 
               {/* Create Button */}
               <div className="flex items-center gap-3">
-
                 <button
                   onClick={() =>
                     requireAuth("Sign in to create your own community and build your fandom!", () =>

@@ -52,9 +52,13 @@ function ScheduledRoomCard({ room }) {
       }
 
       try {
-        await privateAxios.post("/api/rooms/join", { room_id: room.id }, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await privateAxios.post(
+          "/api/rooms/join",
+          { room_id: room.id },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setRsvpd(true);
       } catch (err) {
         console.error("RSVP error:", err);

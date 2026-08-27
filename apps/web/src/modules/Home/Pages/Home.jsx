@@ -74,7 +74,8 @@ export default function Home() {
                     Fan Theories & Industry Rumors
                   </h3>
                   <p className="text-xs md:text-sm text-white/60 mt-1 max-w-xl">
-                    Explore unverified fan speculation, casting rumors, and vote your stance on the latest entertainment topics.
+                    Explore unverified fan speculation, casting rumors, and vote your stance on the
+                    latest entertainment topics.
                   </p>
                 </div>
                 <button

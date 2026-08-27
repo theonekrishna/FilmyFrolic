@@ -217,7 +217,8 @@ function VoiceRoomCard({ room }) {
         inviteCode ? `/social/rooms/${room.id}?code=${inviteCode}` : `/social/rooms/${room.id}`
       );
     } catch (err) {
-      const msg = err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌";
+      const msg =
+        err.response?.data?.error || err.response?.data?.message || "Failed to join room ❌";
       showToast(msg);
       if (err.response?.status === 401 || msg.includes("Unauthorized")) {
         window.dispatchEvent(new CustomEvent("auth-expired"));

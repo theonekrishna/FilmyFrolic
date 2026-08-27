@@ -151,11 +151,7 @@ const submitGame = async (req, res) => {
       return res.status(400).json({ success: false, error: "Invalid submission speed detected." });
     }
 
-    const result = await GameService.processSubmission(
-      req.params.game_id,
-      answers,
-      req.user.id
-    );
+    const result = await GameService.processSubmission(req.params.game_id, answers, req.user.id);
 
     // ── Notification: game achievement (>= 80%) ─────────────────
     try {
