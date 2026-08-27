@@ -1,0 +1,40 @@
+{
+  "name": "@filmyfrolic/admin",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "vite build",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist .turbo",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@filmyfrolic/shared": "workspace:*",
+    "@filmyfrolic/types": "workspace:*",
+    "@filmyfrolic/validation": "workspace:*",
+    "@supabase/supabase-js": "^2.48.0",
+    "axios": "^1.7.9",
+    "lucide-react": "^0.577.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router": "^7.13.1",
+    "react-router-dom": "^7.13.1",
+    "recharts": "^2.15.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@filmyfrolic/config": "workspace:*",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9.39.4",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  }
+}
