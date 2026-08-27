@@ -1008,3 +1008,5 @@ export function WriterDashboard() {
     </div>
   );
 }
+
+export default WriterDashboard;
