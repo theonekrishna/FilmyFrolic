@@ -887,6 +887,14 @@ function OverviewSection() {
       ? overviewData.quizzesPlayed.toLocaleString()
       : "42.1K";
 
+  const moduleHealth = [
+    { name: "CORE", status: "Healthy", users: `${totalUsersVal} active`, color: BLUE },
+    { name: "SOCIAL", status: "Healthy", users: `${communitiesVal} groups`, color: A },
+    { name: "CONTENT", status: "Healthy", users: `${totalContentVal} items`, color: GOLD },
+    { name: "ENTERTAIN", status: "Healthy", users: `${quizzesPlayedVal} played`, color: TEAL },
+    { name: "USER", status: "Healthy", users: `${dailyActiveVal} daily`, color: GREEN },
+  ];
+
   return (
     <div>
       <SectionTitle
