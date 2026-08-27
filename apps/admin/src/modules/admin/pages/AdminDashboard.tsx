@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { adminApi } from "../../../services/adminApi";
 import { supabase } from "../../../services/supabase";
+import { AdminLayout } from "../../../components/layout/AdminLayout";
 import {
   LayoutDashboard,
   Users,
@@ -26,12 +26,10 @@ import {
   ToggleLeft,
   ToggleRight,
   Send,
-  ChevronRight,
   Activity,
   Clock,
   ArrowUp,
   ArrowDown,
-  Menu,
   Globe,
   Zap,
   RefreshCw,
@@ -109,19 +107,6 @@ type Section =
   | "notifications"
   | "analytics"
   | "settings";
-
-const NAV: { id: Section; label: string; icon: React.ReactNode; badge?: number }[] = [
-  { id: "overview", label: "Overview", icon: <LayoutDashboard size={16} /> },
-  { id: "users", label: "Users", icon: <Users size={16} />, badge: 10 },
-  { id: "content", label: "Content", icon: <Film size={16} /> },
-  { id: "contentFeedback", label: "Content Feedback", icon: <Flag size={16} />, badge: 4 },
-  { id: "social", label: "Social", icon: <MessageSquare size={16} /> },
-  { id: "entertain", label: "Entertainment", icon: <Gamepad2 size={16} /> },
-  { id: "moderation", label: "Moderation", icon: <Shield size={16} />, badge: 5 },
-  { id: "notifications", label: "Notifications", icon: <Bell size={16} /> },
-  { id: "analytics", label: "Analytics", icon: <BarChart3 size={16} /> },
-  { id: "settings", label: "Settings", icon: <Settings size={16} /> },
-];
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -390,398 +375,6 @@ function SubTabs({
           {t}
         </button>
       ))}
-    </div>
-  );
-}
-
-// ─── Admin Sidebar ────────────────────────────────────────────────────────────
-
-function AdminSidebar({
-  section,
-  onSection,
-  collapsed,
-}: {
-  section: Section;
-  onSection: (s: Section) => void;
-  collapsed: boolean;
-}) {
-  const adminUser = (() => {
-    try {
-      const demo = localStorage.getItem("ff_admin_auth");
-      if (demo) {
-        const parsed = JSON.parse(demo);
-        return {
-          name: parsed.user?.name || "Demo Admin",
-          email: parsed.user?.email || "admin@filmyfrolic.com",
-          role: (parsed.role || "admin").toUpperCase(),
-        };
-      }
-      const user = localStorage.getItem("user");
-      if (user) {
-        const parsed = JSON.parse(user);
-        return {
-          name: parsed.displayName || parsed.username || "Admin User",
-          email: parsed.email || "admin@filmyfrolic.com",
-          role: (parsed.role || "admin").toUpperCase(),
-        };
-      }
-    } catch {
-      // fallback
-    }
-    return { name: "Super Admin", email: "admin@filmyfrolic.app", role: "ADMIN" };
-  })();
-
-  const handleLogout = () => {
-    localStorage.removeItem("ff_admin_auth");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    supabase.auth.signOut();
-    window.location.href = "/login";
-  };
-
-  return (
-    <aside
-      style={{
-        width: collapsed ? 0 : 230,
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        background: "#09090f",
-        borderRight: "1px solid rgba(255,255,255,0.06)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        transition: "width 0.25s",
-        flexShrink: 0,
-        zIndex: 40,
-      }}
-    >
-      {/* Sidebar Header */}
-      <div
-        style={{
-          padding: "16px 16px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          whiteSpace: "nowrap" as const,
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: `linear-gradient(135deg,${A},#5e3fd8)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              boxShadow: `0 4px 14px ${A}35`,
-            }}
-          >
-            <Shield size={18} color="#fff" />
-          </div>
-          <div>
-            <div
-              style={{
-                fontFamily: B,
-                fontSize: 15,
-                letterSpacing: 2,
-                color: "#f0f0f8",
-                lineHeight: 1.1,
-              }}
-            >
-              FILMY FROLIC
-            </div>
-            <div
-              style={{ fontFamily: F, fontSize: 10, color: A, fontWeight: 700, letterSpacing: 1.5 }}
-            >
-              ADMIN PANEL
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav Menu */}
-      <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
-        {NAV.map((item) => {
-          const active = item.id === section;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSection(item.id)}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                background: active ? `${A}15` : "transparent",
-                border: active ? `1px solid ${A}25` : "1px solid transparent",
-                borderRadius: 10,
-                marginBottom: 2,
-                cursor: "pointer",
-                transition: "all 0.15s",
-                whiteSpace: "nowrap" as const,
-              }}
-              onMouseEnter={(e) =>
-                !active &&
-                ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)")
-              }
-              onMouseLeave={(e) =>
-                !active && ((e.currentTarget as HTMLElement).style.background = "transparent")
-              }
-            >
-              <span style={{ color: active ? A : "rgba(240,240,248,0.38)", flexShrink: 0 }}>
-                {item.icon}
-              </span>
-              <span
-                style={{
-                  fontFamily: F,
-                  fontSize: 13,
-                  fontWeight: active ? 700 : 400,
-                  color: active ? A : "rgba(240,240,248,0.6)",
-                  flex: 1,
-                  textAlign: "left",
-                }}
-              >
-                {item.label}
-              </span>
-              {item.badge !== undefined && (
-                <span
-                  style={{
-                    background: RED,
-                    borderRadius: 100,
-                    padding: "1px 7px",
-                    fontFamily: F,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: "#fff",
-                  }}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Fixed Profile Card Pinned At Bottom */}
-      <div
-        style={{
-          padding: "12px 10px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          whiteSpace: "nowrap" as const,
-          flexShrink: 0,
-          background: "#09090f",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "10px 12px",
-            borderRadius: 10,
-            background: "rgba(255,255,255,0.03)",
-          }}
-        >
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: `linear-gradient(135deg,${GOLD},${RED})`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: B,
-              fontSize: 13,
-              color: "#fff",
-              flexShrink: 0,
-            }}
-          >
-            {adminUser.name.charAt(0).toUpperCase()}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: F,
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#f0f0f8",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {adminUser.name}
-            </div>
-            <div
-              style={{
-                fontFamily: F,
-                fontSize: 10,
-                color: "rgba(240,240,248,0.35)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {adminUser.email}
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            title="Sign Out"
-            style={{
-              background: "rgba(232,69,69,0.12)",
-              border: "1px solid rgba(232,69,69,0.25)",
-              borderRadius: 8,
-              padding: "6px 8px",
-              color: RED,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.background = "rgba(232,69,69,0.25)")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.background = "rgba(232,69,69,0.12)")
-            }
-          >
-            <Lock size={13} />
-          </button>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-// ─── Admin Top Bar ────────────────────────────────────────────────────────────
-
-function AdminTopBar({
-  sectionLabel,
-  onMenu,
-  onNav,
-}: {
-  sectionLabel: string;
-  onMenu: () => void;
-  onNav?: () => void;
-}) {
-  const handleViewSite = () => {
-    if (onNav) {
-      onNav();
-      return;
-    }
-    const env = (import.meta as any).env;
-    const siteUrl = env?.VITE_CLIENT_URL || "https://filmy-frolic-new-frontend.onrender.com";
-    window.open(siteUrl, "_blank");
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("ff_admin_auth");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    supabase.auth.signOut();
-    window.location.href = "/login";
-  };
-
-  return (
-    <div
-      style={{
-        height: 56,
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        display: "flex",
-        alignItems: "center",
-        padding: "0 22px",
-        gap: 14,
-        background: "#09090f",
-        flexShrink: 0,
-        position: "sticky",
-        top: 0,
-        zIndex: 30,
-      }}
-    >
-      <button
-        onClick={onMenu}
-        style={{
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          color: "rgba(240,240,248,0.5)",
-          display: "flex",
-          padding: 4,
-          minHeight: "unset",
-        }}
-      >
-        <Menu size={18} />
-      </button>
-      <span style={{ fontFamily: F, fontSize: 12, color: "rgba(240,240,248,0.25)" }}>Admin</span>
-      <ChevronRight size={12} color="rgba(240,240,248,0.2)" />
-      <span
-        style={{ fontFamily: F, fontSize: 13, fontWeight: 600, color: "rgba(240,240,248,0.75)" }}
-      >
-        {sectionLabel}
-      </span>
-      <div style={{ flex: 1 }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span
-          style={{
-            background: `${A}15`,
-            border: `1px solid ${A}30`,
-            borderRadius: 100,
-            padding: "3px 12px",
-            fontFamily: F,
-            fontSize: 11,
-            fontWeight: 700,
-            color: A,
-          }}
-        >
-          ⬡ ADMIN CONSOLE
-        </span>
-
-        <button
-          onClick={handleViewSite}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 8,
-            padding: "6px 12px",
-            fontFamily: F,
-            fontSize: 12,
-            color: "rgba(240,240,248,0.75)",
-            cursor: "pointer",
-            minHeight: "unset",
-          }}
-        >
-          <Globe size={13} /> View Site ↗
-        </button>
-
-        <button
-          onClick={handleLogout}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            background: "rgba(232,69,69,0.1)",
-            border: "1px solid rgba(232,69,69,0.25)",
-            borderRadius: 8,
-            padding: "6px 12px",
-            fontFamily: F,
-            fontSize: 12,
-            color: RED,
-            cursor: "pointer",
-            minHeight: "unset",
-          }}
-        >
-          <Lock size={13} /> Logout
-        </button>
-      </div>
     </div>
   );
 }
@@ -5013,9 +4606,7 @@ function SettingsSection() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function AdminDashboard() {
-  const navigate = useNavigate();
   const [section, setSection] = useState<Section>("overview");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [realtimeAlerts, setRealtimeAlerts] = useState<string[]>([]);
 
   useEffect(() => {
@@ -5038,75 +4629,48 @@ export function AdminDashboard() {
     };
   }, []);
 
-  const sectionLabel = NAV.find((n) => n.id === section)?.label || "";
-
   return (
-    <div style={{ minHeight: "100vh", display: "flex", background: "#080810", fontFamily: F }}>
-      <AdminSidebar section={section} onSection={setSection} collapsed={!sidebarOpen} />
-
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          overflow: "hidden",
-        }}
-      >
-        <AdminTopBar
-          sectionLabel={sectionLabel}
-          onMenu={() => setSidebarOpen((v) => !v)}
-          onNav={() => navigate("/")}
-        />
-
-        {realtimeAlerts.length > 0 && (
-          <div
+    <AdminLayout section={section} onSectionChange={setSection}>
+      {realtimeAlerts.length > 0 && (
+        <div
+          style={{
+            background: "rgba(232,69,69,0.15)",
+            border: "1px solid rgba(232,69,69,0.3)",
+            borderRadius: 10,
+            padding: "10px 20px",
+            marginBottom: 20,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>{realtimeAlerts[0]}</span>
+          <button
+            onClick={() => setRealtimeAlerts([])}
             style={{
-              background: "rgba(232,69,69,0.15)",
-              borderBottom: "1px solid rgba(232,69,69,0.3)",
-              padding: "8px 32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              background: "none",
+              border: "none",
+              color: "rgba(240,240,248,0.5)",
+              cursor: "pointer",
+              fontSize: 11,
             }}
           >
-            <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>{realtimeAlerts[0]}</span>
-            <button
-              onClick={() => setRealtimeAlerts([])}
-              style={{
-                background: "none",
-                border: "none",
-                color: "rgba(240,240,248,0.5)",
-                cursor: "pointer",
-                fontSize: 11,
-              }}
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+            Dismiss
+          </button>
+        </div>
+      )}
 
-        <main style={{ flex: 1, overflowY: "auto", padding: "28px 32px", background: "#080810" }}>
-          {section === "overview" && <OverviewSection />}
-          {section === "users" && <UsersSection />}
-          {section === "content" && <ContentSection />}
-          {section === "contentFeedback" && <ContentFeedbackSection />}
-          {section === "social" && <SocialSection />}
-          {section === "entertain" && <EntertainSection />}
-          {section === "moderation" && <ModerationSection />}
-          {section === "notifications" && <NotificationsSection />}
-          {section === "analytics" && <AnalyticsSection />}
-          {section === "settings" && <SettingsSection />}
-        </main>
-      </div>
-
-      {/* Mobile bottom nav */}
-      <style>{`
-        @media (max-width: 768px) {
-          .ff-admin-main { padding: 16px 16px 80px !important; }
-        }
-      `}</style>
-    </div>
+      {section === "overview" && <OverviewSection />}
+      {section === "users" && <UsersSection />}
+      {section === "content" && <ContentSection />}
+      {section === "contentFeedback" && <ContentFeedbackSection />}
+      {section === "social" && <SocialSection />}
+      {section === "entertain" && <EntertainSection />}
+      {section === "moderation" && <ModerationSection />}
+      {section === "notifications" && <NotificationsSection />}
+      {section === "analytics" && <AnalyticsSection />}
+      {section === "settings" && <SettingsSection />}
+    </AdminLayout>
   );
 }
 
