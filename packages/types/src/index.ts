@@ -5,22 +5,79 @@ export interface User {
   email: string;
   username: string;
   avatar_url?: string;
-  created_at: string;
+  created_at?: string;
+  role?: string;
+  status?: string;
 }
 
 export interface Movie {
-  id: number;
+  id: string | number;
   title: string;
-  overview: string;
-  poster_path: string | null;
-  backdrop_path: string | null;
-  release_date: string;
-  vote_average: number;
+  overview?: string;
+  synopsis?: string;
+  poster?: string;
+  poster_path?: string | null;
+  backdropUrl?: string;
+  backdrop_path?: string | null;
+  releaseYear?: number;
+  release_date?: string;
+  rating?: number;
+  vote_average?: number;
+  duration?: string;
+  director?: string;
+  status?: string;
+  viewsCount?: number;
+  genre?: string[];
+  cast?: string[];
+}
+
+export interface Gossip {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  category: string;
+  publishedAt: string;
+  likesCount: number;
+  commentsCount: number;
+  imageUrl?: string;
 }
 
 export interface Community {
   id: string;
   name: string;
   description?: string;
-  created_at: string;
+  membersCount?: number;
+  category?: string;
+  bannerUrl?: string;
+  isJoined?: boolean;
+  created_at?: string;
+}
+
+export interface Room {
+  id: string;
+  title: string;
+  host: string;
+  activeViewers: number;
+  status: "live" | "scheduled" | "ended";
+  currentMovie?: string;
+}
+
+export interface Quiz {
+  id: string;
+  title: string;
+  category: string;
+  questionsCount: number;
+  playsCount: number;
+  avgScore: number;
+  imageUrl?: string;
+}
+
+export interface Meme {
+  id: string;
+  title: string;
+  imageUrl?: string;
+  author: string;
+  upvotes: number;
+  submittedAt: string;
 }
