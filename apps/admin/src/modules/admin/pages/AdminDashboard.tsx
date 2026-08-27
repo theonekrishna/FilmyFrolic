@@ -785,10 +785,37 @@ function AdminTopBar({
 // ─── SECTION: OVERVIEW ────────────────────────────────────────────────────────
 
 function OverviewSection() {
-  const recentActivity = [
+  const [loading, setLoading] = useState(true);
+  const [overviewData, setOverviewData] = useState<any>(null);
+  const [activities, setActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        const [stats, logs] = await Promise.all([adminApi.getOverview(), adminApi.getAuditLogs()]);
+        if (isMounted) {
+          if (stats) setOverviewData(stats);
+          if (Array.isArray(logs) && logs.length > 0) {
+            setActivities(logs);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load overview data:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const defaultActivity = [
     {
       icon: <UserCheck size={14} />,
-      text: 'New user "chloem" joined',
+      text: 'New user "chloem" registered',
       time: "2m ago",
       color: GREEN,
     },
@@ -806,52 +833,80 @@ function OverviewSection() {
     },
     {
       icon: <Shield size={14} />,
-      text: "User @yukit suspended for harassment",
+      text: "User @yukit suspended for policy violation",
       time: "42m ago",
       color: A,
     },
     {
       icon: <Bell size={14} />,
-      text: "Platform announcement sent to 84.2K users",
+      text: "Platform broadcast sent to active users",
       time: "1h ago",
       color: BLUE,
     },
     {
       icon: <BarChart2 size={14} />,
-      text: "Daily quiz generated for Apr 7, 2026",
+      text: "Daily games leaderboard updated",
       time: "2h ago",
       color: TEAL,
     },
   ];
 
-  const moduleHealth = [
-    { name: "CORE", status: "Healthy", users: "61K active", color: BLUE },
-    { name: "SOCIAL", status: "Healthy", users: "28K active", color: A },
-    { name: "CONTENT", status: "Healthy", users: "24K active", color: GOLD },
-    { name: "ENTERTAIN", status: "Degraded", users: "18K active", color: RED },
-    { name: "USER", status: "Healthy", users: "14K active", color: TEAL },
-  ];
+  const recentActivity =
+    activities.length > 0
+      ? activities.map((act) => ({
+          icon: act.icon ? (
+            <span style={{ color: act.iconColor }}>{act.icon}</span>
+          ) : (
+            <Activity size={14} />
+          ),
+          text:
+            act.description ||
+            `${act.admin_name || "Admin"} performed ${act.action} on ${act.module}`,
+          time: act.created_at
+            ? new Date(act.created_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "Just now",
+          color: act.iconColor || A,
+        }))
+      : defaultActivity;
+
+  const totalUsersVal =
+    overviewData?.totalUsers !== undefined ? overviewData.totalUsers.toLocaleString() : "84,200";
+  const dailyActiveVal =
+    overviewData?.dailyActive !== undefined ? overviewData.dailyActive.toLocaleString() : "61,000";
+  const totalContentVal =
+    overviewData?.totalContent !== undefined ? overviewData.totalContent.toLocaleString() : "1,240";
+  const openReportsVal =
+    overviewData?.openReports !== undefined ? overviewData.openReports.toString() : "7";
+  const communitiesVal =
+    overviewData?.communities !== undefined ? overviewData.communities.toString() : "48";
+  const quizzesPlayedVal =
+    overviewData?.quizzesPlayed !== undefined
+      ? overviewData.quizzesPlayed.toLocaleString()
+      : "42.1K";
 
   return (
     <div>
       <SectionTitle
         icon={<LayoutDashboard size={20} />}
         title="OVERVIEW"
-        sub="Real-time platform health and key metrics"
+        sub="Real-time platform health, active users, and key metrics"
       />
 
-      {/* KPI Row */}
+      {/* KPI Grid — Balanced 6-card row */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(185px, 1fr))",
           gap: 14,
           marginBottom: 28,
         }}
       >
         <StatCard
           label="Total Users"
-          value="84,200"
+          value={totalUsersVal}
           sub="Registered accounts"
           icon={<Users size={16} />}
           color={BLUE}
@@ -859,7 +914,7 @@ function OverviewSection() {
         />
         <StatCard
           label="Daily Active"
-          value="61,000"
+          value={dailyActiveVal}
           sub="Last 24 hours"
           icon={<Activity size={16} />}
           color={A}
@@ -867,7 +922,7 @@ function OverviewSection() {
         />
         <StatCard
           label="Total Content"
-          value="1,240"
+          value={totalContentVal}
           sub="Movies, articles, gossip"
           icon={<Film size={16} />}
           color={GOLD}
@@ -875,7 +930,7 @@ function OverviewSection() {
         />
         <StatCard
           label="Open Reports"
-          value="7"
+          value={openReportsVal}
           sub="Awaiting action"
           icon={<AlertTriangle size={16} />}
           color={RED}
@@ -883,7 +938,7 @@ function OverviewSection() {
         />
         <StatCard
           label="Communities"
-          value="48"
+          value={communitiesVal}
           sub="Active groups"
           icon={<MessageSquare size={16} />}
           color={TEAL}
@@ -891,8 +946,8 @@ function OverviewSection() {
         />
         <StatCard
           label="Quizzes Played"
-          value="42.1K"
-          sub="Today"
+          value={quizzesPlayedVal}
+          sub="Total games played"
           icon={<Award size={16} />}
           color={GREEN}
           trend={18}
