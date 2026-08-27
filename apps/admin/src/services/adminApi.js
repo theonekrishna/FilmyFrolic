@@ -78,18 +78,91 @@ export const adminApi = {
     return res.data;
   },
 
-  // Content Feedback
-  getContentFeedback: async () => {
+  // Audit & Activity Logs
+  getAuditLogs: async () => {
     try {
-      const res = await api.get("/admin/feedback");
+      const res = await api.get("/admin/overview/recent-activity");
       return res.data;
     } catch (e) {
       return null;
     }
   },
 
-  updateFeedbackStatus: async (feedbackId, status, notes) => {
-    const res = await api.patch(`/admin/feedback/${feedbackId}`, { status, notes });
+  // Social Moderation (Communities, Feeds, Rooms)
+  getCommunities: async () => {
+    try {
+      const res = await api.get("/admin/social/communities");
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  toggleVerifyCommunity: async (communityId) => {
+    const res = await api.patch(`/admin/social/communities/${communityId}/verify`);
+    return res.data;
+  },
+
+  toggleSuspendCommunity: async (communityId) => {
+    const res = await api.patch(`/admin/social/communities/${communityId}/suspend`);
+    return res.data;
+  },
+
+  getFeeds: async () => {
+    try {
+      const res = await api.get("/admin/social/feeds");
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  deleteFeed: async (feedId) => {
+    const res = await api.delete(`/admin/social/feeds/${feedId}`);
+    return res.data;
+  },
+
+  getRooms: async () => {
+    try {
+      const res = await api.get("/admin/social/rooms");
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  closeRoom: async (roomId) => {
+    const res = await api.patch(`/admin/social/rooms/${roomId}/close`);
+    return res.data;
+  },
+
+  toggleFeaturedRoom: async (roomId) => {
+    const res = await api.patch(`/admin/social/rooms/${roomId}/featured`);
+    return res.data;
+  },
+
+  // System Policies
+  getPolicies: async () => {
+    try {
+      const res = await api.get("/admin/policy/public/all");
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  createPolicy: async (payload) => {
+    const res = await api.post("/admin/policy", payload);
+    return res.data;
+  },
+
+  updatePolicy: async (id, payload) => {
+    const res = await api.put(`/admin/policy/${id}`, payload);
+    return res.data;
+  },
+
+  deletePolicy: async (id) => {
+    const res = await api.delete(`/admin/policy/${id}`);
     return res.data;
   },
 };
