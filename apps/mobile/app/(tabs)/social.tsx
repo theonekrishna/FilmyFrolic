@@ -107,7 +107,7 @@ export default function SocialScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.communityName}>{c.name}</Text>
                   <Text style={styles.communityMeta}>
-                    {c.membersCount.toLocaleString()} members • {c.category}
+                    {(c.membersCount ?? 0).toLocaleString()} members • {c.category}
                   </Text>
                 </View>
                 <TouchableOpacity
