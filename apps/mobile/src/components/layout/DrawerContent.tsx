@@ -68,7 +68,10 @@ export const DrawerContent: React.FC<DrawerContentProps> = ({ onClose }) => {
           <ChevronRight size={16} color="rgba(240,240,248,0.3)" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => handleNavigate("/(tabs)/entertain")}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => handleNavigate("/(tabs)/entertain")}
+        >
           <View style={[styles.itemIcon, { backgroundColor: "rgba(253,203,110,0.15)" }]}>
             <MessageSquarePlus size={18} color="#fdcb6e" />
           </View>

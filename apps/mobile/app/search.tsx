@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SearchBar } from "../src/components/ui/SearchBar";
 import { MovieBadge } from "../src/components/ui/MovieBadge";
@@ -35,7 +28,11 @@ export default function SearchScreen() {
         </TouchableOpacity>
       </View>
 
-      <SearchBar value={query} onChangeText={setQuery} placeholder="Search movies, gossip, directors…" />
+      <SearchBar
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search movies, gossip, directors…"
+      />
 
       <ScrollView style={styles.resultsScroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionLabel}>MOVIES ({filteredMovies.length})</Text>
@@ -56,7 +53,9 @@ export default function SearchScreen() {
           </TouchableOpacity>
         ))}
 
-        <Text style={[styles.sectionLabel, { marginTop: 24 }]}>GOSSIP & NEWS ({filteredGossip.length})</Text>
+        <Text style={[styles.sectionLabel, { marginTop: 24 }]}>
+          GOSSIP & NEWS ({filteredGossip.length})
+        </Text>
         {filteredGossip.map((gossip) => (
           <TouchableOpacity
             key={gossip.id}

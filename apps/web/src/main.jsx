@@ -4,7 +4,8 @@ import App from "./App.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const GOOGLE_CLIENT_ID =
-  import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID"
+  import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+  import.meta.env.VITE_GOOGLE_CLIENT_ID !== "YOUR_GOOGLE_CLIENT_ID"
     ? import.meta.env.VITE_GOOGLE_CLIENT_ID
     : "1000000000000-demo.apps.googleusercontent.com";
 
@@ -15,4 +16,3 @@ root.render(
     <App />
   </GoogleOAuthProvider>
 );
-

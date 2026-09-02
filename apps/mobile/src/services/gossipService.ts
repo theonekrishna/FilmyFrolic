@@ -5,7 +5,8 @@ export const MOCK_GOSSIP: Gossip[] = [
   {
     id: "g1",
     title: "Nolan Teases Next Sci-Fi Project in Tokyo Studio Visit",
-    content: "Reports confirm Christopher Nolan has begun pre-production on an original IMAX sci-fi epic involving time dilation and deep sea exploration.",
+    content:
+      "Reports confirm Christopher Nolan has begun pre-production on an original IMAX sci-fi epic involving time dilation and deep sea exploration.",
     author: "CinemaSpy",
     category: "Nolan",
     publishedAt: "2 hours ago",
@@ -16,7 +17,8 @@ export const MOCK_GOSSIP: Gossip[] = [
   {
     id: "g2",
     title: "Secret Marvel Cameo Leaked Ahead of Summer Blockbuster",
-    content: "Insiders reveal a fan-favorite X-Men character makes a surprise appearance in the upcoming multiverse climax.",
+    content:
+      "Insiders reveal a fan-favorite X-Men character makes a surprise appearance in the upcoming multiverse climax.",
     author: "GeekInsider",
     category: "Marvel",
     publishedAt: "5 hours ago",
@@ -27,7 +29,8 @@ export const MOCK_GOSSIP: Gossip[] = [
   {
     id: "g3",
     title: "Prabhas & Rajamouli Re-Unite for Massive Fantasy Franchise",
-    content: "Following the historic success of Baahubali, the powerhouse duo is rumored to collaborate on an international mythical epic.",
+    content:
+      "Following the historic success of Baahubali, the powerhouse duo is rumored to collaborate on an international mythical epic.",
     author: "TollywoodTracker",
     category: "Tollywood",
     publishedAt: "1 day ago",

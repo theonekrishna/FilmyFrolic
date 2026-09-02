@@ -5,7 +5,8 @@ export const MOCK_COMMUNITIES: Community[] = [
   {
     id: "c1",
     name: "Nolan Cinematic Universe",
-    description: "Deep discussions on Inception, Tenet, Oppenheimer & Interstellar timeline theories.",
+    description:
+      "Deep discussions on Inception, Tenet, Oppenheimer & Interstellar timeline theories.",
     membersCount: 14200,
     category: "Director Focus",
     bannerUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800",

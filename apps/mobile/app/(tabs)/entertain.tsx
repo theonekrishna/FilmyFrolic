@@ -15,10 +15,34 @@ import { entertainService, MOCK_QUIZZES, MOCK_MEMES } from "../../src/services/e
 import type { Quiz, Meme } from "@filmyfrolic/types";
 
 const GAMES = [
-  { id: "g1", title: "Film Trivia Blitz", desc: "60-second rapid quiz", color: "#6c5ce7", plays: "28.4K" },
-  { id: "g2", title: "Movie Wordle", desc: "Guess movie title in 6 tries", color: "#fdcb6e", plays: "19.2K" },
-  { id: "g3", title: "Scene It?", desc: "Identify movies from screenshots", color: "#0984e3", plays: "12.1K" },
-  { id: "g4", title: "Rating Roulette", desc: "Guess IMDb ratings", color: "#00cec9", plays: "8.7K" },
+  {
+    id: "g1",
+    title: "Film Trivia Blitz",
+    desc: "60-second rapid quiz",
+    color: "#6c5ce7",
+    plays: "28.4K",
+  },
+  {
+    id: "g2",
+    title: "Movie Wordle",
+    desc: "Guess movie title in 6 tries",
+    color: "#fdcb6e",
+    plays: "19.2K",
+  },
+  {
+    id: "g3",
+    title: "Scene It?",
+    desc: "Identify movies from screenshots",
+    color: "#0984e3",
+    plays: "12.1K",
+  },
+  {
+    id: "g4",
+    title: "Rating Roulette",
+    desc: "Guess IMDb ratings",
+    color: "#00cec9",
+    plays: "8.7K",
+  },
 ];
 
 export default function EntertainScreen() {
@@ -45,9 +69,7 @@ export default function EntertainScreen() {
   };
 
   const handleUpvote = (id: string) => {
-    setMemes((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, upvotes: m.upvotes + 1 } : m))
-    );
+    setMemes((prev) => prev.map((m) => (m.id === id ? { ...m, upvotes: m.upvotes + 1 } : m)));
   };
 
   return (
@@ -87,7 +109,11 @@ export default function EntertainScreen() {
           {quizzes.map((quiz) => (
             <View key={quiz.id} style={styles.quizCard}>
               {quiz.imageUrl && (
-                <Image source={{ uri: quiz.imageUrl }} style={styles.quizImage} resizeMode="cover" />
+                <Image
+                  source={{ uri: quiz.imageUrl }}
+                  style={styles.quizImage}
+                  resizeMode="cover"
+                />
               )}
               <View style={styles.quizBody}>
                 <View style={styles.quizHeader}>
@@ -96,7 +122,9 @@ export default function EntertainScreen() {
                 </View>
                 <Text style={styles.quizTitle}>{quiz.title}</Text>
                 <View style={styles.quizFooter}>
-                  <Text style={styles.quizMeta}>{quiz.questionsCount} Questions • Avg {quiz.avgScore}%</Text>
+                  <Text style={styles.quizMeta}>
+                    {quiz.questionsCount} Questions • Avg {quiz.avgScore}%
+                  </Text>
                   <TouchableOpacity style={styles.playQuizBtn} activeOpacity={0.8}>
                     <Play size={12} color="#fff" fill="#fff" />
                     <Text style={styles.playQuizText}>Start Quiz</Text>
@@ -147,7 +175,11 @@ export default function EntertainScreen() {
               </View>
               <Text style={styles.memeTitle}>{meme.title}</Text>
               {meme.imageUrl && (
-                <Image source={{ uri: meme.imageUrl }} style={styles.memeImage} resizeMode="cover" />
+                <Image
+                  source={{ uri: meme.imageUrl }}
+                  style={styles.memeImage}
+                  resizeMode="cover"
+                />
               )}
               <View style={styles.memeFooter}>
                 <TouchableOpacity

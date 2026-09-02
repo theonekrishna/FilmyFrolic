@@ -9,7 +9,16 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Star, Clock, Calendar, Bookmark, Play, Share2, Check } from "lucide-react-native";
+import {
+  ArrowLeft,
+  Star,
+  Clock,
+  Calendar,
+  Bookmark,
+  Play,
+  Share2,
+  Check,
+} from "lucide-react-native";
 import { MovieBadge } from "../../src/components/ui/MovieBadge";
 import { movieService, MOCK_MOVIES } from "../../src/services/movieService";
 import type { Movie } from "@filmyfrolic/types";
@@ -80,7 +89,9 @@ export default function MovieDetailScreen() {
 
               <View style={styles.ratingRow}>
                 <Star size={16} color="#fdcb6e" fill="#fdcb6e" />
-                <Text style={styles.ratingScore}>{movie.rating ? movie.rating.toFixed(1) : "N/A"}</Text>
+                <Text style={styles.ratingScore}>
+                  {movie.rating ? movie.rating.toFixed(1) : "N/A"}
+                </Text>
                 <Text style={styles.ratingMax}>/10 IMDb</Text>
               </View>
 

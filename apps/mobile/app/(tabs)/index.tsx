@@ -45,9 +45,7 @@ export default function HomeScreen() {
   const featuredMovie = movies[0] || MOCK_MOVIES[0];
 
   const filteredMovies =
-    selectedGenre === "All"
-      ? movies
-      : movies.filter((m) => m.genre?.includes(selectedGenre));
+    selectedGenre === "All" ? movies : movies.filter((m) => m.genre?.includes(selectedGenre));
 
   return (
     <ScrollView

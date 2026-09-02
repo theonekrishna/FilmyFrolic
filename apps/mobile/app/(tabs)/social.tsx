@@ -37,9 +37,7 @@ export default function SocialScreen() {
   };
 
   const toggleJoin = (id: string) => {
-    setCommunities((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isJoined: !c.isJoined } : c))
-    );
+    setCommunities((prev) => prev.map((c) => (c.id === id ? { ...c, isJoined: !c.isJoined } : c)));
   };
 
   return (
@@ -99,7 +97,11 @@ export default function SocialScreen() {
       <View style={styles.communityContainer}>
         {communities.map((c) => (
           <View key={c.id} style={styles.communityCard}>
-            <Image source={{ uri: c.bannerUrl }} style={styles.communityBanner} resizeMode="cover" />
+            <Image
+              source={{ uri: c.bannerUrl }}
+              style={styles.communityBanner}
+              resizeMode="cover"
+            />
             <View style={styles.communityBody}>
               <View style={styles.communityHeader}>
                 <View style={{ flex: 1 }}>
@@ -109,10 +111,7 @@ export default function SocialScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  style={[
-                    styles.joinBtn,
-                    c.isJoined && styles.joinedBtn,
-                  ]}
+                  style={[styles.joinBtn, c.isJoined && styles.joinedBtn]}
                   onPress={() => toggleJoin(c.id)}
                 >
                   {c.isJoined ? (

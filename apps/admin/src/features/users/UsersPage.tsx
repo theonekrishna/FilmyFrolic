@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { Users, Download, Lock, Unlock, Ban } from "lucide-react";
 import { SectionTitle } from "../../components/ui/SectionTitle";
-import {
-  ADMIN_USERS,
-  UserRole,
-  UserStatus,
-} from "../../modules/admin/data/AdminData";
+import { ADMIN_USERS, UserRole, UserStatus } from "../../modules/admin/data/AdminData";
 
 const F = "'Plus Jakarta Sans', system-ui, sans-serif";
 const B = "'Bebas Neue', sans-serif";

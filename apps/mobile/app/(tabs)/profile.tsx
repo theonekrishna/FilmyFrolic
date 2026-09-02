@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { User, Bookmark, Star, Shield, LogOut, Settings, Award, Sparkles } from "lucide-react-native";
+import {
+  User,
+  Bookmark,
+  Star,
+  Shield,
+  LogOut,
+  Settings,
+  Award,
+  Sparkles,
+} from "lucide-react-native";
 import { SectionHeader } from "../../src/components/ui/SectionHeader";
 import { CinematicCard } from "../../src/components/ui/CinematicCard";
 import { MOCK_MOVIES } from "../../src/services/movieService";
@@ -41,7 +43,9 @@ export default function ProfileScreen() {
               </View>
             </View>
             <Text style={styles.handleText}>@saikrishna • Movie Buff</Text>
-            <Text style={styles.bioText}>Sci-Fi enthusiast & IMAX purist. 240+ movies logged in 2025.</Text>
+            <Text style={styles.bioText}>
+              Sci-Fi enthusiast & IMAX purist. 240+ movies logged in 2025.
+            </Text>
           </View>
         </View>
 

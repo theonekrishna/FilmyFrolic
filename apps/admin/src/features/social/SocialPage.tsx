@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { MessageSquare, Download, Plus, CheckCircle, Flag, X, Eye, Star } from "lucide-react";
 import { SectionTitle } from "../../components/ui/SectionTitle";
-import {
-  ADMIN_COMMUNITIES,
-  ADMIN_POSTS,
-  ADMIN_ROOMS,
-} from "../../modules/admin/data/AdminData";
+import { ADMIN_COMMUNITIES, ADMIN_POSTS, ADMIN_ROOMS } from "../../modules/admin/data/AdminData";
 
 const F = "'Plus Jakarta Sans', system-ui, sans-serif";
 const B = "'Bebas Neue', sans-serif";

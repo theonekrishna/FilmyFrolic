@@ -13,7 +13,15 @@ import {
   Bell,
   BarChart2,
 } from "lucide-react";
-import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { adminApi } from "../../services/adminApi";
 import { StatCard } from "../../components/ui/StatCard";
 import { SectionTitle } from "../../components/ui/SectionTitle";
@@ -43,10 +51,7 @@ export const OverviewPage: React.FC = () => {
     let isMounted = true;
     async function loadData() {
       try {
-        const [stats, logs] = await Promise.all([
-          adminApi.getOverview(),
-          adminApi.getAuditLogs(),
-        ]);
+        const [stats, logs] = await Promise.all([adminApi.getOverview(), adminApi.getAuditLogs()]);
         if (isMounted) {
           if (stats) setOverviewData(stats);
           if (Array.isArray(logs) && logs.length > 0) {
@@ -66,12 +71,42 @@ export const OverviewPage: React.FC = () => {
   }, []);
 
   const defaultActivity = [
-    { icon: <UserCheck size={14} />, text: 'New user "chloem" registered', time: "2m ago", color: GREEN },
-    { icon: <Flag size={14} />, text: "Post flagged for spam in Sci-Fi Fanatics", time: "5m ago", color: RED },
-    { icon: <Film size={14} />, text: 'Movie "Realm of Ash" featured by moderator', time: "18m ago", color: GOLD },
-    { icon: <Shield size={14} />, text: "User @yukit suspended for policy violation", time: "42m ago", color: A },
-    { icon: <Bell size={14} />, text: "Platform broadcast sent to active users", time: "1h ago", color: BLUE },
-    { icon: <BarChart2 size={14} />, text: "Daily games leaderboard updated", time: "2h ago", color: TEAL },
+    {
+      icon: <UserCheck size={14} />,
+      text: 'New user "chloem" registered',
+      time: "2m ago",
+      color: GREEN,
+    },
+    {
+      icon: <Flag size={14} />,
+      text: "Post flagged for spam in Sci-Fi Fanatics",
+      time: "5m ago",
+      color: RED,
+    },
+    {
+      icon: <Film size={14} />,
+      text: 'Movie "Realm of Ash" featured by moderator',
+      time: "18m ago",
+      color: GOLD,
+    },
+    {
+      icon: <Shield size={14} />,
+      text: "User @yukit suspended for policy violation",
+      time: "42m ago",
+      color: A,
+    },
+    {
+      icon: <Bell size={14} />,
+      text: "Platform broadcast sent to active users",
+      time: "1h ago",
+      color: BLUE,
+    },
+    {
+      icon: <BarChart2 size={14} />,
+      text: "Daily games leaderboard updated",
+      time: "2h ago",
+      color: TEAL,
+    },
   ];
 
   const recentActivity =

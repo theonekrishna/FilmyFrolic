@@ -12,7 +12,8 @@ export const MOCK_MOVIES: Movie[] = [
     releaseYear: 2025,
     duration: "2h 45m",
     director: "Christopher Nolan",
-    synopsis: "In a ruined post-apocalyptic biosphere, a lone team of archivists races against time to unlock the lost cinematic records of humanity.",
+    synopsis:
+      "In a ruined post-apocalyptic biosphere, a lone team of archivists races against time to unlock the lost cinematic records of humanity.",
     status: "published",
     viewsCount: 284000,
     cast: ["Cillian Murphy", "Florence Pugh", "Tom Hardy"],
@@ -27,7 +28,8 @@ export const MOCK_MOVIES: Movie[] = [
     releaseYear: 2025,
     duration: "2h 12m",
     director: "Denis Villeneuve",
-    synopsis: "A rogue cybernetic detective uncovers a covert conspiracy spanning planetary neural nodes.",
+    synopsis:
+      "A rogue cybernetic detective uncovers a covert conspiracy spanning planetary neural nodes.",
     status: "published",
     viewsCount: 192000,
     cast: ["Timothée Chalamet", "Zendaya", "Javier Bardem"],
@@ -41,7 +43,8 @@ export const MOCK_MOVIES: Movie[] = [
     releaseYear: 2024,
     duration: "1h 58m",
     director: "Greta Gerwig",
-    synopsis: "Two souls across distinct centuries communicate through a mysterious glowing theater projection.",
+    synopsis:
+      "Two souls across distinct centuries communicate through a mysterious glowing theater projection.",
     status: "published",
     viewsCount: 145000,
     cast: ["Saoirse Ronan", "Paul Mescal"],

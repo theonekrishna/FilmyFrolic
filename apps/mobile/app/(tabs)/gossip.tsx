@@ -39,9 +39,7 @@ export default function GossipScreen() {
   };
 
   const filtered =
-    selectedCat === "All"
-      ? gossipList
-      : gossipList.filter((g) => g.category === selectedCat);
+    selectedCat === "All" ? gossipList : gossipList.filter((g) => g.category === selectedCat);
 
   return (
     <ScrollView

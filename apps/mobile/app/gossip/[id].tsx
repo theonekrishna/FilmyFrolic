@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Heart, MessageSquare, Clock, Share2 } from "lucide-react-native";
 import { MovieBadge } from "../../src/components/ui/MovieBadge";
@@ -57,8 +50,9 @@ export default function GossipDetailScreen() {
 
           <Text style={styles.contentParagraph}>{gossip.content}</Text>
           <Text style={styles.contentParagraph}>
-            Industry rumors indicate that studio executives have already greenlit preliminary conceptual designs.
-            Fans across social platforms are actively speculating on potential casting choices and filming locations.
+            Industry rumors indicate that studio executives have already greenlit preliminary
+            conceptual designs. Fans across social platforms are actively speculating on potential
+            casting choices and filming locations.
           </Text>
 
           <View style={styles.actionRow}>
@@ -67,7 +61,11 @@ export default function GossipDetailScreen() {
               onPress={toggleLike}
               activeOpacity={0.8}
             >
-              <Heart size={16} color={liked ? "#fff" : "#e84545"} fill={liked ? "#fff" : "#e84545"} />
+              <Heart
+                size={16}
+                color={liked ? "#fff" : "#e84545"}
+                fill={liked ? "#fff" : "#e84545"}
+              />
               <Text style={[styles.likeText, liked && { color: "#fff" }]}>
                 {likes.toLocaleString()} Likes
               </Text>

@@ -36,10 +36,7 @@ export default function RootLayout() {
             <View style={styles.drawerContainer}>
               <DrawerContent onClose={() => setDrawerOpen(false)} />
             </View>
-            <View
-              style={styles.dismissOverlay}
-              onTouchStart={() => setDrawerOpen(false)}
-            />
+            <View style={styles.dismissOverlay} onTouchStart={() => setDrawerOpen(false)} />
           </View>
         </Modal>
       )}

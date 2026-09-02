@@ -11,17 +11,9 @@ interface CinematicCardProps {
 
 export const CinematicCard: React.FC<CinematicCardProps> = ({ movie, onPress, width = 150 }) => {
   return (
-    <TouchableOpacity
-      style={[styles.card, { width }]}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
+    <TouchableOpacity style={[styles.card, { width }]} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.imageWrapper}>
-        <Image
-          source={{ uri: movie.poster }}
-          style={styles.poster}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: movie.poster }} style={styles.poster} resizeMode="cover" />
         {movie.rating && (
           <View style={styles.ratingBadge}>
             <Star size={11} color="#fdcb6e" fill="#fdcb6e" />
