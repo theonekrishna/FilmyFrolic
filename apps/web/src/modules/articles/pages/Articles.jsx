@@ -30,6 +30,7 @@ export default function Articles() {
   const { requireAuth, authPromptProps } = useAuthGate();
 
   // ── State ──
+  const [articles, setArticles] = useState(ARTICLES);
   const [filterCat, setFilterCat] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
@@ -46,7 +47,7 @@ export default function Articles() {
 
   // ── Filter Logic ──
   const filteredArticles = useMemo(() => {
-    return ARTICLES.filter((a) => {
+    return articles.filter((a) => {
       const matchesCat =
         filterCat === "all" || a.category.toLowerCase() === filterCat.toLowerCase();
       const matchesSearch =
@@ -55,7 +56,7 @@ export default function Articles() {
         a.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCat && matchesSearch;
     });
-  }, [filterCat, searchQuery]);
+  }, [articles, filterCat, searchQuery]);
 
   const featured = useMemo(() => {
     return filteredArticles.find((a) => a.featured) || filteredArticles[0];
@@ -79,7 +80,10 @@ export default function Articles() {
       <AuthPromptModal {...authPromptProps} />
 
       {createOpen && (
-        <CreateArticleModal onClose={() => setCreateOpen(false)} onCreate={() => {}} />
+        <CreateArticleModal
+          onClose={() => setCreateOpen(false)}
+          onCreate={(newArticle) => setArticles((prev) => [newArticle, ...prev])}
+        />
       )}
 
       <TopBar title="Articles & Insights" />

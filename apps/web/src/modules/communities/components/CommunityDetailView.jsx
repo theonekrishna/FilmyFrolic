@@ -84,10 +84,16 @@ export default function CommunityDetailView({
   const [members, setMembers] = useState([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
 
-  // Check if current user is an admin of this community
-  const isAdmin = members.some(
-    (m) => (m.id === user?.id || m.id === user?.id?.toString()) && m.role?.toLowerCase() === "admin"
-  );
+  // Check if current user is an admin or creator of this community
+  const isAdmin =
+    !!community.isCreator ||
+    !!community.is_creator ||
+    (!!user?.id && String(community.created_by) === String(user.id)) ||
+    members.some(
+      (m) =>
+        (m.id === user?.id || String(m.id) === String(user?.id)) &&
+        (m.role?.toLowerCase() === "admin" || m.role?.toLowerCase() === "creator")
+    );
   const [errorMembers, setErrorMembers] = useState(null);
   const [events, setEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);

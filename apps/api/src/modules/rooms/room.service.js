@@ -30,19 +30,26 @@ module.exports = {
    */
   uploadImageToSupabase: async (file) => {
     if (!file) return null;
-    const fileExtension = file.originalname.split(".").pop();
-    const fileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExtension}`;
-    const filePath = `room-covers/${fileName}`;
+    try {
+      const fileExtension = file.originalname.split(".").pop();
+      const fileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExtension}`;
+      const filePath = `room-covers/${fileName}`;
 
-    const { error } = await supabase.storage
-      .from("room-images")
-      .upload(filePath, file.buffer, { contentType: file.mimetype });
+      const { error } = await supabase.storage
+        .from("room-images")
+        .upload(filePath, file.buffer, { contentType: file.mimetype });
 
-    if (error) throw error;
+      if (error) {
+        console.warn("[uploadImageToSupabase] storage upload warning:", error.message);
+        return null;
+      }
 
-    const { data: urlData } = supabase.storage.from("room-images").getPublicUrl(filePath);
-
-    return urlData.publicUrl;
+      const { data: urlData } = supabase.storage.from("room-images").getPublicUrl(filePath);
+      return urlData.publicUrl;
+    } catch (err) {
+      console.warn("[uploadImageToSupabase] storage upload exception:", err.message);
+      return null;
+    }
   },
 
   /**

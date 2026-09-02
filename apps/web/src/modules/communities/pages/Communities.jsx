@@ -278,8 +278,12 @@ export default function Communities() {
         return { ...c, members: String(n) };
       };
       setAllCommunities((prev) => prev.map(revert));
-      setDetailCommunity((prev) => (prev?.id === id ? revert(prev) : prev));
-      showToast(err.message || "Failed to update community status.", "error");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to update community status.";
+      showToast(errorMsg, "error");
     } finally {
       setJoiningSet((prev) => {
         const next = new Set(prev);

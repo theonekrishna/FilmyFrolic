@@ -2,6 +2,11 @@ export const FILTERS = [
   { value: "all", label: "All" },
   { value: "movies", label: "Movies" },
   { value: "series", label: "Series" },
+  { value: "action", label: "💥 Action" },
+  { value: "comedy", label: "😂 Comedy" },
+  { value: "drama", label: "🎭 Drama" },
+  { value: "scifi", label: "🚀 Sci-Fi" },
+  { value: "thriller", label: "😱 Thriller" },
 ];
 
 // Mock "recently searched" and trending searches — no live endpoint for these yet

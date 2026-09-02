@@ -145,8 +145,15 @@ export default function Messages() {
         .on("presence", { event: "sync" }, () => {
           const state = channel.presenceState();
           const onlineMap = {};
-          Object.keys(state).forEach((key) => {
+          Object.entries(state).forEach(([key, presences]) => {
             onlineMap[key] = true;
+            if (Array.isArray(presences)) {
+              presences.forEach((p) => {
+                if (p.key) onlineMap[String(p.key)] = true;
+                if (p.user_id) onlineMap[String(p.user_id)] = true;
+                if (p.userId) onlineMap[String(p.userId)] = true;
+              });
+            }
           });
           setOnlineUsers(onlineMap);
         })

@@ -37,6 +37,13 @@ export function NotificationProvider({ children }) {
     fetchCount();
   }, [fetchCount]);
 
+  // ─── Request browser Notification permission ─────────────────────────────
+  useEffect(() => {
+    if (userId && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+  }, [userId]);
+
   // ─── Supabase Realtime — user + admin table INSERT ────────────────────────
   useEffect(() => {
     if (!userId) return;
@@ -52,7 +59,18 @@ export function NotificationProvider({ children }) {
           table: "notifications",
           filter: `user_id=eq.${userId}`,
         },
-        () => setUserUnread((c) => c + 1)
+        (payload) => {
+          setUserUnread((c) => c + 1);
+          const n = payload?.new;
+          if (n && "Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification(n.title || "Filmy Frolic", {
+                body: n.message || "You have a new notification",
+                icon: "/favicon.ico",
+              });
+            } catch (_) {}
+          }
+        }
       )
       // User notifications marked as read (UPDATE) — keep count in sync
       .on(

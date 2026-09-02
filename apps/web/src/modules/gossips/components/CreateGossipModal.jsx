@@ -26,7 +26,7 @@ function CreateGossipModal({ onClose, onCreate, onUpdate, gossipToEdit }) {
   const [topicType, setTopicType] = useState(gossipToEdit?.topic_type || "movies");
   const [sourceUrl, setSourceUrl] = useState(gossipToEdit?.source_url || "");
   const [sourceType, setSourceType] = useState(gossipToEdit?.source_type || "user_reference");
-  const [unverifiedConfirmed, setUnverifiedConfirmed] = useState(false);
+  const [unverifiedConfirmed, setUnverifiedConfirmed] = useState(true);
   const [verified, setVerified] = useState(gossipToEdit?.verified || false);
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState(gossipToEdit?.tags || []);

@@ -52,7 +52,7 @@ export default function SocialFeed() {
   const reactingPosts = useRef(new Set());
   const [reactingState, setReactingState] = useState({});
 
-  const [isLoggedIn] = useState(() => !!localStorage.getItem("accessToken"));
+  const isLoggedIn = !!user && !!localStorage.getItem("accessToken");
   const [authPrompt, setAuthPrompt] = useState({ open: false, message: "" });
 
   function requireAuth(message) {

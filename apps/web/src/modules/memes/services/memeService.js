@@ -1,4 +1,4 @@
-import { privateAxios } from "../../../utils/AxiosInstance";
+import { privateAxios, publicAxios } from "../../../utils/AxiosInstance";
 const BASE_URL = "/api/memes";
 
 // Response wrapper - handles both { success: true, data: ... } and direct data formats
@@ -28,7 +28,8 @@ export const memeService = {
   /** Fetch memes feed (hot | new | top | saved) */
   getMemes: async (tab = "hot") => {
     try {
-      const res = await privateAxios.get(BASE_URL, { params: { tab } });
+      const axiosClient = tab === "saved" ? privateAxios : publicAxios;
+      const res = await axiosClient.get(BASE_URL, { params: { tab } });
       return unwrap(res);
     } catch (error) {
       return handleError(error);
@@ -38,7 +39,7 @@ export const memeService = {
   /** Get trending tags */
   getTrendingTags: async () => {
     try {
-      const res = await privateAxios.get(`${BASE_URL}/trending-tags`);
+      const res = await publicAxios.get(`${BASE_URL}/trending-tags`);
       return unwrap(res);
     } catch (error) {
       return handleError(error);
@@ -48,7 +49,7 @@ export const memeService = {
   /** Get meme of the week */
   getMemeOfTheWeek: async () => {
     try {
-      const res = await privateAxios.get(`${BASE_URL}/meme-of-the-week`);
+      const res = await publicAxios.get(`${BASE_URL}/meme-of-the-week`);
       return unwrap(res);
     } catch (error) {
       return handleError(error);
@@ -58,7 +59,7 @@ export const memeService = {
   /** Get top memers */
   getTopMemers: async () => {
     try {
-      const res = await privateAxios.get(`${BASE_URL}/top-memers`);
+      const res = await publicAxios.get(`${BASE_URL}/top-memers`);
       return unwrap(res);
     } catch (error) {
       return handleError(error);
@@ -148,7 +149,7 @@ export const memeService = {
   /** Get single meme by ID */
   getMemeById: async (memeId) => {
     try {
-      const res = await privateAxios.get(`${BASE_URL}/${memeId}`);
+      const res = await publicAxios.get(`${BASE_URL}/${memeId}`);
       return unwrap(res);
     } catch (error) {
       return handleError(error);
@@ -180,7 +181,7 @@ export const memeService = {
   /** Get comments for a meme (nested + count) */
   getComments: async (memeId) => {
     try {
-      const res = await privateAxios.get(`${BASE_URL}/${memeId}/comments`);
+      const res = await publicAxios.get(`${BASE_URL}/${memeId}/comments`);
       return unwrap(res);
     } catch (error) {
       return handleError(error);

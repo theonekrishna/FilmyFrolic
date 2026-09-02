@@ -90,22 +90,40 @@ export default function Archive() {
       .finally(() => setMoviesLoading(false));
   }, [filter, query]);
 
+  // ─── Filter movies by type / genre ───────────────────────────────────────
+  const displayMovies = useMemo(() => {
+    let list = movies;
+    if (filter && filter !== "all") {
+      if (filter === "movies" || filter === "series") {
+        list = list.filter((m) => (m.type || "").toLowerCase().includes(filter));
+      } else {
+        const target = filter.toLowerCase() === "scifi" ? "sci-fi" : filter.toLowerCase();
+        list = list.filter(
+          (m) =>
+            Array.isArray(m.genre) &&
+            m.genre.some((g) => (typeof g === "string" ? g.toLowerCase().includes(target) : false))
+        );
+      }
+    }
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter((m) => m.title.toLowerCase().includes(q));
+    }
+    return list;
+  }, [movies, filter, query]);
+
   // ─── Search results (mobile) — title search ────────────────────────────
   const results = useMemo(() => {
     if (!query) return [];
-    const q = query.toLowerCase();
-    return movies.filter((m) => m.title.toLowerCase().includes(q));
-  }, [query, movies]);
+    return displayMovies;
+  }, [query, displayMovies]);
 
   // ─── Desktop full list ──────────────────────────────────────────────────
-  const desktopMovies = useMemo(() => {
-    if (!query) return movies;
-    return movies.filter((m) => m.title.toLowerCase().includes(query.toLowerCase()));
-  }, [query, movies]);
+  const desktopMovies = displayMovies;
 
   const featuredMovie = useMemo(
-    () => [...movies].sort((a, b) => b.rating - a.rating)[0] ?? null,
-    [movies]
+    () => [...displayMovies].sort((a, b) => b.rating - a.rating)[0] ?? null,
+    [displayMovies]
   );
 
   const handlePickRecent = (term) => {
