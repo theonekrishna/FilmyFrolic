@@ -77,6 +77,46 @@ export const adminApi = {
     return res.data;
   },
 
+  warnUser: async (reportId) => {
+    const res = await api.post(`/admin/moderation/${reportId}/warn`);
+    return res.data;
+  },
+
+  dismissReport: async (reportId) => {
+    const res = await api.post(`/admin/moderation/${reportId}/dismiss`);
+    return res.data;
+  },
+
+  removeContent: async (reportId) => {
+    const res = await api.post(`/admin/moderation/${reportId}/remove`);
+    return res.data;
+  },
+
+  // Entertainment / Games & Quizzes
+  getQuizzes: async () => {
+    try {
+      const res = await api.get("/admin/entertainment/quizzes");
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  createQuiz: async (payload) => {
+    const res = await api.post("/admin/entertainment/quizzes", payload);
+    return res.data;
+  },
+
+  updateQuiz: async (id, payload) => {
+    const res = await api.put(`/admin/entertainment/quizzes/${id}`, payload);
+    return res.data;
+  },
+
+  deleteQuiz: async (id) => {
+    const res = await api.delete(`/admin/entertainment/quizzes/${id}`);
+    return res.data;
+  },
+
   // Notifications
   sendNotification: async (payload) => {
     const res = await api.post("/admin/notifications", payload);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Shield,
   PenLine,
@@ -12,9 +12,12 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
+  Eye,
 } from "lucide-react";
 import { SectionTitle } from "../../components/ui/SectionTitle";
 import { ADMIN_REPORTS, ReportType, ReportReason } from "../../modules/admin/data/AdminData";
+import { adminApi } from "../../services/adminApi";
+import { ReportDetailModal, ModerationReport } from "./ReportDetailModal";
 
 const F = "'Plus Jakarta Sans', system-ui, sans-serif";
 const B = "'Bebas Neue', sans-serif";
@@ -98,34 +101,74 @@ function Btn({
 }
 
 export const ModerationPage: React.FC = () => {
-  const [reports, setReports] = useState(ADMIN_REPORTS);
+  const [reports, setReports] = useState<any[]>(ADMIN_REPORTS);
   const [filter, setFilter] = useState<"all" | "pending" | "resolved" | "dismissed">("pending");
+  const [selectedReport, setSelectedReport] = useState<ModerationReport | null>(null);
 
-  function resolve(id: string, action: "resolved" | "dismissed") {
+  useEffect(() => {
+    async function loadReports() {
+      const data = await adminApi.getReports();
+      if (Array.isArray(data) && data.length > 0) {
+        setReports(data);
+      }
+    }
+    loadReports();
+  }, []);
+
+  async function resolve(id: string, action: "resolved" | "dismissed") {
+    try {
+      if (action === "dismissed") {
+        await adminApi.dismissReport(id);
+      } else {
+        await adminApi.resolveReport(id, action);
+      }
+    } catch (e) {
+      console.error("Resolve report failed", e);
+    }
     setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status: action } : r)));
   }
 
-  const typeIcon = (t: ReportType) => {
-    if (t === "post") return <PenLine size={13} />;
+  async function handleWarn(id: string) {
+    try {
+      await adminApi.warnUser(id);
+      setReports((prev) => prev.map((r) => (r.id === id ? { ...r, is_warning_sent: true } : r)));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function handleRemove(id: string) {
+    try {
+      await adminApi.removeContent(id);
+      setReports((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, is_content_removed: true, status: "resolved" } : r))
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const typeIcon = (t: ReportType | string) => {
+    if (t === "post" || t === "feed") return <PenLine size={13} />;
     if (t === "review") return <Star size={13} />;
     if (t === "user") return <Users size={13} />;
     if (t === "community") return <MessageSquare size={13} />;
-    if (t === "article") return <FilmIcon size={13} />;
+    if (t === "article" || t === "gossip") return <FilmIcon size={13} />;
     if (t === "message") return <Send size={13} />;
     return <Flag size={13} />;
   };
 
-  const typeColor = (t: ReportType) => {
-    if (t === "post") return BLUE;
+  const typeColor = (t: ReportType | string) => {
+    if (t === "post" || t === "feed") return BLUE;
     if (t === "review") return GOLD;
     if (t === "user") return RED;
     if (t === "community") return A;
-    if (t === "article") return TEAL;
+    if (t === "article" || t === "gossip") return TEAL;
     if (t === "message") return GREEN;
     return BLUE;
   };
 
-  const reasonColor = (r: ReportReason) => {
+  const reasonColor = (r: ReportReason | string) => {
     if (r === "spam" || r === "scam") return GOLD;
     if (r === "harassment" || r === "hate_speech" || r === "violence") return RED;
     if (r === "misinformation" || r === "copyright") return A;
@@ -146,6 +189,20 @@ export const ModerationPage: React.FC = () => {
         title="MODERATION QUEUE"
         sub={`${pendingCount} reports awaiting action`}
       />
+
+      {/* Detail Modal */}
+      {selectedReport && (
+        <ReportDetailModal
+          report={selectedReport}
+          onClose={() => setSelectedReport(null)}
+          onActionDone={() => {
+            setSelectedReport(null);
+            adminApi.getReports().then((data) => {
+              if (Array.isArray(data)) setReports(data);
+            });
+          }}
+        />
+      )}
 
       {/* Summary cards */}
       <div
@@ -231,16 +288,16 @@ export const ModerationPage: React.FC = () => {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: `${typeColor(r.type)}15`,
-                border: `1px solid ${typeColor(r.type)}25`,
+                background: `${typeColor(r.type || r.module_type || "post")}15`,
+                border: `1px solid ${typeColor(r.type || r.module_type || "post")}25`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: typeColor(r.type),
+                color: typeColor(r.type || r.module_type || "post"),
                 flexShrink: 0,
               }}
             >
-              {typeIcon(r.type)}
+              {typeIcon(r.type || r.module_type || "post")}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
@@ -252,11 +309,16 @@ export const ModerationPage: React.FC = () => {
                   flexWrap: "wrap",
                 }}
               >
-                <Pill label={r.type.toUpperCase()} color={typeColor(r.type)} />
                 <Pill
-                  label={r.reason.replace("_", " ").toUpperCase()}
-                  color={reasonColor(r.reason)}
+                  label={(r.type || r.module_type || "POST").toUpperCase()}
+                  color={typeColor(r.type || r.module_type || "post")}
                 />
+                {r.reason && (
+                  <Pill
+                    label={r.reason.replace("_", " ").toUpperCase()}
+                    color={reasonColor(r.reason)}
+                  />
+                )}
                 {r.severity && (
                   <Pill
                     label={`${r.severity.toUpperCase()} SEVERITY`}
@@ -264,10 +326,10 @@ export const ModerationPage: React.FC = () => {
                   />
                 )}
                 <span style={{ fontFamily: F, fontSize: 11, color: "rgba(240,240,248,0.3)" }}>
-                  Reported by @{r.reporter}
+                  Reported by @{r.reporter?.username || r.reporter || "user"}
                 </span>
                 <span style={{ fontFamily: F, fontSize: 11, color: "rgba(240,240,248,0.25)" }}>
-                  {r.time}
+                  {r.time || (r.created_at ? new Date(r.created_at).toLocaleDateString() : "")}
                 </span>
               </div>
               <p
@@ -280,7 +342,12 @@ export const ModerationPage: React.FC = () => {
                   lineHeight: 1.5,
                 }}
               >
-                "{r.contentPreview}"
+                "
+                {r.contentPreview ||
+                  r.custom_description ||
+                  r.custom_issue ||
+                  "Reported content item"}
+                "
               </p>
               {r.additionalInfo && (
                 <p
@@ -297,10 +364,29 @@ export const ModerationPage: React.FC = () => {
               )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+              <Btn
+                sm
+                label="View Details"
+                icon={<Eye size={11} />}
+                color={A}
+                onClick={() => setSelectedReport(r)}
+              />
               {r.status === "pending" ? (
                 <>
-                  <Btn sm label="Warn User" color={GOLD} icon={<ShieldAlert size={11} />} />
-                  <Btn sm label="Remove" danger icon={<Trash2 size={11} />} />
+                  <Btn
+                    sm
+                    label="Warn User"
+                    color={GOLD}
+                    icon={<ShieldAlert size={11} />}
+                    onClick={() => handleWarn(r.id)}
+                  />
+                  <Btn
+                    sm
+                    label="Remove"
+                    danger
+                    icon={<Trash2 size={11} />}
+                    onClick={() => handleRemove(r.id)}
+                  />
                   <Btn
                     sm
                     label="Resolve"

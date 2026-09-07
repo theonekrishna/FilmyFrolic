@@ -1,7 +1,19 @@
 import React, { useState } from "react";
-import { Gamepad2, Plus, Edit3, Trash2, ToggleRight, ToggleLeft, Check, X } from "lucide-react";
+import {
+  Gamepad2,
+  Plus,
+  Edit3,
+  Trash2,
+  ToggleRight,
+  ToggleLeft,
+  Check,
+  X,
+  HelpCircle,
+} from "lucide-react";
 import { SectionTitle } from "../../components/ui/SectionTitle";
 import { ADMIN_QUIZZES, ADMIN_MEMES } from "../../modules/admin/data/AdminData";
+import { CreateQuizModal } from "./CreateQuizModal";
+import { GameQuestionsModal } from "./GameQuestionsModal";
 
 const F = "'Plus Jakarta Sans', system-ui, sans-serif";
 const B = "'Bebas Neue', sans-serif";
@@ -133,6 +145,9 @@ export const EntertainPage: React.FC = () => {
   const [tab, setTab] = useState("Quizzes");
   const [quizzes, setQuizzes] = useState(ADMIN_QUIZZES);
   const [memes, setMemes] = useState(ADMIN_MEMES);
+  const [showCreateQuizModal, setShowCreateQuizModal] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<any | null>(null);
+  const [managingQuestionsQuiz, setManagingQuestionsQuiz] = useState<any | null>(null);
 
   function toggleQuizStatus(id: string) {
     setQuizzes((prev) =>
@@ -200,16 +215,67 @@ export const EntertainPage: React.FC = () => {
       />
       <SubTabs tabs={["Quizzes", "Games", "Memes"]} active={tab} onTab={setTab} />
 
+      {/* Modals */}
+      {(showCreateQuizModal || editingQuiz) && (
+        <CreateQuizModal
+          quiz={editingQuiz}
+          onClose={() => {
+            setShowCreateQuizModal(false);
+            setEditingQuiz(null);
+          }}
+          onSuccess={(newQuiz) => {
+            if (editingQuiz) {
+              setQuizzes((prev) =>
+                prev.map((q) => (q.id === editingQuiz.id ? { ...q, ...newQuiz } : q))
+              );
+            } else {
+              setQuizzes((prev) => [
+                {
+                  id: `q_${Date.now()}`,
+                  title: newQuiz.title,
+                  category: newQuiz.category || "movies",
+                  questions: 0,
+                  plays: 0,
+                  avgScore: 0,
+                  status: "active",
+                  featured: newQuiz.featured || false,
+                },
+                ...prev,
+              ]);
+            }
+          }}
+        />
+      )}
+
+      {managingQuestionsQuiz && (
+        <GameQuestionsModal
+          quizTitle={managingQuestionsQuiz.title}
+          onClose={() => setManagingQuestionsQuiz(null)}
+          onSave={(questions) => {
+            setQuizzes((prev) =>
+              prev.map((q) =>
+                q.id === managingQuestionsQuiz.id ? { ...q, questions: questions.length } : q
+              )
+            );
+          }}
+        />
+      )}
+
       {tab === "Quizzes" && (
         <div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
-            <Btn label="New Quiz" icon={<Plus size={13} />} color={A} />
+            <Btn
+              label="New Quiz"
+              icon={<Plus size={13} />}
+              color={A}
+              onClick={() => setShowCreateQuizModal(true)}
+            />
           </div>
           <div style={{ ...card, overflow: "hidden" }}>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "2fr 1fr 80px 80px 80px 80px 1fr 140px",
+                gridTemplateColumns: "2fr 1fr 80px 80px 80px 80px 1fr 180px",
                 gap: 10,
                 padding: "11px 16px",
                 borderBottom: "1px solid rgba(255,255,255,0.07)",
@@ -238,7 +304,7 @@ export const EntertainPage: React.FC = () => {
                 key={q.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1fr 80px 80px 80px 80px 1fr 140px",
+                  gridTemplateColumns: "2fr 1fr 80px 80px 80px 80px 1fr 180px",
                   gap: 10,
                   padding: "11px 16px",
                   borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
@@ -289,14 +355,30 @@ export const EntertainPage: React.FC = () => {
                   {q.featured ? "Featured" : "Off"}
                 </button>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <Btn sm icon={<Edit3 size={12} />} color={BLUE} />
+                  <Btn
+                    sm
+                    icon={<HelpCircle size={12} />}
+                    color={A}
+                    onClick={() => setManagingQuestionsQuiz(q)}
+                  />
+                  <Btn
+                    sm
+                    icon={<Edit3 size={12} />}
+                    color={BLUE}
+                    onClick={() => setEditingQuiz(q)}
+                  />
                   <Btn
                     sm
                     label={q.status === "active" ? "Disable" : "Enable"}
                     color={q.status === "active" ? GOLD : GREEN}
                     onClick={() => toggleQuizStatus(q.id)}
                   />
-                  <Btn sm icon={<Trash2 size={12} />} danger />
+                  <Btn
+                    sm
+                    icon={<Trash2 size={12} />}
+                    danger
+                    onClick={() => setQuizzes((prev) => prev.filter((item) => item.id !== q.id))}
+                  />
                 </div>
               </div>
             ))}
