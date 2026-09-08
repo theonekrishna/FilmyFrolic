@@ -424,7 +424,18 @@ export default function Messages() {
                         : "border-transparent hover:bg-white/5 active:bg-white/10"
                     }`}
                   >
-                    <div className="relative flex-shrink-0">
+                    <div
+                      className="relative flex-shrink-0 cursor-pointer group/avatar"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewUser({
+                          id: uId,
+                          username: uName,
+                          avatar_url: uAvatar,
+                        });
+                      }}
+                      title={`Preview @${uName}'s profile`}
+                    >
                       <div
                         className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-white text-sm overflow-hidden shadow-md"
                         style={{

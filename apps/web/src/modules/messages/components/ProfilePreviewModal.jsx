@@ -28,16 +28,17 @@ export default function ProfilePreviewModal({ user, isOnline, currentUserId, onC
   const [isBlocked, setIsBlocked] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const targetId = user?.id || user?._id || user?.user_id;
-  const username = user?.username || profileData?.username || "User";
-  const avatarUrl = user?.avatar_url || profileData?.avatar_url;
+  const targetId = user?.id || user?._id || user?.user_id || user?.other_user_id || user?.user?.id;
+  const username = user?.username || user?.user?.username || profileData?.username || "User";
+  const avatarUrl = user?.avatar_url || user?.user?.avatar_url || profileData?.avatar_url;
 
   useEffect(() => {
-    if (!targetId) return;
+    if (!targetId && (!username || username === "User")) return;
     async function fetchProfile() {
       try {
         setLoading(true);
-        const res = await privateAxios.get(`/api/profile/${username || targetId}`);
+        const identifier = username && username !== "User" ? username : targetId;
+        const res = await privateAxios.get(`/api/profile/${identifier}`);
         if (res.data?.success && res.data?.data) {
           setProfileData(res.data.data);
           setIsBlocked(!!res.data.data.is_blocked);
@@ -46,7 +47,7 @@ export default function ProfilePreviewModal({ user, isOnline, currentUserId, onC
         setProfileData({
           username,
           display_name: username,
-          bio: "Cinematic fan & community member",
+          bio: "FilmyFrolic cinephile & community member 🍿",
         });
       } finally {
         setLoading(false);

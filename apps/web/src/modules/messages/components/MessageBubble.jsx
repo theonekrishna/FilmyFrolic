@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Clock, ImageIcon, Film, X, PlayCircle } from "lucide-react";
+import { Trash2, Clock, ImageIcon, Film, X, PlayCircle, Ticket } from "lucide-react";
 
 // Helper to get initials and gradient
 const getAvatarGradient = (str = "") => {
@@ -16,10 +16,11 @@ const getAvatarGradient = (str = "") => {
 
 // Movie-themed Status Ticks for Messages (Replaces plain WhatsApp checkmarks)
 // 1. Sending: ⏳ Clock
-// 2. Delivered (Unread): 🎬 Dual Clapperboard (Silver Gray)
-// 3. Read / Seen: 🎬 Dual Clapperboard with Golden Glow (Premiered ✨)
-function MovieStatusTick({ isOptimistic, isRead }) {
-  if (isOptimistic) {
+// 2. Sent (Single Tick equivalent): 🎟️ Single Ticket
+// 3. Delivered (Double Tick equivalent): 🎬🎬 Dual Clapperboard (Silver Gray)
+// 4. Read / Seen (Blue Tick equivalent): 🎬🎬 Dual Clapperboard with Golden Glow (Premiered ✨)
+function MovieStatusTick({ isOptimistic, isRead, isDelivered, status }) {
+  if (isOptimistic || status === "sending") {
     return (
       <span
         className="inline-flex items-center gap-1 text-[10px] text-white/40 font-medium"
@@ -30,7 +31,7 @@ function MovieStatusTick({ isOptimistic, isRead }) {
     );
   }
 
-  if (isRead) {
+  if (isRead || status === "read" || status === "seen") {
     return (
       <span
         className="inline-flex items-center gap-0.5 text-amber-300 font-bold transition-all duration-300 ml-1 select-none"
@@ -49,12 +50,24 @@ function MovieStatusTick({ isOptimistic, isRead }) {
     );
   }
 
+  if (isDelivered || status === "delivered") {
+    return (
+      <span
+        className="inline-flex items-center gap-0.5 text-white/60 opacity-90 ml-1 select-none"
+        title="Delivered to theater 🍿"
+      >
+        <span style={{ fontSize: "11px", lineHeight: 1 }}>🎬🎬</span>
+      </span>
+    );
+  }
+
+  // Single tick equivalent (Ticket issued & sent)
   return (
     <span
-      className="inline-flex items-center gap-0.5 text-white/50 opacity-80 ml-1 select-none"
-      title="Delivered to theater 🍿"
+      className="inline-flex items-center gap-0.5 text-amber-400/90 ml-1 select-none"
+      title="Ticket Issued & Sent 🎟️"
     >
-      <span style={{ fontSize: "11px", lineHeight: 1 }}>🎬🎬</span>
+      <Ticket size={12} className="text-amber-400 rotate-45" />
     </span>
   );
 }
@@ -230,7 +243,12 @@ export default function MessageBubble({ msg, isMe, onDelete, activeUser, onOpenP
         >
           {isMe ? (
             <div className="flex items-center gap-1">
-              <MovieStatusTick isOptimistic={isOptimistic} isRead={isRead} />
+              <MovieStatusTick
+                isOptimistic={isOptimistic}
+                isRead={isRead}
+                isDelivered={!!msg.is_delivered}
+                status={msg.status}
+              />
               <span className="text-[11px] text-white/30 tabular-nums font-light ml-1">
                 {timeStr}
               </span>
