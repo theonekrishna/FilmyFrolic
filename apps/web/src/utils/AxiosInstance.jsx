@@ -1,8 +1,14 @@
 import axios from "axios";
-const BASE_URL = (import.meta.env.VITE_BASE_URL || "https://filmyfrolic-api.onrender.com").replace(
-  /\/+$/,
-  ""
-);
+let rawBase =
+  import.meta.env.VITE_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  "https://filmyfrolic-api.onrender.com";
+
+if (typeof rawBase === "string" && rawBase.includes("filmy-frolic-new-backend")) {
+  rawBase = "https://filmyfrolic-api.onrender.com";
+}
+
+const BASE_URL = rawBase.replace(/\/+$/, "");
 const ARCHIVE_API_BASE_URL = import.meta.env.VITE_ARCHIVE_API_BASE_URL;
 const publicAxios = axios.create({
   baseURL: BASE_URL,
