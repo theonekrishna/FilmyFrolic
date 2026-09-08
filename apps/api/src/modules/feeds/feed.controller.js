@@ -231,10 +231,11 @@ const getPostComments = async (req, res) => {
 
 /** COMMENT */
 const commentOnPost = async (req, res) => {
-  const { comment_text, parent_id } = req.body;
+  const commentText = req.body.comment_text || req.body.content || "";
+  const parent_id = req.body.parent_id || req.body.parentId || null;
   const { id: feed_id } = req.params;
 
-  if (!comment_text?.trim()) {
+  if (!commentText?.trim()) {
     return sendResponse(res, 400, false, "Comment cannot be empty.");
   }
   const { data: feed } = await supabase
@@ -266,7 +267,7 @@ const commentOnPost = async (req, res) => {
         {
           feed_id,
           user_id: req.user.id,
-          comment_text,
+          comment_text: commentText.trim(),
           parent_id: parent_id || null,
         },
       ])

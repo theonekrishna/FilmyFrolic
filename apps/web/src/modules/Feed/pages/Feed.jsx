@@ -799,8 +799,11 @@ export default function SocialFeed() {
               setCommentPostId(null);
             }}
             postId={commentPostId}
-            onCommentCountUpdate={handleCommentCountUpdate}
+            isLoggedIn={isLoggedIn}
             myProfile={myProfile}
+            onCountUpdate={(pId, count) => {
+              setPosts((prev) => prev.map((p) => (p.id === pId ? { ...p, comments: count } : p)));
+            }}
           />
         )}
 

@@ -104,12 +104,15 @@ export default function CommentModal({
   const navigate = useNavigate();
   const toast = useToast();
 
+  const userIsLoggedIn =
+    isLoggedIn !== undefined ? isLoggedIn : !!myProfile || !!localStorage.getItem("accessToken");
+
   const [commentText, setCommentText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [commentsList, setCommentsList] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [showAddComment, setShowAddComment] = useState(false);
+  const [showAddComment, setShowAddComment] = useState(true);
   const [editingComment, setEditingComment] = useState(null); // { id, text }
   const [savingEdit, setSavingEdit] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null); // { id, name }
@@ -494,7 +497,7 @@ export default function CommentModal({
 
         {/* Add Comment */}
         <div className="border-t border-white/5 bg-[#12121e]/50">
-          {!isLoggedIn ? (
+          {!userIsLoggedIn ? (
             <div className="flex items-center justify-center gap-2 px-4 py-3">
               <span className="font-['Outfit'] text-xs text-[#f0f0f8]/40">
                 Want to join the discussion?
