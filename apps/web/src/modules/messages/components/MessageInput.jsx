@@ -42,21 +42,38 @@ export default function MessageInput({ value, onChange, onSend, disabled }) {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-2">
-      {/* File attachment preview chip */}
+      {/* File attachment preview chip with thumbnail preview */}
       {attachedFile && (
-        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/70 self-start max-w-full">
-          {isVideo ? (
-            <Film size={13} className="text-purple-400 shrink-0" />
-          ) : isImage ? (
-            <ImageIcon size={13} className="text-blue-400 shrink-0" />
-          ) : (
-            <Paperclip size={13} className="text-white/40 shrink-0" />
+        <div className="flex items-center gap-2 bg-[#16162a] border border-white/15 rounded-2xl p-2 text-xs text-white/90 self-start max-w-full shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-150">
+          {isImage && (
+            <img
+              src={URL.createObjectURL(attachedFile)}
+              alt="Preview"
+              className="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0"
+            />
           )}
-          <span className="truncate max-w-[180px] font-['Outfit']">{attachedFile.name}</span>
+          {isVideo && (
+            <div className="w-10 h-10 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center shrink-0">
+              <Film size={18} className="text-purple-400" />
+            </div>
+          )}
+          {!isImage && !isVideo && (
+            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+              <Paperclip size={18} className="text-white/50" />
+            </div>
+          )}
+          <div className="flex flex-col min-w-0 pr-1">
+            <span className="truncate max-w-[160px] md:max-w-[220px] font-semibold text-white/90">
+              {attachedFile.name}
+            </span>
+            <span className="text-[10px] text-white/40">
+              {(attachedFile.size / (1024 * 1024)).toFixed(2)} MB
+            </span>
+          </div>
           <button
             type="button"
             onClick={() => setAttachedFile(null)}
-            className="ml-1 text-white/30 hover:text-red-400 transition-colors shrink-0"
+            className="w-6 h-6 rounded-full bg-white/10 hover:bg-red-500/20 hover:text-red-400 text-white/50 flex items-center justify-center transition-colors shrink-0 ml-1"
             aria-label="Remove attachment"
           >
             <X size={12} />
@@ -75,16 +92,21 @@ export default function MessageInput({ value, onChange, onSend, disabled }) {
           onChange={handleFileChange}
         />
 
-        <div className="flex-1 bg-[#12121e] border border-white/5 rounded-xl md:rounded-2xl px-2 md:px-4 py-1 flex items-center gap-1 md:gap-2 focus-within:border-blue-500/30 transition-all shadow-2xl">
+        <div className="flex-1 bg-[#12121e] border border-white/10 rounded-xl md:rounded-2xl px-2 md:px-4 py-1 flex items-center gap-1 md:gap-2 focus-within:border-blue-500/40 transition-all shadow-2xl">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled}
-            className={`p-2 hidden sm:block transition-colors ${attachedFile ? "text-blue-400" : "text-white/20 hover:text-white/50"}`}
+            className={`p-2 rounded-xl transition-colors flex items-center justify-center ${
+              attachedFile
+                ? "text-blue-400 bg-blue-500/10"
+                : "text-white/40 hover:text-white/80 hover:bg-white/5"
+            }`}
             aria-label="Attach media"
             tabIndex={-1}
+            title="Attach photo or video"
           >
-            <Paperclip size={18} />
+            <Paperclip size={19} />
           </button>
           <input
             type="text"

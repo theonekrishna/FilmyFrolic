@@ -14,8 +14,54 @@ const getAvatarGradient = (str = "") => {
   return AVATAR_PALETTES[Math.abs(hash) % AVATAR_PALETTES.length];
 };
 
-export default function MessageBubble({ msg, isMe, onDelete, activeUser }) {
+// Movie-themed Status Ticks for Messages (Replaces plain WhatsApp checkmarks)
+// 1. Sending: ⏳ Clock
+// 2. Delivered (Unread): 🎬 Dual Clapperboard (Silver Gray)
+// 3. Read / Seen: 🎬 Dual Clapperboard with Golden Glow (Premiered ✨)
+function MovieStatusTick({ isOptimistic, isRead }) {
+  if (isOptimistic) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-[10px] text-white/40 font-medium"
+        title="Sending to studio..."
+      >
+        <Clock size={11} className="animate-spin text-blue-400" />
+      </span>
+    );
+  }
+
+  if (isRead) {
+    return (
+      <span
+        className="inline-flex items-center gap-0.5 text-amber-300 font-bold transition-all duration-300 ml-1 select-none"
+        title="Premiered & Read ✨"
+      >
+        <span
+          style={{
+            filter: "drop-shadow(0 0 6px rgba(245, 197, 24, 0.95))",
+            fontSize: "12px",
+            lineHeight: 1,
+          }}
+        >
+          🎬🎬
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="inline-flex items-center gap-0.5 text-white/50 opacity-80 ml-1 select-none"
+      title="Delivered to theater 🍿"
+    >
+      <span style={{ fontSize: "11px", lineHeight: 1 }}>🎬🎬</span>
+    </span>
+  );
+}
+
+export default function MessageBubble({ msg, isMe, onDelete, activeUser, onOpenProfile }) {
   const isOptimistic = !!msg._optimistic;
+  const isRead = !!msg.is_read;
   const timeStr = new Date(msg.created_at).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -39,7 +85,12 @@ export default function MessageBubble({ msg, isMe, onDelete, activeUser }) {
     >
       {/* Avatar */}
       {!isMe && (
-        <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-bold text-white mb-6 shadow-md select-none overflow-hidden border border-white/5">
+        <button
+          type="button"
+          onClick={() => onOpenProfile?.(activeUser)}
+          className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-[12px] font-bold text-white mb-6 shadow-md select-none overflow-hidden border border-white/5 hover:scale-105 transition-transform cursor-pointer"
+          title={`View @${senderName}'s profile`}
+        >
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -59,7 +110,7 @@ export default function MessageBubble({ msg, isMe, onDelete, activeUser }) {
               {senderName.charAt(0).toUpperCase()}
             </div>
           )}
-        </div>
+        </button>
       )}
 
       <div
@@ -173,28 +224,28 @@ export default function MessageBubble({ msg, isMe, onDelete, activeUser }) {
           </div>
         )}
 
-        {/* ── Timestamp / Actions ── */}
+        {/* ── Timestamp / Cinematic Delivery Status ── */}
         <div
-          className={`flex items-center gap-3 mt-1.5 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}
+          className={`flex items-center gap-1.5 mt-1.5 px-1 ${isMe ? "flex-row-reverse" : "flex-row"}`}
         >
-          {isOptimistic ? (
-            <span className="flex items-center gap-1.5 text-[10px] text-white/40 uppercase tracking-widest font-medium">
-              <Clock size={11} className="animate-pulse" />
-              Sending
-            </span>
-          ) : (
-            <>
-              <span className="text-[11px] text-white/30 tabular-nums font-light">{timeStr}</span>
-              {isMe && (
+          {isMe ? (
+            <div className="flex items-center gap-1">
+              <MovieStatusTick isOptimistic={isOptimistic} isRead={isRead} />
+              <span className="text-[11px] text-white/30 tabular-nums font-light ml-1">
+                {timeStr}
+              </span>
+              {!isOptimistic && (
                 <button
                   onClick={() => onDelete(msg.id)}
-                  className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 transition-all p-1 hover:bg-white/5 rounded-full"
+                  className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 transition-all p-1 hover:bg-white/5 rounded-full ml-1"
                   title="Delete message"
                 >
                   <Trash2 size={12} />
                 </button>
               )}
-            </>
+            </div>
+          ) : (
+            <span className="text-[11px] text-white/30 tabular-nums font-light">{timeStr}</span>
           )}
         </div>
       </div>

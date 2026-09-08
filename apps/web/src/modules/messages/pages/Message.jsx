@@ -16,6 +16,7 @@ import {
 } from "../services/messageService";
 import { supabase } from "../utils/supabaseClient";
 import AuthPromptModal from "../components/Authpromptmoda";
+import ProfilePreviewModal from "../components/ProfilePreviewModal";
 
 // --- HELPERS (Keep these outside the component) ---
 const AVATAR_PALETTES = [
@@ -101,6 +102,7 @@ export default function Messages() {
   const [onlineUsers, setOnlineUsers] = useState({});
   const [isSending, setIsSending] = useState(false);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [previewUser, setPreviewUser] = useState(null);
 
   const location = useLocation();
   const channelRef = useRef(null);
@@ -156,6 +158,28 @@ export default function Messages() {
             }
           });
           setOnlineUsers(onlineMap);
+        })
+        .on("presence", { event: "join" }, ({ newPresences }) => {
+          setOnlineUsers((prev) => {
+            const next = { ...prev };
+            newPresences.forEach((p) => {
+              if (p.key) next[String(p.key)] = true;
+              if (p.user_id) next[String(p.user_id)] = true;
+              if (p.userId) next[String(p.userId)] = true;
+            });
+            return next;
+          });
+        })
+        .on("presence", { event: "leave" }, ({ leftPresences }) => {
+          setOnlineUsers((prev) => {
+            const next = { ...prev };
+            leftPresences.forEach((p) => {
+              if (p.key) delete next[String(p.key)];
+              if (p.user_id) delete next[String(p.user_id)];
+              if (p.userId) delete next[String(p.userId)];
+            });
+            return next;
+          });
         })
         .on(
           "postgres_changes",
@@ -491,47 +515,65 @@ export default function Messages() {
                   >
                     <ChevronLeft size={20} />
                   </button>
-                  <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold text-sm border border-blue-500/30 overflow-hidden shadow-md">
-                    {activeUser.avatar_url ? (
-                      <img
-                        src={activeUser.avatar_url}
-                        alt={activeUser.username}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.parentElement.textContent = activeUser.username
-                            ?.charAt(0)
-                            .toUpperCase();
-                        }}
-                      />
-                    ) : (
-                      activeUser.username?.charAt(0).toUpperCase()
-                    )}
-                  </div>
 
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-white font-semibold text-sm md:text-base truncate m-0">
-                        {activeUser.username}
-                      </h3>
-                      {onlineUsers[String(activeUser.id || activeUser._id)] && (
-                        <div
-                          className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
-                          title="Online"
+                  {/* Clickable Profile header info */}
+                  <div
+                    onClick={() => setPreviewUser(activeUser)}
+                    className="flex items-center gap-3 cursor-pointer group min-w-0"
+                    title={`View @${activeUser.username}'s profile`}
+                  >
+                    <div className="w-10 h-10 rounded-2xl bg-blue-500/20 flex-shrink-0 flex items-center justify-center text-blue-400 font-bold text-sm border border-blue-500/30 overflow-hidden shadow-md group-hover:border-blue-400 transition-all">
+                      {activeUser.avatar_url ? (
+                        <img
+                          src={activeUser.avatar_url}
+                          alt={activeUser.username}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.parentElement.textContent = activeUser.username
+                              ?.charAt(0)
+                              .toUpperCase();
+                          }}
                         />
+                      ) : (
+                        activeUser.username?.charAt(0).toUpperCase()
                       )}
                     </div>
-                    <p className="text-[11px] text-white/40 hidden sm:block m-0 font-light">
-                      {onlineUsers[String(activeUser.id || activeUser._id)] ? (
-                        <span className="text-green-400 font-medium">Online</span>
-                      ) : (
-                        "Offline"
-                      )}
-                    </p>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-white font-semibold text-sm md:text-base truncate m-0 group-hover:text-blue-400 transition-colors">
+                          {activeUser.username}
+                        </h3>
+                        {onlineUsers[String(activeUser.id || activeUser._id)] && (
+                          <div
+                            className="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                            title="Online"
+                          />
+                        )}
+                      </div>
+                      <p className="text-[11px] text-white/40 hidden sm:block m-0 font-light">
+                        {onlineUsers[String(activeUser.id || activeUser._id)] ? (
+                          <span className="text-green-400 font-medium">Online</span>
+                        ) : (
+                          "Offline"
+                        )}
+                      </p>
+                    </div>
                   </div>
                 </div>
+
+                {/* Header Actions */}
+                <button
+                  type="button"
+                  onClick={() => setPreviewUser(activeUser)}
+                  className="w-9 h-9 rounded-2xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/5"
+                  title="Profile & Conversation Info"
+                >
+                  <MoreHorizontal size={18} />
+                </button>
               </header>
 
               {/* Chat Messages */}
@@ -570,6 +612,7 @@ export default function Messages() {
                           isMe={String(msg.sender_id) === String(currentUserId)}
                           onDelete={handleDelete}
                           activeUser={activeUser}
+                          onOpenProfile={(u) => setPreviewUser(u || activeUser)}
                         />
                       </div>
                     );
@@ -600,6 +643,16 @@ export default function Messages() {
           )}
         </div>
       </div>
+
+      {/* Profile Preview & Actions Modal */}
+      {previewUser && (
+        <ProfilePreviewModal
+          user={previewUser}
+          isOnline={!!onlineUsers[String(previewUser.id || previewUser._id)]}
+          currentUserId={currentUserId}
+          onClose={() => setPreviewUser(null)}
+        />
+      )}
     </div>
   );
 }
