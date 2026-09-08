@@ -61,11 +61,11 @@ export default function ProfilePreviewModal({ user, isOnline, currentUserId, onC
     try {
       setActionLoading(true);
       if (isBlocked) {
-        await privateAxios.delete(`/api/users/${targetId}/block`);
+        await privateAxios.delete(`/api/settings/blocked/${targetId}`);
         setIsBlocked(false);
         toast.success(`Unblocked @${username}`);
       } else {
-        await privateAxios.post(`/api/users/${targetId}/block`);
+        await privateAxios.post(`/api/settings/blocked`, { userId: targetId });
         setIsBlocked(true);
         toast.success(`Blocked @${username}`);
       }

@@ -62,7 +62,19 @@ const getMyProfile = async (req, res) => {
 // GET /api/profile/:username
 const getProfile = async (req, res) => {
   try {
-    let profile = await ProfileModel.getByUsername(req.params.username);
+    const identifier = req.params.username;
+    let profile = null;
+
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      identifier
+    );
+    if (isUUID) {
+      profile = await ProfileModel.getById(identifier);
+    }
+    if (!profile) {
+      profile = await ProfileModel.getByUsername(identifier);
+    }
+
     if (!profile) {
       return res.status(404).json({ success: false, message: "Profile not found" });
     }
@@ -85,7 +97,7 @@ const getProfile = async (req, res) => {
       }
     }
 
-    const total_posts_count = await ProfileModel.getTotalPostCount(profile.id);
+    const total_posts_count = await ProfileModel.getTotalPostCount(profile.id).catch(() => 0);
     profile.total_posts_count = total_posts_count;
 
     res.status(200).json({ success: true, data: profile });
